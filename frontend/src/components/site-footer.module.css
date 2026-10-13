@@ -1,0 +1,25 @@
+.footer { border-top: 4px solid #3a0051; background: #1c1c1c; }
+.inner { width: min(1280px, calc(100% - 48px)); margin: auto; padding: 72px 0 30px; }
+.columns { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 60px; }
+.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+.brand img { width: 42px; height: 42px; object-fit: contain; }
+.brand strong { font-size: 17px; font-weight: 900; text-transform: uppercase; }
+.columns h2 { margin: 8px 0 15px; font-size: 14px; font-weight: 900; text-transform: uppercase; }
+.columns p, .columns a { color: #c9c3cb; font-size: 13px; line-height: 1.55; }
+.about p { max-width: 350px; }
+.columns a:hover { color: white; }
+.instagram { display: inline-flex; max-width: 100%; align-items: center; gap: 9px; margin-top: 12px; color: var(--orange) !important; font-weight: 700; }
+.instagramIcon { display: block; width: 19px; height: 19px; flex: 0 0 19px; }
+.partners { display: flex; flex-wrap: wrap; gap: 8px; }
+.partners span { padding: 6px 10px; border: 1px solid var(--purple); border-radius: 3px; font-size: 11px; font-weight: 800; }
+.bottom { margin-top: 58px; padding-top: 25px; border-top: 1px solid #888; color: #c9c3cb; font-size: 11px; }
+@media (max-width: 800px) {
+  .inner { width: min(100% - 32px, 1280px); padding: 48px 0 25px; }
+  .columns { grid-template-columns: 1fr 1fr; gap: 35px; }
+  .about { grid-column: 1 / -1; }
+}
+@media (max-width: 520px) {
+  .columns { grid-template-columns: 1fr; }
+  .about { grid-column: auto; }
+  .bottom { margin-top: 40px; }
+}

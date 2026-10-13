@@ -1,0 +1,25 @@
+.main { min-height: 850px; padding: 63px 0 95px; background: var(--background); }
+.container { width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
+.kicker { width: 39px; height: 3px; margin-bottom: 13px; border-radius: 2px; background: var(--orange); }
+.main h1 { margin: 0; font-size: clamp(34px, 3.4vw, 48px); font-weight: 900; line-height: 1.1; text-transform: uppercase; }
+.intro { margin: 12px 0 43px; color: #c9bfcc; font-size: 15px; }
+.filters { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 43px; }
+.filters button { min-height: 36px; padding: 7px 17px; border: 1px solid #382840; border-radius: 5px; background: var(--surface); color: #fff; cursor: pointer; font-size: 12px; font-weight: 800; }
+.filters button:hover, .filters .selected { border-color: var(--purple); background: var(--purple); }
+.filters button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(280px, 1fr); align-items: start; gap: 43px; }
+.eventList { display: grid; gap: 17px; }
+.eventCard { display: flex; min-width: 0; align-items: center; gap: 21px; min-height: 104px; padding: 16px 21px; border: 1px solid #32113e; border-radius: 12px; background: var(--surface); }
+.dateBox { display: flex; flex: 0 0 66px; min-height: 66px; flex-direction: column; align-items: center; justify-content: center; border-radius: 7px; background: var(--orange); color: #1d0a20; line-height: 1; }
+.dateBox strong { font-size: 27px; font-weight: 900; }
+.dateBox span { margin-top: 3px; font-size: 12px; font-weight: 900; }
+.eventDetails { min-width: 0; flex: 1; }
+.eventDetails h2 { margin: 0 0 7px; font-size: 19px; font-weight: 900; line-height: 1.2; }
+.eventDetails p { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: #bdb4c1; font-size: 13px; }
+.badge { flex: 0 0 auto; padding: 6px 9px; border-radius: 3px; background: #3a0051; color: #fff; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.info { padding: 31px; border-radius: 13px; background: var(--surface); }
+.info h2 { margin: 0 0 17px; font-size: 19px; font-weight: 900; text-transform: uppercase; }
+.info p { margin: 0; color: #c7bdca; font-size: 14px; line-height: 1.6; }
+.empty { margin: 0; padding: 30px; border-radius: 10px; background: var(--surface); color: #c7bdca; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 28px; } }
+@media (max-width: 600px) { .main { min-height: 0; padding: 50px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 30px; } .filters { margin-bottom: 30px; } .eventCard { gap: 12px; padding: 13px; } .dateBox { flex-basis: 54px; min-height: 59px; } .dateBox strong { font-size: 23px; } .eventDetails h2 { font-size: 15px; } .eventDetails p { gap: 4px; font-size: 11px; } .badge { font-size: 9px; padding: 5px 6px; } .info { padding: 24px; } }

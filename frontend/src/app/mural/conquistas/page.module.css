@@ -1,0 +1,25 @@
+.main { min-height: 900px; padding: 36px 0 90px; background: var(--background); }
+.container { width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
+.breadcrumb { display: flex; gap: 10px; margin-bottom: 38px; color: #bcb0c1; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.breadcrumb a:hover, .breadcrumb span:last-child { color: var(--orange); }
+.kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.kicker span { padding: 5px 9px; border-radius: 3px; background: var(--purple); font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.kicker i { width: 38px; height: 3px; background: var(--orange); }
+.main h1, .gallerySection h2 { margin: 0; font-size: clamp(33px, 3.4vw, 48px); font-weight: 900; line-height: 1.1; text-transform: uppercase; }
+.intro { margin: 10px 0 33px; color: #c9bfcc; font-size: 15px; }
+.achievementGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.achievement { padding: 30px; border: 2px solid #6d1e6f; border-radius: 11px; background: #22052e; }
+.achievement:first-child { border-color: var(--orange); }
+.achievementMeta { display: flex; align-items: center; gap: 12px; margin-bottom: 17px; }
+.achievementMeta strong { color: var(--orange); font-size: 26px; font-weight: 900; }
+.achievementMeta strong span { font-size: 18px; }
+.achievementMeta > span { padding: 5px 9px; border-radius: 4px; background: #228b59; font-size: 11px; font-weight: 900; }
+.achievement:nth-child(2) .achievementMeta > span { background: #b95a2e; }
+.achievement h2 { margin: 0 0 11px; font-size: 23px; font-weight: 900; text-transform: uppercase; }
+.achievement p { margin: 0; color: #cdc1d0; font-size: 14px; line-height: 1.5; }
+.gallerySection { margin-top: 65px; }
+.gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 23px; }
+.gallery img, .placeholder { width: 100%; aspect-ratio: 1.68; border-radius: 8px; object-fit: cover; }
+.placeholder { background: #fff; }
+@media (max-width: 800px) { .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; } }
+@media (max-width: 600px) { .main { min-height: 0; padding: 30px 0 70px; } .container { width: min(100% - 32px, 1280px); } .achievementGrid { grid-template-columns: 1fr; gap: 16px; } .achievement { padding: 22px; } .achievement h2 { font-size: 19px; } .gallery { gap: 10px; } .gallerySection { margin-top: 50px; } }

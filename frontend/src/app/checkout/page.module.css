@@ -1,0 +1,50 @@
+.main { min-height: 760px; padding: 38px 0 100px; background: var(--background); }
+.container { width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
+.breadcrumb { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; color: #bcb0c1; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.breadcrumb a:hover, .breadcrumb span:last-child { color: var(--orange); }
+.kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+.kicker span, .badge { padding: 5px 10px; border-radius: 3px; background: var(--purple); font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.kicker i { width: 38px; height: 3px; background: var(--orange); }
+.main h1 { margin: 0; font-size: clamp(34px, 3.4vw, 48px); font-weight: 900; line-height: 1.08; text-transform: uppercase; }
+.intro { margin: 10px 0 42px; color: #c9bfcc; font-size: 15px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(310px, .85fr); align-items: start; gap: 30px; }
+.form, .summary, .confirmation, .empty, .loading { border-radius: 12px; background: var(--surface); }
+.form { padding: 34px; }
+.form h2, .summary h2 { margin: 0; font-size: 22px; font-weight: 900; text-transform: uppercase; }
+.formIntro { margin: 9px 0 30px; color: #c8bdca; font-size: 13px; line-height: 1.5; }
+.fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 21px; }
+.fields label { display: flex; min-width: 0; flex-direction: column; gap: 9px; font-size: 13px; font-weight: 800; }
+.fields label span { color: #bdb2c1; font-weight: 400; }
+.fullWidth { grid-column: 1 / -1; }
+.fields input, .fields select, .fields textarea { width: 100%; min-height: 46px; padding: 11px 13px; border: 1px solid #60446a; border-radius: 6px; outline: none; background: #12041e; color: #fff; font-size: 14px; font-weight: 400; }
+.fields textarea { resize: vertical; }
+.fields input:focus, .fields select:focus, .fields textarea:focus { border-color: var(--orange); box-shadow: 0 0 0 2px #ff7f3f33; }
+.fields input::placeholder, .fields textarea::placeholder { color: #9d90a3; }
+.form > button { min-width: 220px; margin-top: 29px; border: 0; cursor: pointer; }
+.error { margin: 18px 0 0; color: #ffaf85; font-size: 13px; }
+.summary { padding: 30px; }
+.summary h2 { margin-bottom: 26px; }
+.summary ul { display: grid; gap: 18px; margin: 0; padding: 0 0 26px; list-style: none; }
+.summary li { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; }
+.summary li div { display: grid; gap: 5px; }
+.summary li div strong { line-height: 1.25; }
+.summary li div span { color: #bfb4c4; font-size: 12px; }
+.summary li > strong { flex: none; color: var(--orange); }
+.total { display: flex; justify-content: space-between; gap: 15px; padding: 21px 0; border-top: 1px solid #513058; font-size: 20px; font-weight: 900; }
+.total strong { color: var(--orange); }
+.summary p { margin: 0 0 20px; color: #bfb4c4; font-size: 12px; line-height: 1.5; }
+.summary > a { color: var(--orange); font-size: 13px; font-weight: 800; }
+.summary > a:hover { text-decoration: underline; }
+.loading { max-width: 680px; margin: 0; padding: 35px; color: #c8bdcb; }
+.empty { max-width: 680px; padding: 45px; }
+.empty h2 { margin: 0 0 10px; font-size: 25px; font-weight: 900; text-transform: uppercase; }
+.empty p { margin: 0 0 25px; color: #c8bdcb; font-size: 15px; }
+.confirmation { max-width: 780px; padding: 42px; }
+.badge { display: inline-block; margin-bottom: 21px; }
+.confirmation > p { margin: 17px 0 27px; color: #d1c7d4; font-size: 15px; line-height: 1.6; }
+.confirmationDetails { display: grid; gap: 15px; margin-bottom: 29px; padding: 22px; border: 1px solid #5c2867; border-radius: 8px; background: #23072e; }
+.confirmationDetails div { display: flex; justify-content: space-between; gap: 16px; }
+.confirmationDetails span { color: #cbbfd0; font-size: 13px; }
+.confirmationDetails strong { font-size: 14px; text-align: right; }
+@media (max-width: 950px) { .layout { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .main { padding: 30px 0 70px; } .container { width: min(100% - 32px, 1280px); } .breadcrumb { margin-bottom: 25px; } .intro { margin-bottom: 30px; } .form, .summary, .confirmation { padding: 23px; } .fields { grid-template-columns: 1fr; gap: 18px; } .form > button { width: 100%; } .empty { padding: 30px 23px; } .confirmationDetails div { flex-direction: column; gap: 4px; } .confirmationDetails strong { text-align: left; } }

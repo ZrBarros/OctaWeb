@@ -1,0 +1,36 @@
+.header { position: relative; z-index: 10; background: #1c1c1c; border-bottom: 2px solid #3a0051; }
+.inner { width: min(1280px, calc(100% - 48px)); min-height: 86px; margin: auto; display: flex; align-items: center; gap: 36px; }
+.brand { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.brand .brandMark { position: relative; display: block; width: 56px; height: 56px; overflow: hidden; flex: 0 0 56px; }
+.brandMark img { position: absolute; left: -10px; top: -7px; width: 76px; height: 76px; max-width: none; }
+.brand span { display: grid; gap: 1px; }
+.brand strong { font-size: 20px; font-weight: 900; line-height: 1; text-transform: uppercase; }
+.brand small { color: var(--orange); font-size: 10px; font-weight: 700; letter-spacing: .025em; text-transform: uppercase; }
+.desktopNav { margin-left: auto; display: flex; align-items: center; gap: clamp(13px, 1.8vw, 30px); }
+.desktopNav a { position: relative; padding: 33px 0; font-size: 13px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
+.desktopNav a:hover, .desktopNav .active { color: var(--orange); }
+.desktopNav .active::after { position: absolute; bottom: 20px; left: 0; width: 18px; height: 3px; content: ""; background: var(--purple); border-radius: 3px; }
+.account { margin-left: auto; padding: 10px 19px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px; font-weight: 800; text-transform: uppercase; white-space: nowrap; }
+.account:hover { background: #ffffff18; }
+.mobileMenu { display: none; }
+@media (max-width: 1100px) {
+  .inner { gap: 18px; }
+  .brand strong { font-size: 17px; }
+  .brand small { font-size: 8px; }
+  .desktopNav { gap: 12px; }
+  .desktopNav a, .account { font-size: 11px; }
+  .account { padding: 9px; }
+}
+@media (max-width: 830px) {
+  .inner { width: min(100% - 32px, 1280px); min-height: 72px; }
+  .brand .brandMark { width: 46px; height: 46px; flex-basis: 46px; }
+  .brandMark img { width: 63px; height: 63px; left: -8px; top: -6px; }
+  .desktopNav, .account { display: none; }
+  .mobileMenu { display: block; margin-left: auto; position: relative; }
+  .mobileMenu summary { display: flex; align-items: center; gap: 9px; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 800; text-transform: uppercase; list-style: none; }
+  .mobileMenu summary::-webkit-details-marker { display: none; }
+  .mobileMenu summary span { color: var(--orange); font-size: 23px; line-height: 1; }
+  .mobileMenu nav { position: absolute; right: 0; top: 52px; width: min(270px, calc(100vw - 32px)); padding: 12px; display: grid; background: #1c1c1c; border: 1px solid var(--deep-purple); border-radius: 8px; box-shadow: 0 15px 30px #0008; }
+  .mobileMenu nav a { padding: 10px 12px; font-size: 13px; font-weight: 800; text-transform: uppercase; }
+  .mobileMenu nav a:hover { color: var(--orange); }
+}

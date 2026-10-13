@@ -1,0 +1,27 @@
+.main { display: flex; justify-content: center; align-items: center; padding-inline: 24px; background: var(--background); }
+.loginPage { min-height: 759px; padding-block: 120px; }
+.signupPage { min-height: 920px; padding-block: 80px; }
+.card { width: 100%; padding: 48px; border: 2px solid var(--deep-purple); border-radius: 16px; background: var(--surface); }
+.loginPage .card { max-width: 500px; }
+.signupPage .card { max-width: 550px; }
+.loginHeading, .signupHeading { text-align: center; }
+.loginHeading img { width: 64px; height: 64px; margin: 0 auto 16px; object-fit: contain; }
+.card h1 { margin: 0; font-size: 24px; font-weight: 900; line-height: 1.15; text-transform: uppercase; }
+.signupHeading p { margin: 12px 0 0; color: #c7becb; font-size: 13px; line-height: 1.5; }
+.form { display: grid; gap: 20px; margin-top: 32px; }
+.signupPage .form { margin-top: 28px; }
+.field { display: grid; gap: 8px; color: #fff; font-size: 14px; font-weight: 800; text-transform: uppercase; }
+.field input { width: 100%; height: 48px; padding: 0 13px; border: 1px solid #30073d; border-radius: 5px; outline: none; background: #1c1c1c; color: #fff; font-size: 14px; font-weight: 400; text-transform: none; }
+.field input::placeholder { color: #d0cbd2; opacity: .6; }
+.field input:focus { border-color: var(--orange); box-shadow: 0 0 0 2px #ff7f3f33; }
+.loginLinks { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 14px; }
+.loginLinks button { padding: 0; border: 0; background: transparent; color: var(--orange); cursor: pointer; text-decoration: underline; }
+.loginLinks span { color: #c8c2ca; text-align: right; }
+.loginLinks a { color: var(--purple); text-decoration: underline; }
+.loginLinks a:hover, .loginLinks button:hover { filter: brightness(1.2); }
+.supportingText { margin: 0; color: #c7becb; font-size: 13px; line-height: 1.5; }
+.feedback { margin: 0; color: #ffbd99; font-size: 13px; line-height: 1.5; }
+.previewLink { margin-top: -12px; color: var(--orange); font-size: 13px; font-weight: 800; text-decoration: underline; }
+.submit { width: 100%; min-height: 48px; padding-inline: 16px; border: 0; cursor: pointer; }
+.backToLogin { width: 100%; margin-top: 14px; }
+@media (max-width: 560px) { .main { padding-inline: 16px; } .loginPage, .signupPage { min-height: 0; padding-block: 56px; } .card { padding: 32px 24px; } .card h1 { font-size: 22px; } .form { gap: 18px; } .loginLinks { flex-wrap: wrap; } .loginLinks span { margin-left: auto; } }

@@ -1,0 +1,35 @@
+.main { min-height: 730px; padding: 72px 0 90px; background: var(--background); }
+.container { width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
+.demoLabel { display: inline-block; max-width: 100%; margin: 0 0 18px; padding: 6px 10px; border: 1px solid #7b3680; border-radius: 4px; color: #d2aed9; font-size: 11px; font-weight: 800; line-height: 1.4; overflow-wrap: anywhere; text-transform: uppercase; }
+.main h1 { margin: 0; font-size: clamp(30px, 3vw, 38px); font-weight: 900; line-height: 1.1; text-transform: uppercase; }
+.intro { margin: 10px 0 45px; color: #c9bfcc; font-size: 15px; }
+.orderCard { padding: 32px; border: 1px solid #32123c; border-radius: 12px; background: var(--surface); }
+.orderHeader, .orderHeader > div { display: flex; align-items: center; gap: 15px; }
+.orderHeader { justify-content: space-between; }
+.orderHeader h2 { margin: 0; font-size: 20px; font-weight: 900; }
+.orderHeader p { margin: 0; color: #bbb3c0; font-size: 13px; }
+.status { padding: 5px 8px; border: 1px solid #a9663f; border-radius: 4px; background: #3a281e; color: #f2a16e; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.items { display: grid; gap: 12px; margin: 30px 0 0; padding: 0 0 30px; border-bottom: 1px solid #302036; list-style: none; }
+.items li { display: flex; align-items: center; gap: 16px; }
+.imagePlaceholder { width: 48px; height: 48px; flex: 0 0 48px; border-radius: 4px; background: #303030; }
+.itemText { display: grid; gap: 4px; }
+.itemText strong { font-size: 14px; }
+.itemText small { color: #b9b1bd; font-size: 12px; }
+.itemPrice { margin-left: auto; font-size: 14px; white-space: nowrap; }
+.progress { padding: 24px 0 30px; border-bottom: 1px solid #302036; }
+.progress h3 { margin: 0 0 20px; font-size: 12px; font-weight: 900; text-transform: uppercase; }
+.progress ol { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.progress li { display: grid; justify-items: center; gap: 6px; color: #aaa1ad; text-align: center; }
+.progress li span { display: grid; width: 31px; height: 31px; place-items: center; border-radius: 50%; background: #333; color: #fff; font-size: 12px; font-weight: 800; }
+.progress li strong { font-size: 11px; font-weight: 700; }
+.progress .currentStep { color: #fff; }
+.progress .currentStep span { background: var(--orange); color: #210b19; }
+.orderFooter { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding-top: 26px; color: #c0b7c4; font-size: 13px; }
+.orderFooter strong { margin-left: 6px; color: var(--orange); font-size: 22px; }
+.history { margin-top: 50px; padding: 25px 30px; border: 1px solid #381342; border-radius: 8px; background: #180820; }
+.history h2 { margin: 0 0 8px; font-size: 18px; text-transform: uppercase; }
+.history p { margin: 0 0 15px; color: #beb3c3; font-size: 14px; }
+.history a { color: var(--orange); font-size: 13px; font-weight: 800; }
+.history a:hover { text-decoration: underline; }
+@media (max-width: 700px) { .orderHeader, .orderHeader > div, .orderFooter { align-items: flex-start; flex-direction: column; } .orderHeader { gap: 12px; } .orderFooter strong { display: block; margin: 5px 0 0; } }
+@media (max-width: 600px) { .main { padding: 48px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 28px; } .orderCard { padding: 22px; } .items li { gap: 10px; } .imagePlaceholder { width: 38px; height: 38px; flex-basis: 38px; } .itemText strong, .itemPrice { font-size: 12px; } .itemText small { font-size: 10px; } .progress ol { gap: 4px; } .progress li strong { font-size: 9px; } .history { padding: 22px; } }

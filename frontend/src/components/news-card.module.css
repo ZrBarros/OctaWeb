@@ -1,0 +1,12 @@
+.card { min-width: 0; overflow: hidden; border-radius: 9px; background: var(--surface); }
+.link { display: flex; height: 100%; flex-direction: column; }
+.placeholder { width: 100%; aspect-ratio: 1.72; background: #fff; }
+.content { display: flex; flex: 1; flex-direction: column; padding: 23px 24px 26px; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 14px; font-size: 12px; font-weight: 800; }
+.meta span { color: var(--orange); text-transform: uppercase; }
+.meta time { color: #bfb5c2; }
+.content h2 { margin: 0 0 11px; font-size: 22px; font-weight: 900; line-height: 1.18; }
+.content p { margin: 0 0 22px; color: #c9c0cb; font-size: 14px; line-height: 1.5; }
+.readMore { margin-top: auto; color: var(--orange); font-size: 13px; font-weight: 900; text-transform: uppercase; }
+.link:hover .readMore, .link:focus-visible .readMore { text-decoration: underline; }
+@media (max-width: 600px) { .content { padding: 19px; } .content h2 { font-size: 20px; } }

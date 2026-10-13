@@ -1,0 +1,16 @@
+.main { min-height: 1050px; padding: 65px 0 95px; background: var(--background); }
+.container { width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
+.kicker { width: 39px; height: 3px; margin-bottom: 13px; border-radius: 2px; background: var(--orange); }
+.main h1 { margin: 0; font-size: clamp(33px, 3.4vw, 48px); font-weight: 900; line-height: 1.1; text-transform: uppercase; }
+.intro { margin: 11px 0 43px; color: #c9bfcc; font-size: 15px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.card { display: flex; min-width: 0; flex-direction: column; padding: 23px; border: 1px solid #351041; border-radius: 12px; background: var(--surface); }
+.cardHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 19px; }
+.cardHeading h2 { margin: 0; font-size: 25px; font-weight: 900; }
+.cardHeading span { color: var(--orange); font-size: 12px; font-weight: 900; }
+.placeholder { width: 100%; aspect-ratio: 1.9; border-radius: 7px; background: #fff; }
+.card p { min-height: 54px; margin: 19px 0 18px; color: #c9c2cb; font-size: 14px; line-height: 1.5; }
+.details { display: flex; min-height: 45px; align-items: center; justify-content: center; margin-top: auto; border-radius: 5px; background: var(--orange); color: #210b19; font-size: 13px; font-weight: 900; text-align: center; text-transform: uppercase; }
+.details:hover { background: #ff965e; }
+@media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; } }
+@media (max-width: 600px) { .main { min-height: 0; padding: 50px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 30px; } .grid { grid-template-columns: 1fr; } .card p { min-height: 0; } }
