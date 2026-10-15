@@ -34,9 +34,11 @@ Abra `http://localhost:3000`. Para conferir o código, use `npm run lint` e `npm
 - `src/app/globals.css`: cores e estilos globais.
 - `src/components`: cabeçalho e rodapé reutilizáveis.
 - `src/components/auth-form.tsx`: formulário compartilhado pelas telas de login e cadastro; ainda não realiza autenticação.
+- `src/components/site-chrome.tsx`: mantém cabeçalho e rodapé nas páginas públicas; `/admin` usa uma estrutura visual própria.
 - `src/app/minha-conta` e `src/app/meus-pedidos`: prévias do painel e de um pedido, com dados fictícios de `src/data/account.ts`.
+- `src/app/admin`: dashboard, notícias, produtos, eventos, integrantes, resultados e pedidos administrativos do Figma. O `layout.tsx` compartilha a barra lateral; os dados demonstrativos estão em `src/data/admin.ts` e nos arquivos `src/data/admin-*.ts`. As ações locais permitem explorar os fluxos sem publicar mudanças no site. As rotas ainda não exigem login.
 - `public/images`: cópias das imagens utilizadas pelo site. Os arquivos originais permanecem em `../assets`.
 
 ## Próximos passos
 
-A Home, Notícias, Modalidades, Agenda, Mural, Login, Cadastro, Minha Conta, Meus Pedidos e o fluxo visual da Loja até o checkout simulado já têm interfaces. Os conteúdos de exemplo, incluindo os tamanhos das camisas e as opções de retirada, ainda precisam de revisão da atlética. A próxima área visual do MVP é administração; depois, as interfaces serão ligadas à API NestJS.
+A Home, Notícias, Modalidades, Agenda, Mural, Login, Cadastro, Minha Conta, Meus Pedidos, o dashboard, as telas administrativas de notícias, produtos, eventos, integrantes, resultados e pedidos, e o fluxo visual da Loja até o checkout simulado já têm interfaces. Os conteúdos de exemplo, incluindo os tamanhos das camisas e as opções de retirada, ainda precisam de revisão da atlética. A próxima etapa é revisar conteúdo e fluxos com a equipe; depois, as interfaces serão ligadas à API NestJS com controle de acesso.

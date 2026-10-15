@@ -1,0 +1,68 @@
+.shell { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; background: #0d001a; }
+.sidebar { display: flex; flex-direction: column; min-height: 100vh; padding: 24px 20px 30px; border-right: 1px solid #3a0051; background: #1c1c1c; }
+.brand { display: flex; align-items: center; gap: 10px; width: 100%; padding: 0 8px 18px; border-bottom: 1px solid #918b93; }
+.brandMark { display: grid; width: 50px; height: 50px; flex: 0 0 50px; place-items: center; overflow: hidden; border-radius: 50%; background: #3a0051; }
+.brandMark img { width: 48px; height: 48px; object-fit: contain; }
+.brandText { display: grid; }
+.brand strong { font-size: 19px; font-weight: 900; line-height: 1; text-transform: uppercase; }
+.brand small { margin-top: 3px; color: var(--orange); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.navigation { display: grid; gap: 4px; margin: 215px 4px 0; }
+.navigation button, .navigation a { display: flex; min-height: 43px; width: 100%; align-items: center; gap: 12px; padding: 0 14px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #c2bbc4; cursor: pointer; font-size: 14px; font-weight: 600; text-align: left; }
+.navigation button:hover, .navigation a:hover { background: #2d1834; color: white; }
+.navigation .activeNav { border-color: var(--purple); background: #3a0051; color: white; font-weight: 800; }
+.navigation svg { width: 18px; height: 18px; flex: 0 0 18px; color: #9d98a1; }
+.activeNav svg { color: var(--orange); }
+.activeDot { width: 6px; height: 6px; margin-left: auto; border-radius: 50%; background: var(--orange); }
+.sidebarBottom { display: grid; gap: 15px; margin: auto 4px 0; padding: 20px 10px 0; border-top: 1px solid #918b93; }
+.sidebarBottom a, .sidebarBottom button { display: flex; align-items: center; gap: 11px; padding: 0; border: 0; background: none; color: #d0c9d2; cursor: pointer; font-size: 13px; font-weight: 700; text-align: left; }
+.sidebarBottom button { color: #fa555f; }
+.sidebarBottom a:hover, .sidebarBottom button:hover { text-decoration: underline; }
+.main { min-width: 0; }
+.shellFeedback { margin: 0; padding: 10px 34px; border-bottom: 1px solid #7c3e87; background: #260e30; color: #f0d5f1; font-size: 13px; }
+.topbar { display: flex; min-height: 80px; align-items: center; justify-content: space-between; gap: 20px; padding: 0 34px; border-bottom: 1px solid #352039; background: #1c1c1c; }
+.titleGroup, .topbarRight { display: flex; align-items: center; gap: 16px; }
+.titleGroup h1 { margin: 0; font-size: clamp(19px, 1.55vw, 24px); font-weight: 900; text-transform: uppercase; white-space: nowrap; }
+.roleBadge { padding: 4px 11px; border-radius: 20px; background: #a000b5; color: white; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.search { display: flex; width: 280px; height: 36px; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid #301a39; border-radius: 6px; background: #0e0714; color: #a49bab; }
+.search svg { width: 16px; height: 16px; flex: 0 0 16px; }
+.search:focus-within { border-color: var(--orange); }
+.search input { width: 100%; min-width: 0; border: 0; outline: none; background: transparent; color: white; font-size: 12px; }
+.search input::placeholder { color: #958d9a; }
+.srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.adminIdentity { display: grid; gap: 2px; text-align: right; white-space: nowrap; }
+.adminIdentity strong { font-size: 12px; }
+.adminIdentity small { color: var(--orange); font-size: 10px; }
+.adminAvatar { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border: 2px solid #a63ab1; border-radius: 50%; background: #3a0051; color: #fff; font-size: 11px; font-weight: 900; }
+.content { padding: 30px 34px 80px; }
+.demoNotice { display: inline-block; margin: 0 0 20px; padding: 6px 10px; border: 1px solid #684073; border-radius: 4px; color: #ddc1e2; font-size: 11px; font-weight: 800; line-height: 1.35; text-transform: uppercase; }
+.feedback { margin: 0 0 18px; padding: 12px 15px; border: 1px solid #7c3e87; border-radius: 6px; background: #260e30; color: #f0d5f1; font-size: 13px; }
+.metricGrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.metricCard { min-width: 0; min-height: 155px; padding: 20px; border: 1px solid #2b202e; border-radius: 8px; background: #1c1c1c; }
+.metricTop { display: flex; justify-content: space-between; align-items: flex-start; gap: 7px; }
+.metricTop h2 { margin: 2px 0 0; font-size: 11px; font-weight: 800; line-height: 1.25; text-transform: uppercase; }
+.metricTop span { display: grid; width: 26px; height: 26px; flex: 0 0 26px; place-items: center; border-radius: 5px; background: #2a1b2d; }
+.metricTop svg { width: 17px; height: 17px; }
+.metricTop .orange { color: #ffad45; }.metricTop .purple { color: #cb4bdb; }.metricTop .mint { color: #53d4ad; }.metricTop .white { color: #eee; }
+.metricValue { display: block; margin-top: 20px; font-size: 30px; font-weight: 900; line-height: 1; }
+.metricCard p { margin: 8px 0 0; color: #71c896; font-size: 11px; }
+.metricCard:nth-child(3) p { color: #ffa947; }
+.dashboardGrid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .95fr); gap: 20px; align-items: start; margin-top: 28px; }
+.panel { min-width: 0; padding: 24px; border: 1px solid #2b202e; border-radius: 9px; background: #1c1c1c; }
+.panelHeader { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+.panelHeader h2 { margin: 0; font-size: 15px; font-weight: 900; text-transform: uppercase; }
+.panelHeader > span { padding: 7px 10px; border-radius: 5px; background: #0e0812; color: #d2cbd4; font-size: 11px; white-space: nowrap; }
+.chart { display: grid; height: 196px; grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: end; gap: 12px; margin-top: 27px; }
+.barGroup { display: flex; height: 100%; min-width: 0; flex-direction: column; align-items: center; justify-content: flex-end; }
+.barValue { margin-bottom: 6px; color: var(--orange); font-size: 10px; white-space: nowrap; }
+.bar { display: block; width: min(44px, 65%); min-height: 13px; border-radius: 3px 3px 0 0; background: linear-gradient(180deg, #bb17cc, #ff7f3f); }
+.barMonth { margin-top: 7px; color: #d3cbd5; font-size: 11px; }
+.activityList { display: grid; gap: 0; margin: 18px 0 0; padding: 0; list-style: none; }
+.activityList li { padding: 10px 0; border-bottom: 1px solid #302735; }
+.activityList li:last-child { border-bottom: 0; }
+.activityList p { margin: 0 0 5px; color: #eee9ef; font-size: 12px; line-height: 1.35; }
+.activityList small { display: flex; gap: 14px; color: var(--orange); font-size: 10px; }
+.activityList small span + span { color: #a69eaa; }
+.emptyState { color: #b9b0bd; font-size: 13px; }
+@media (max-width: 1250px) { .metricGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } .topbar { padding-inline: 22px; } .content { padding-inline: 22px; } .search { width: 220px; } }
+@media (max-width: 950px) { .shell { grid-template-columns: 205px minmax(0, 1fr); } .sidebar { padding-inline: 14px; } .brand { padding-inline: 4px; } .navigation { margin-top: 75px; } .topbar { align-items: flex-start; flex-direction: column; justify-content: center; padding-block: 14px; } .topbarRight { width: 100%; justify-content: space-between; } .search { width: min(100%, 370px); } .dashboardGrid { grid-template-columns: 1fr; } }
+@media (max-width: 650px) { .shell { display: block; } .sidebar { min-height: 0; padding: 14px 16px; border-right: 0; border-bottom: 1px solid #3a0051; } .brand { padding-bottom: 12px; } .brandMark { width: 42px; height: 42px; flex-basis: 42px; } .brandMark img { width: 40px; height: 40px; } .navigation { display: flex; gap: 5px; margin-top: 18px; overflow-x: auto; padding-bottom: 3px; } .navigation button, .navigation a { width: auto; min-height: 38px; flex: 0 0 auto; padding-inline: 10px; font-size: 12px; } .navigation svg { width: 15px; height: 15px; flex-basis: 15px; } .activeDot { display: none; } .sidebarBottom { display: flex; justify-content: space-between; margin-top: 14px; padding: 10px 4px 0; } .sidebarBottom a, .sidebarBottom button { font-size: 11px; } .topbar { gap: 14px; } .titleGroup { flex-wrap: wrap; gap: 8px; } .titleGroup h1 { white-space: normal; } .adminIdentity, .adminAvatar { display: none; } .content { padding: 20px 16px 60px; } .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .metricCard { min-height: 135px; padding: 15px; } .metricTop h2 { font-size: 10px; } .metricValue { margin-top: 18px; font-size: 27px; } .metricCard p { font-size: 10px; } .panel { padding: 18px; } .panelHeader h2 { font-size: 13px; } .chart { gap: 3px; } .barValue { font-size: 8px; } }
