@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import Image from "next/image";
 import { InstagramIcon } from "@/components/instagram-icon";
 import { adminMembers, type AdminMember } from "@/data/admin-members";
-import { AdminIcon } from "../admin-shell";
+import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
 
@@ -72,19 +72,12 @@ export function AdminMembersPage() {
   }
 
   return <>
-    <header className={shared.topbar}>
-      <div className={shared.titleGroup}><h1>Gente de Arena - Integrantes</h1><span className={shared.roleBadge}>Diretoria</span></div>
-      <div className={shared.topbarRight}>
-        <label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar integrantes no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar no painel..." /></label>
-        <div className={shared.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI</small></div>
-        <span className={shared.adminAvatar} aria-hidden="true">AP</span>
-      </div>
-    </header>
+    <AdminToolbarSearch><label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar integrantes no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar integrantes..." /></label></AdminToolbarSearch>
     <div className={shared.content}>
+      <AdminPageHeading title="Gente de Arena - Integrantes" />
       <p className={shared.demoNotice}>Prévia demonstrativa · integrantes e alterações temporários</p>
       {message && <p className={styles.message} role="status">{message}</p>}
       <div className={styles.toolbar}>
-        <label className={styles.memberSearch}><AdminIcon name="search" /><span className={shared.srOnly}>Filtrar integrantes pelo nome</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filtrar integrantes pelo nome..." /></label>
         <button className={styles.newButton} type="button" onClick={() => openEditor()}>+ <span>Novo Integrante</span></button>
       </div>
       {query && <p className={styles.resultCount}>{filtered.length} {filtered.length === 1 ? "integrante encontrado" : "integrantes encontrados"}<button type="button" onClick={() => setQuery("")}>Limpar busca</button></p>}

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import styles from "./site-header.module.css";
 
 const links = [
@@ -16,7 +17,27 @@ const links = [
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const mobileMenuRef = useRef<HTMLDetailsElement>(null);
   const accountLabel = pathname === "/login" || pathname === "/cadastro" ? "Minha conta" : "Entrar / Minha conta";
+  const closeMobileMenu = () => {
+    if (mobileMenuRef.current) mobileMenuRef.current.open = false;
+  };
+
+  useEffect(() => {
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (event.target instanceof Node && !mobileMenuRef.current?.contains(event.target)) closeMobileMenu();
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMobileMenu();
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
 
   return (
     <header className={styles.header}>
@@ -29,11 +50,11 @@ export function SiteHeader() {
           {links.map((link) => <Link className={pathname === link.href || (link.href !== "/" && pathname.startsWith(`${link.href}/`)) ? styles.active : ""} href={link.href} key={link.href}>{link.label}</Link>)}
         </nav>
         <Link className={styles.account} href="/login">{accountLabel}</Link>
-        <details className={styles.mobileMenu}>
-          <summary>Menu <span aria-hidden="true">☰</span></summary>
+        <details className={styles.mobileMenu} ref={mobileMenuRef}>
+          <summary aria-label="Menu de navegação"><span aria-hidden="true">☰</span></summary>
           <nav aria-label="Navegação móvel">
-            {links.map((link) => <Link href={link.href} key={link.href}>{link.label}</Link>)}
-            <Link href="/login">{accountLabel}</Link>
+            {links.map((link) => <Link href={link.href} key={link.href} onClick={closeMobileMenu}>{link.label}</Link>)}
+            <Link href="/login" onClick={closeMobileMenu}>{accountLabel}</Link>
           </nav>
         </details>
       </div>

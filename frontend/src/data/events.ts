@@ -15,6 +15,7 @@ export type AgendaEvent = {
   id: string;
   title: string;
   category: EventCategory;
+  detailSlug?: string;
   dateTime: string;
   day: string;
   month: string;
@@ -38,11 +39,23 @@ export const agendaEvents: AgendaEvent[] = [
     id:"reuniao-alinhamento-20-out",
     title: "Reunião de alinhamento Intereng",
     category: "Reunião",
+    detailSlug: "reuniao-alinhamento-intereng",
     dateTime:"2026-10-20T14:00:00",
-    day: "10",
+    day: "20",
     month: "OUT",
     time: "14:00",
     place: "NEES"
+  },
+  {
+    id: "treino-volei-24-set",
+    title: "Treino de Vôlei - Octacore",
+    category: "Treino",
+    detailSlug: "treino-volei-octacore",
+    dateTime: "2026-09-24T18:00:00",
+    day: "24",
+    month: "SET",
+    time: "18:00",
+    place: "Quadra Geral - UFAL",
   },
   {
     id: "seletiva-volei-24-set",
@@ -88,6 +101,7 @@ export const agendaEvents: AgendaEvent[] = [
     id: "jogo-protendidos-20-nov",
     title: "Octa x Protendidos",
     category: "Jogo",
+    detailSlug: "octa-x-protendidos",
     dateTime: "2026-11-20T15:00:00",
     day: "20",
     month: "NOV",
@@ -95,3 +109,9 @@ export const agendaEvents: AgendaEvent[] = [
     place: "Local a confirmar",
   },
 ];
+
+export function getUpcomingAgendaEvents() {
+  return agendaEvents
+    .filter((event) => event.detailSlug && new Date(event.dateTime).getTime() >= Date.now())
+    .sort((a, b) => a.dateTime.localeCompare(b.dateTime));
+}

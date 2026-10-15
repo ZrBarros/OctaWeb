@@ -38,12 +38,18 @@
 .eventsCard { padding: 24px; border-radius: 15px; background: #1c1c1c; }
 .eventsCard h2, .sportsSection h2 { margin: 0 0 18px; font-size: 18px; font-weight: 900; text-transform: uppercase; }
 .eventsCard ul { margin: 0; padding: 0; list-style: none; }
-.eventsCard li { display: grid; grid-template-columns: 98px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #31083f; }
+.eventsCard li { display: block; padding: 12px 0; border-bottom: 1px solid #31083f; }
+.eventsCard li a { display: grid; grid-template-columns: 98px minmax(0, 1fr); align-items: center; gap: 12px; border-radius: 5px; transition: color .2s ease; }
+.eventsCard li a:hover strong { color: var(--orange); }
+.eventsCard li a:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }
 .eventsCard li:last-child { border-bottom: 0; }
 .eventsCard time { color: var(--orange); font-size: 12px; font-weight: 800; }
 .eventsCard li div { display: grid; gap: 3px; }
 .eventsCard strong { font-size: 13px; line-height: 1.2; }
 .eventsCard li span { color: #a9a0ad; font-size: 11px; }
+.noUpcomingEvents { margin: 0; color: #a9a0ad; font-size: 12px; line-height: 1.5; }
+.moreEvents { display: inline-block; margin-top: 14px; color: var(--orange); font-size: 11px; font-weight: 800; }
+.moreEvents:hover { text-decoration: underline; }
 .sportTags { display: flex; flex-wrap: wrap; gap: 8px; }
 .sportTags span { padding: 6px 11px; border: 1px solid var(--orange); border-radius: 30px; font-size: 12px; font-weight: 800; }
 .joinCard { display: grid; gap: 10px; padding: 31px; border-radius: 16px; background: linear-gradient(135deg, #b500c3, #38004d); }

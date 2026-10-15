@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { AdminIcon } from "../admin-shell";
+import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import { adminOrders, orderStatuses, orderTotalCents, type AdminOrder, type OrderStatus } from "@/data/admin-orders";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
@@ -63,21 +63,15 @@ export function AdminOrdersPage() {
   }
 
   return <>
-    <header className={shared.topbar}>
-      <div className={shared.titleGroup}><h1>Gerenciador de Pedidos</h1><span className={shared.roleBadge}>Financeiro</span></div>
-      <div className={shared.topbarRight}>
-        <div className={shared.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI / Adm</small></div>
-        <span className={shared.adminAvatar} aria-hidden="true">AP</span>
-      </div>
-    </header>
+    <AdminToolbarSearch><label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar pedido por número ou cliente</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar pedidos..." /></label></AdminToolbarSearch>
     <div className={shared.content}>
+      <AdminPageHeading title="Gerenciador de Pedidos" role="Financeiro" />
       <p className={shared.demoNotice}>Prévia demonstrativa · pedidos fictícios e alterações temporárias</p>
       {message && <p className={styles.message} role="status">{message}</p>}
       <div className={styles.toolbar}>
         <div className={styles.filters} role="group" aria-label="Filtrar pedidos por status">
           {filters.map((item) => <button key={item.status} type="button" className={filter === item.status ? styles.activeFilter : styles.filter} aria-pressed={filter === item.status} onClick={() => setFilter(item.status)}>{item.label}</button>)}
         </div>
-        <label className={styles.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar pedido por número ou cliente</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar pedido..." /></label>
       </div>
       {(filter !== "Todos" || query) && <p className={styles.count}>{visibleOrders.length} {visibleOrders.length === 1 ? "pedido encontrado" : "pedidos encontrados"}<button type="button" onClick={() => { setFilter("Todos"); setQuery(""); }}>Limpar filtros</button></p>}
       <div className={styles.layout}>

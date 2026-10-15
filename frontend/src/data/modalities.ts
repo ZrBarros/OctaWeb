@@ -47,7 +47,7 @@ export const futsalDetails = {
   trainingPlace: "Ginásio de Esportes da UFAL",
   roster: [
     "Marcos Lima (Goleiro)",
-    "João Silva (Fixo)",
+    "João Silva (Ala)",
     "Felipe Rocha (Ala)",
     "Lucas Mendes (Ala)",
     "Guilherme Souza (Pivô)",

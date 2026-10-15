@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { AdminIcon } from "../admin-shell";
+import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import { adminProducts, adminProductCategories, type AdminProduct } from "@/data/admin-products";
 import { formatPrice } from "@/data/products";
 import shared from "../admin.module.css";
@@ -91,20 +91,13 @@ export function AdminProductsPage() {
   }
 
   return <>
-    <header className={shared.topbar}>
-      <div className={shared.titleGroup}><h1>Octa Store - Produtos</h1><span className={shared.roleBadge}>Diretoria</span></div>
-      <div className={shared.topbarRight}>
-        <label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar no painel..." /></label>
-        <div className={shared.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI</small></div>
-        <span className={shared.adminAvatar} aria-hidden="true">AP</span>
-      </div>
-    </header>
+    <AdminToolbarSearch><label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produto pelo nome..." /></label></AdminToolbarSearch>
 
     <div className={shared.content}>
+      <AdminPageHeading title="Octa Store - Produtos" />
       <p className={shared.demoNotice}>Prévia demonstrativa · estoque e alterações temporários</p>
       {message && <p className={styles.message} role="status">{message}</p>}
       <div className={styles.toolbar}>
-        <label className={styles.productSearch}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar produto pelo nome ou categoria</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar produto pelo nome..." /></label>
         <button className={styles.newButton} type="button" onClick={() => openEditor()}>+ <span>Cadastrar Produto</span></button>
       </div>
       <p className={styles.resultCount}>{filteredItems.length} {filteredItems.length === 1 ? "produto encontrado" : "produtos encontrados"}{query && <button type="button" onClick={() => setQuery("")}>Limpar busca</button>}</p>

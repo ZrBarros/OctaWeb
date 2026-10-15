@@ -1,0 +1,45 @@
+.main { min-height: 900px; padding-bottom: 82px; background: var(--background); }
+.hero { width: 100%; height: min(22.2vw, 320px); min-height: 220px; overflow: hidden; background: #10151b; }
+.hero img { width: 100%; height: 100%; object-fit: cover; }
+.heroPlaceholder { width: 100%; height: 100%; background: radial-gradient(ellipse at 75% 35%, #5c1768 0, transparent 42%), linear-gradient(120deg, #17051e, #2b0735 55%, #13051a); }
+.container { width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
+.demoNotice { margin: 20px 0 0; color: #a892ad; font-size: 11px; font-weight: 700; }
+.layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, .8fr); align-items: start; gap: 48px; padding-top: 38px; }
+.eventContent { min-width: 0; }
+.titleRow { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.tags { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+.tags span:first-child { padding: 5px 9px; border-radius: 3px; background: #9e00b7; color: white; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.tags span:last-child { color: #c0b1c4; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+.titleRow h1 { margin: 0; font-size: clamp(27px, 3vw, 42px); font-weight: 900; line-height: 1.1; }
+.favorite { flex: 0 0 auto; padding: 10px 14px; border: 1px solid #523155; border-radius: 6px; background: #20191f; color: #f4e7ef; cursor: pointer; font-size: 11px; font-weight: 800; }
+.favorite span { color: var(--orange); font-size: 16px; vertical-align: -1px; }
+.favorite:hover, .favorite.isFavorite { border-color: var(--orange); }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; margin-top: 31px; }
+.facts div { display: flex; min-height: 88px; flex-direction: column; justify-content: center; gap: 10px; padding: 16px 19px; border-radius: 9px; background: #1c1c1c; }
+.facts span { color: var(--orange); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.facts strong { font-size: 14px; font-weight: 800; }
+.description { margin-top: 30px; }
+.description h2 { margin: 0 0 14px; font-size: 19px; font-weight: 900; text-transform: uppercase; }
+.description p { margin: 0; color: #d2c8d5; font-size: 14px; line-height: 1.6; }
+.confirmation { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 27px; padding: 22px 25px; border-radius: 9px; background: #1c1c1c; }
+.confirmation h2 { margin: 0 0 8px; font-size: 16px; font-weight: 900; }
+.confirmation p { max-width: 460px; margin: 0; color: #bfb4c3; font-size: 12px; line-height: 1.4; }
+.confirmation button { flex: 0 0 auto; min-height: 42px; padding: 9px 17px; border: 0; border-radius: 6px; background: var(--orange); color: #211019; cursor: pointer; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.confirmation button:hover { background: #ff965e; }
+.backLink { display: inline-block; margin-top: 33px; color: var(--orange); font-size: 13px; font-weight: 800; }
+.backLink:hover { text-decoration: underline; }
+.attendees { min-width: 0; padding: 28px; border-radius: 10px; background: #1c1c1c; }
+.attendees h2 { margin: 0 0 25px; font-size: 16px; font-weight: 900; text-transform: uppercase; }
+.attendees ul { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.attendees li { display: flex; align-items: center; gap: 12px; }
+.avatar { display: grid; width: 39px; height: 39px; flex: 0 0 39px; place-items: center; border: 1px solid #76466f; border-radius: 50%; background: #44283f; color: #f9eaf8; font-size: 11px; font-weight: 900; }
+.person { display: grid; min-width: 0; gap: 2px; }
+.person strong { font-size: 12px; font-weight: 800; }
+.person small { color: #a69ba9; font-size: 11px; }
+.check { margin-left: auto; color: #62c196; font-size: 17px; font-weight: 800; }
+.allAttendees { margin-top: 24px; padding: 0; border: 0; background: transparent; color: var(--orange); cursor: pointer; font-size: 11px; font-weight: 800; text-decoration: underline; }
+.attendeeNote { margin: 13px 0 0; color: #c8bdcb; font-size: 11px; line-height: 1.5; }
+.emptyAttendees { color: #bfb4c3; font-size: 12px; line-height: 1.5; }
+.favorite:focus-visible, .confirmation button:focus-visible, .allAttendees:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+@media (max-width: 950px) { .layout { grid-template-columns: 1fr; gap: 28px; } .attendees { width: min(100%, 520px); } }
+@media (max-width: 640px) { .main { padding-bottom: 64px; } .hero { height: 210px; min-height: 0; } .container { width: min(100% - 32px, 1280px); } .layout { gap: 23px; padding-top: 26px; } .titleRow { align-items: flex-start; flex-direction: column; gap: 17px; } .facts { grid-template-columns: 1fr; gap: 10px; margin-top: 24px; } .facts div { min-height: 70px; } .confirmation { align-items: stretch; flex-direction: column; padding: 20px; } .confirmation button { width: 100%; } .attendees { padding: 22px; } }

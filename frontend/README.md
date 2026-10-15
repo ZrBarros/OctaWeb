@@ -26,7 +26,10 @@ Abra `http://localhost:3000`. Para conferir o código, use `npm run lint` e `npm
 - `src/lib/cart.ts`: leitura e atualização dos itens salvos no navegador.
 - `src/app/noticias`: listagem com filtros e páginas individuais das notícias.
 - `src/app/modalidades`: catálogo das modalidades e páginas de detalhes.
-- `src/app/agenda`: compromissos com filtros por categoria.
+- `src/app/atletas/[slug]`: perfil público demonstrativo de João Silva, ligado ao elenco do Futsal; os dados estão em `src/data/athletes.ts` e a foto ainda é provisória.
+- `src/app/ranking`: indicadores e classificação esportiva de exemplo, acessíveis pela página de Modalidades; os valores estão em `src/data/ranking.ts`.
+- `src/app/agenda`: compromissos com filtros por categoria; a Home mostra os futuros com acesso direto aos detalhes.
+- `src/app/agenda/[slug]`: detalhes demonstrativos de eventos com favorito e presença temporários; o conteúdo está em `src/data/event-details.ts`.
 - `src/app/mural`: página principal, história, integrantes e conquistas com galeria.
 - `src/data`: conteúdo de exemplo do protótipo, separado das telas para facilitar a futura integração com a API.
 - `src/data/products.ts`: dados de exemplo dos produtos, compartilhados pela home e pela loja.
@@ -41,4 +44,4 @@ Abra `http://localhost:3000`. Para conferir o código, use `npm run lint` e `npm
 
 ## Próximos passos
 
-A Home, Notícias, Modalidades, Agenda, Mural, Login, Cadastro, Minha Conta, Meus Pedidos, o dashboard, as telas administrativas de notícias, produtos, eventos, integrantes, resultados e pedidos, e o fluxo visual da Loja até o checkout simulado já têm interfaces. Os conteúdos de exemplo, incluindo os tamanhos das camisas e as opções de retirada, ainda precisam de revisão da atlética. A próxima etapa é revisar conteúdo e fluxos com a equipe; depois, as interfaces serão ligadas à API NestJS com controle de acesso.
+A Home, Notícias, Modalidades, Ranking, o perfil público do atleta, Agenda com detalhe de evento e presença simulada, Mural, Login, Cadastro, Minha Conta, Meus Pedidos, o dashboard, as telas administrativas de notícias, produtos, eventos, integrantes, resultados e pedidos, e o fluxo visual da Loja até o checkout simulado já têm interfaces. Os conteúdos de exemplo, incluindo os tamanhos das camisas e as opções de retirada, ainda precisam de revisão da atlética. A próxima etapa é revisar telas e dados com a equipe; depois, as interfaces serão ligadas à API NestJS com controle de acesso.

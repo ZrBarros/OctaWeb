@@ -2,7 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import Image from "next/image";
-import { AdminIcon } from "../admin-shell";
+import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import { adminEvents, adminEventCategories, type AdminEvent } from "@/data/admin-events";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
@@ -84,15 +84,9 @@ export function AdminEventsPage() {
   }
 
   return <>
-    <header className={shared.topbar}>
-      <div className={shared.titleGroup}><h1>Cronograma de Eventos</h1><span className={shared.roleBadge}>Diretoria</span></div>
-      <div className={shared.topbarRight}>
-        <label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar eventos no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar no painel..." /></label>
-        <div className={shared.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI</small></div>
-        <span className={shared.adminAvatar} aria-hidden="true">AP</span>
-      </div>
-    </header>
+    <AdminToolbarSearch><label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar eventos no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar eventos..." /></label></AdminToolbarSearch>
     <div className={shared.content}>
+      <AdminPageHeading title="Cronograma de Eventos" />
       <p className={shared.demoNotice}>Prévia demonstrativa · eventos e alterações temporários</p>
       {message && <p className={styles.message} role="status">{message}</p>}
       <div className={styles.toolbar}>

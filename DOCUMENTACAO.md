@@ -23,10 +23,13 @@ Os documentos de planejamento originais estão em `assets/`. Esta página regist
 
 | Rota | O que existe hoje | Estado |
 | --- | --- | --- |
-| `/` | Página inicial com apresentação, destaques, loja e atalhos para outras áreas. | Interface pronta com conteúdo de exemplo |
+| `/` | Página inicial com apresentação, destaques, loja e até três compromissos futuros com links para detalhes e acesso à agenda completa. | Interface pronta; lista filtrada por data, conteúdo local |
 | `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia. | Interface pronta; notícias locais |
 | `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades. Futsal e basquete têm dados de detalhes próprios. | Interface pronta; conteúdo local |
-| `/agenda` | Eventos listados com filtro por categoria. | Interface pronta; eventos locais |
+| `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
+| `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. | **Prévia visual:** números de exemplo, sem cálculo automático |
+| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e links para páginas de detalhe. | Interface pronta; eventos locais |
+| `/agenda/[slug]` | Detalhe demonstrativo do treino de Vôlei, da reunião do Intereng e do jogo Octa x Protendidos. | **Simulação no navegador:** presença e favorito não são persistidos; imagens e confirmações dos próximos eventos pendentes |
 | `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro na lista de integrantes. | Interface pronta; parte das imagens é placeholder |
 | `/loja` | Catálogo com busca por nome e filtro por categoria. | Interface pronta; produtos locais |
 | `/loja/[slug]` | Detalhe de produto, escolha de tamanho quando necessário e adição ao carrinho. | Interação local funcionando |
@@ -36,7 +39,7 @@ Os documentos de planejamento originais estão em `assets/`. Esta página regist
 | `/minha-conta` | Painel com perfil de exemplo e ações de conta. | **Demonstração:** sem usuário autenticado |
 | `/meus-pedidos` | Pedido de exemplo, etapas de entrega e área de histórico vazia. | **Demonstração:** sem pedido registrado |
 | `/admin` | Dashboard da diretoria com indicadores, gráfico de vendas e atividades recentes de exemplo; busca local nas atividades. | **Prévia visual:** acesso livre, sem dados reais ou autenticação |
-| `/admin/noticias` | Mural administrativo com filtros, busca e tabela fictícia; editor de título, resumo, corpo, categoria, autor, status e imagem opcional, com prévia antes de salvar. | **Simulação no navegador:** não publica nem altera as notícias públicas |
+| `/admin/noticias` | Mural administrativo com filtros, busca e tabela no desktop; no celular, filtros deslizáveis e notícias em cartões. Em telas de celular e iPad, o modal inteiro rola, com cabeçalho e ações no fluxo normal. | **Simulação no navegador:** não publica nem altera as notícias públicas |
 | `/admin/produtos` | Tabela demonstrativa do Figma com busca, ajuste de estoque, cadastro, edição e exclusão de produtos; imagem opcional no formulário. | **Simulação no navegador:** não altera os produtos nem o estoque da loja pública |
 | `/admin/eventos` | Cronograma com lista em cartões, calendário mensal, busca e formulário para criar/editar; exclusão com confirmação. | **Simulação no navegador:** não altera a agenda pública |
 | `/admin/integrantes` | Cartões de integrantes, busca por nome, cadastro, edição, remoção e foto opcional. | **Simulação no navegador:** não altera o mural público |
@@ -51,10 +54,10 @@ No terminal, a partir da pasta `frontend`:
 
 ```bash
 npm install
-npm run dev
+npm run dev -- --hostname 0.0.0.0
 ```
 
-Abra `http://localhost:3000`. Para verificar o front end depois de alterações de código:
+Abra `http://localhost:3000`. Para conferir em celular ou tablet na mesma rede Wi-Fi, use `http://IP-DO-MAC:3000`; o Next está configurado para permitir os recursos de desenvolvimento a partir de endereços IPv4 privados. Para verificar o front end depois de alterações de código:
 
 ```bash
 npm run lint
@@ -75,9 +78,12 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/lib/cart.ts` | Regras do carrinho e armazenamento no navegador. |
 | `frontend/src/components/auth-form.tsx` | Formulário compartilhado pelas telas de login e cadastro. |
 | `frontend/src/data/account.ts` | Perfil e pedido fictícios usados nas prévias de conta. |
+| `frontend/src/data/athletes.ts` | Perfil esportivo demonstrativo e resultados recentes do atleta no Figma. |
+| `frontend/src/data/ranking.ts` | Indicadores, classificação e aproveitamento demonstrativos do quadro de ranking. |
+| `frontend/src/data/event-details.ts` | Descrição, imagem e nomes demonstrativos do detalhe de evento. |
 | `frontend/src/components/site-chrome.tsx` | Exibe cabeçalho e rodapé públicos nas rotas do site; omite ambos na área `/admin`, que usa estrutura própria. |
 | `frontend/src/data/admin.ts` | Indicadores, vendas e atividades fictícios do dashboard administrativo. |
-| `frontend/src/app/admin/layout.tsx` e `admin-shell.tsx` | Estrutura e barra lateral compartilhadas entre as telas administrativas existentes. |
+| `frontend/src/app/admin/layout.tsx` e `admin-shell.tsx` | Estrutura e barra superior compartilhadas entre as telas administrativas; em celular a busca contextual fica abaixo do título. |
 | `frontend/src/data/admin-news.ts` | Notícias fictícias usadas apenas na prévia do mural administrativo. |
 | `frontend/src/data/admin-products.ts` | Produtos e estoques fictícios usados apenas na prévia administrativa. |
 | `frontend/src/data/admin-events.ts` | Eventos fictícios usados apenas na prévia administrativa. |
@@ -97,8 +103,11 @@ As páginas usam CSS Modules (`*.module.css`) para estilos próprios. A identida
 | Notícias e categorias | `frontend/src/data/news.ts` |
 | Modalidades, detalhes de futsal e basquete | `frontend/src/data/modalities.ts` |
 | Agenda | `frontend/src/data/events.ts` |
+| Detalhe do treino de Vôlei | `frontend/src/data/event-details.ts` |
 | História, integrantes e conquistas | `frontend/src/data/mural.ts` |
 | Perfil e pedido exibidos nas prévias | `frontend/src/data/account.ts` |
+| Perfil e estatísticas do atleta | `frontend/src/data/athletes.ts` |
+| Ranking e estatísticas esportivas gerais | `frontend/src/data/ranking.ts` |
 | Indicadores, gráfico e atividades do painel | `frontend/src/data/admin.ts` |
 | Linhas iniciais do mural administrativo | `frontend/src/data/admin-news.ts` |
 | Linhas iniciais da gestão demonstrativa de produtos | `frontend/src/data/admin-products.ts` |
@@ -142,13 +151,19 @@ Após a tentativa de login, aparece um link para explorar a prévia de `/minha-c
 
 `/admin/pedidos` segue o quadro `octacore-admin-pedidos` do Figma: quatro pedidos de exemplo, busca por número ou cliente, filtros para todos os seis status e um painel para escolher e salvar o novo status. A pedido da equipe, foi acrescentado um quadro com produtos, variações, quantidades e valores do pedido selecionado, além dos filtros “Disponível para retirada” e “Cancelado”. O total da tabela é calculado a partir dos itens. Os valores dos itens são exemplos históricos para reproduzir os totais do Figma e não precisam corresponder aos preços atuais da loja. Em telas de até 650 px, cartões substituem a tabela: o botão “Gerenciar pedido” fica visível sem rolagem horizontal e leva aos detalhes e ao controle de status. As mudanças de status ocorrem apenas em memória e são descartadas ao recarregar. Esses pedidos são independentes do pedido fictício em `data/account.ts`, do checkout simulado e do dashboard; **nenhuma compra é registrada, nenhum cliente é avisado e não há integração com o backend**.
 
-A barra lateral segue a segunda referência visual enviada pela equipe: logo sobre círculo roxo, linha abaixo da marca, menu posicionado mais abaixo e item ativo com borda roxa. Em telas estreitas, a navegação passa para uma faixa horizontal rolável.
+`/atletas/joao-silva` segue o quadro `octacore-perfil-atleta` do Figma: perfil de João Silva, Futsal Masculino, camisa 10, quatro estatísticas e três resultados recentes. O elenco da página de Futsal agora leva ao perfil; a posição exibida foi alinhada ao protótipo como “Ala”. A foto do quadro não está nos arquivos fornecidos, então as iniciais “JS” ocupam seu espaço provisoriamente. Os números são exemplos em `data/athletes.ts`, independentes dos resultados administrativos e do perfil de conta; **não há atualização automática nem integração com backend**. Esta é uma página pública de atleta, distinta de `/minha-conta`.
+
+`/ranking` segue o quadro `octacore-ranking-estatisticas` do Figma: quatro indicadores da temporada, três posições no Campeonato Universitário e barras de aproveitamento para Futsal, Basquete, Voleibol e Handebol. O link “Ver ranking e estatísticas” em `/modalidades` leva à página. Os valores estão em `data/ranking.ts` e são exemplos independentes das partidas em `data/admin-results.ts` e do perfil do atleta; **não são calculados a partir de resultados nem sincronizados com o backend**.
+
+`/agenda/treino-volei-octacore` segue o quadro `octacore-evento-presenca` do Figma. A imagem de capa foi exportada do próprio protótipo para `public/images/treino-volei-hero.png`. O treino foi acrescentado à Agenda e seu cartão abre o detalhe. Favoritar e confirmar presença mudam apenas a interface aberta: a confirmação mostra “Você (prévia)” e soma um ao contador demonstrativo, mas tudo é descartado ao sair ou recarregar. O quadro mostra 18 confirmados e só fornece cinco nomes; “Ver todos os confirmados” explica essa limitação, sem inventar as demais pessoas. A Agenda ordena os compromissos por data. **Não há autenticação, inscrição ou registro de presença no backend.**
+
+A navegação administrativa fica recolhida atrás de um ícone simples de três linhas no canto superior esquerdo em PC e iPad; no celular, usa o botão “Menu”, que também mostra a seção atual. Os destinos abrem em um card flutuante sobre a página, liberando a coluna lateral fixa sem deslocar o conteúdo. O card usa três colunas em telas maiores e duas em celulares; fecha ao escolher uma rota, tocar fora ou pressionar Escape. A navbar reúne marca, busca da página, perfil e saída; os títulos ficam no início da área principal, sem seta de retorno. O ícone de saída apenas informa que a prévia não tem sessão para encerrar. No menu público, além da seleção de uma rota, tocar fora do card ou pressionar Escape também fecha a navegação móvel. Tabelas mais largas rolam dentro do próprio painel; em `/admin/pedidos`, os cartões substituem a tabela no celular.
 
 ## 7. Próximos passos
 
-1. Revisar com a equipe os textos, eventos, integrantes, produtos, tamanhos e formas de retirada; disponibilizar as fotos dos quatro eventos e dos seis integrantes do painel e substituir os demais placeholders pelas imagens aprovadas.
-2. Definir os contratos da API NestJS e integrar autenticação, conteúdo e pedidos reais. Nessa integração, acrescentar estados de carregamento, erro e sucesso aos formulários de acesso.
-3. Conferir acessibilidade, responsividade e fluxos completos antes da entrega, incluindo seleção de arquivo de imagem em um navegador sem as restrições da extensão de automação.
+1. Revisar com a equipe as telas implementadas, textos, eventos, integrantes, produtos, tamanhos e formas de retirada; disponibilizar as fotos dos quatro eventos do painel, dos seis integrantes e de João Silva, e substituir os demais placeholders pelas imagens aprovadas.
+2. Definir os contratos da API NestJS e integrar autenticação, conteúdo, presença em eventos e pedidos reais. Nessa integração, acrescentar estados de carregamento, erro e sucesso aos formulários de acesso.
+3. Continuar a revisão de acessibilidade e responsividade em larguras intermediárias e celulares menores; incluir indicação visual de rolagem nas tabelas administrativas que ainda não a mostram. Conferir seleção de imagens em um navegador sem as restrições da extensão de automação.
 
 Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando acontecer.
 
@@ -162,10 +177,98 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - O checkout é uma demonstração explícita. Nenhum pedido deve ser tratado como realizado a partir dessa tela.
 - Login e cadastro também são demonstrações visuais; suas credenciais não são enviadas ou persistidas.
 - “Minha Conta” e “Meus Pedidos” usam dados fixos para reproduzir o Figma. Não há sessão, atualização de perfil, troca de senha, saída de conta ou histórico real.
+- O perfil público do atleta também usa dados fixos e não compartilha ainda estatísticas com as outras páginas.
+- O ranking público usa números fixos do Figma e não é recalculado a partir das partidas do painel ou das estatísticas individuais.
+- Favoritar evento e confirmar presença alteram somente o estado da tela atual. A contagem de 18 e os cinco nomes visíveis vêm do Figma; nenhuma presença real é criada.
 - O painel administrativo é uma prévia pública com valores fictícios. Em Notícias, Produtos, Eventos, Integrantes, Resultados e Pedidos, as edições existem somente em memória no navegador e não publicam conteúdo nem atualizam a loja, a agenda, o mural ou os resultados do site público. A proteção de acesso e qualquer ação real de gestão dependerão de autenticação, autorização e API no backend.
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 15/10/2026 — Agenda compacta na Home
+
+- A Home passou a listar até três compromissos futuros em ordem cronológica, com link em cada item para seu detalhe e “Ver mais” para abrir a agenda completa. O grid foi ajustado ao link para manter os títulos legíveis. As páginas da reunião do Intereng e do jogo Octa x Protendidos são prévias sem imagens ou confirmações reais.
+- Verificados lint, TypeScript, build e acesso do card à página de evento no navegador. O conteúdo permanece local; presença e favorito continuam simulados, sem integração com backend.
+
+### 15/10/2026 — Remoção da seta de retorno do painel
+
+- Removida a seta dos títulos administrativos. O menu segue oferecendo acesso ao Dashboard e a marca aponta para o site público, evitando repetir esses destinos junto de cada título.
+- Validado no navegador o título sem seta; lint, TypeScript e diff verificados.
+
+### 15/10/2026 — Organização mobile do painel administrativo
+
+- Em telas até 650 px, a barra superior agora mantém marca, menu e saída em uma linha compacta. A busca contextual aparece abaixo do título na área principal, sem alterar a apresentação de PC e iPad. Os filtros de notícias rolam horizontalmente, e a tabela vira cartões com título, categoria, autor, data, status e ações.
+- Conferidos visualmente Notícias no celular (529 px) e desktop (1440 px): busca e cartões ficam legíveis no celular e a tabela continua no desktop. A regra responsiva do painel preserva o padrão para iPad acima de 650 px; sem teste em dispositivo físico. `npm run lint`, `npx tsc --noEmit` e `git diff --check` verificados. Os dados e ações continuam simulados no navegador, sem integração com backend.
+
+### 15/10/2026 — Ajuste do modal de notícias em telas baixas
+
+- O editor de criação/edição considera a altura dinâmica da tela e áreas seguras do celular; o foco inicial no campo de título deixou de deslocar o topo do modal.
+- Conferido o modal aberto no navegador mobile com o cabeçalho visível; `npm run lint`, `npx tsc --noEmit`, `npm run build` e `git diff --check` verificados. Os dados salvos continuam temporários nesta prévia.
+
+### 15/10/2026 — Rolagem integral do modal de notícias em mobile e iPad
+
+- Em larguras de até 1366 px, ajustada a área do modal para rolar como um todo quando o conteúdo excede a altura disponível; o cartão inicia no topo e os botões “Cancelar” e “Pré-visualizar” seguem no fluxo do formulário, sem ficarem fixos. Em telas maiores, o modal mantém a apresentação centralizada com rolagem interna.
+- As setas de Categoria e Status foram afastadas da borda direita dos seletores.
+- Conferidos criação no iPad simulado (701 × 722 px), incluindo a rolagem até a borda inferior e os botões, e a abertura mobile. `npm run lint`, `npx tsc --noEmit`, `npm run build` e `git diff --check` passaram. A edição usa o mesmo modal; valores continuam temporários, sem publicação ou backend.
+
+### 15/10/2026 — Navbar unificada e títulos na área principal
+
+- Reunidos na faixa superior administrativa a marca, o menu, a busca contextual da página, o nome/ícone do perfil e a saída. Os títulos e a seta de retorno agora aparecem no começo do conteúdo principal. A busca segue conectada ao filtro local de cada tela.
+- Conferidos visualmente dashboard em desktop e Notícias no celular; testei a busca da navbar em Notícias e ela filtrou e restaurou os cinco registros. `npm run lint`, `npx tsc --noEmit` e `git diff --check` passaram. A saída segue demonstrativa; perfil e buscas não têm integração com backend.
+
+### 15/10/2026 — Menu administrativo recolhível em todas as telas
+
+- Removida a coluna lateral permanente do painel. Em PC e iPad, a marca acompanha um ícone de três linhas no canto superior esquerdo; no celular, permanece o botão “Menu” com o nome da seção. Os destinos aparecem em um card flutuante ao clicar, com três colunas em desktop/tablet e duas no celular. O menu fecha ao navegar, tocar fora ou pressionar Escape.
+- Conferi visualmente o ícone e o card aberto no desktop (1280 px), e o botão largo/card em celular (387 px), incluindo o fechamento ao tocar fora. A faixa de tablet usa o padrão de ícone e card adaptados; não houve teste em iPad físico. `npm run lint`, `npx tsc --noEmit` e `git diff --check` passaram. A navegação continua sendo apenas front end, sem autenticação ou backend.
+
+### 15/10/2026 — Fechamento do menu público ao tocar fora
+
+- A navegação móvel do site público agora fecha quando o usuário toca em qualquer área fora do card. Também fecha com a tecla Escape, além de continuar fechando após a seleção de uma rota.
+- Verificado no navegador em tela móvel: abri o menu da Home e toquei numa área livre do conteúdo; os links do menu desapareceram sem mudar de página. `npm run lint`, `npx tsc --noEmit` e `git diff --check` passaram.
+
+### 15/10/2026 — Menu administrativo como card flutuante
+
+- Em telas de até 650 px, os destinos do menu agora abrem em um card com fundo, borda arredondada e sombra, sobre a página. A navegação deixa de ocupar espaço no fluxo e não desloca o conteúdo abaixo.
+- Conferido visualmente em 387 px na tela de Notícias: o card cobre temporariamente a área sob o botão Menu, enquanto a página permanece na mesma posição. A navegação continua em duas colunas e os links continuam selecionáveis. `npm run lint`, `npx tsc --noEmit` e `git diff --check` passaram. O menu segue sendo navegação local de front end, sem autenticação.
+
+### 15/10/2026 — Acesso móvel por IP na prévia de desenvolvimento
+
+- O Next bloqueava recursos de desenvolvimento quando a página era aberta pelo IP local, o que pode deixar o HTML visível sem ativar filtros e outros controles. `next.config.ts` agora permite origens IPv4 de redes privadas (`10/8`, `172.16/12` e `192.168/16`) para esses recursos em desenvolvimento.
+- Na prévia local, confirmei que os filtros de Notícias alteram a seleção e a contagem. `npm run lint`, `npx tsc --noEmit` e `git diff --check` passaram. O acesso pelo dispositivo físico ainda precisa ser recarregado após o Next reiniciar; a integração continua sendo apenas front end.
+
+### 15/10/2026 — Ícone de saída no cabeçalho desktop
+
+- Realocado o ícone de saída para o extremo direito do cabeçalho administrativo, logo depois do avatar, em todas as sete telas. Em telas pequenas, o ícone continua junto à marca. As duas posições compartilham o mesmo aviso demonstrativo de saída.
+- Conferidos no navegador o ícone depois do avatar em tela de PC e a manutenção do ícone ao lado da logo no mobile; o clique continua exibindo o aviso da prévia. `npm run lint`, `npm run build` e `git diff --check` passaram. A saída real continua pendente de autenticação no backend.
+
+### 15/10/2026 — Menu administrativo recolhível no celular
+
+- Substituída a grade permanente de atalhos por um botão “Menu” compacto, com o nome da seção atual. Ao expandir, os sete destinos aparecem em duas colunas; selecionar uma rota fecha o menu e atualiza a indicação da seção.
+- Conferidos no navegador o estado recolhido, a expansão em duas colunas, a navegação para Integrantes e o fechamento automático após a seleção em 387 px. `npm run lint`, `npm run build` e `git diff --check` passaram. O comportamento continua sendo navegação de front end, sem autenticação ou backend.
+
+### 15/10/2026 — Navegação móvel e cabeçalho administrativo
+
+- O menu público agora fecha ao escolher um destino. No painel, o retorno foi movido para uma seta ao lado do título; ela leva ao site no dashboard e ao dashboard nas páginas internas. O ícone vermelho no topo exibe a saída demonstrativa, sem encerrar sessão real. Removidas as ações inferiores e as divisórias do topo no mobile.
+- Em 387 px, conferidos visualmente dashboard, notícias, produtos, eventos, integrantes, resultados e pedidos; não houve rolagem horizontal da página. As tabelas de produtos e resultados mantêm rolagem local; Pedidos troca a tabela por cartões. Também foi aberto o menu público, selecionada Notícias e confirmado que o menu voltou fechado.
+- `npm run lint`, `npm run build` e `git diff --check` passaram. A responsividade em 387 px foi testada no navegador; pontos a melhorar: indicar a rolagem das tabelas de notícias e produtos e revisar faixas intermediárias e celulares menores. Painel e logout continuam sendo apenas prévias, sem autenticação.
+
+### 15/10/2026 — Detalhe demonstrativo de evento e presença
+
+- Conferido o quadro `octacore-evento-presenca` no Figma; exportada a capa do treino e criada `/agenda/treino-volei-octacore` com informações, descrição, lista de cinco nomes visíveis e botão de retorno. O treino foi incluído na Agenda com link para o detalhe; os cartões da Agenda passaram a ser ordenados por data.
+- Favorito, confirmação e expansão da informação sobre a lista respondem na interface, mas são descartados ao sair ou recarregar. A página informa que não registra presença; os 18 confirmados são um número demonstrativo do protótipo.
+- Conferidos no navegador a rota, a imagem, os controles, a mudança de 18 para 19 na prévia, o retorno à Agenda e a restauração do estado ao entrar novamente. `npm run lint` e `npm run build` passaram. A regra para celular está no CSS; a revisão visual em largura menor permanece pendente.
+
+### 15/10/2026 — Ranking e estatísticas esportivas demonstrativos
+
+- Conferido o quadro `octacore-ranking-estatisticas` no Figma e criada `/ranking` com indicadores, classificação e barras de aproveitamento. A página de Modalidades recebeu o link de acesso.
+- Os valores de `data/ranking.ts` são exemplos do protótipo, separados dos resultados administrativos, sem atualização automática ou backend.
+- Conferidos no navegador o conteúdo da nova rota, o link em Modalidades e o layout em largura de celular; `npm run lint`, `npm run build` e `git diff --check` passaram.
+
+### 15/10/2026 — Perfil público demonstrativo do atleta
+
+- Conferido o quadro `octacore-perfil-atleta` no Figma e criada `/atletas/joao-silva` com apresentação, camisa 10, estatísticas e três resultados recentes. O nome de João Silva no elenco de Futsal agora é um link para esse perfil; sua posição foi alinhada ao quadro como “Ala”.
+- A foto do Figma não está nos arquivos do projeto e foi representada por iniciais. Os dados em `data/athletes.ts` são apenas exemplos, sem sincronização com elenco, resultados administrativos ou backend.
+- Conferidos no navegador o carregamento do perfil, seus dados e a navegação de ida e volta pelo elenco de Futsal. Conferidos `npm run lint` e `npm run build`; o comportamento em largura móvel foi preparado no CSS, mas ainda precisa de revisão visual em dispositivo menor.
 
 ### 15/10/2026 — Cartões móveis para Pedidos
 

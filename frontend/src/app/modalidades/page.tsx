@@ -12,6 +12,7 @@ export default function ModalitiesPage() {
         <div className={styles.kicker} aria-hidden="true" />
         <h1>Nossas modalidades</h1>
         <p className={styles.intro}>Seja na quadra, no campo ou na tela, a Octa tem um time para você.</p>
+        <Link href="/ranking" className={styles.rankingLink}>Ver ranking e estatísticas <span aria-hidden="true">→</span></Link>
 
         <div className={styles.grid}>
           {modalities.map((modality) => (

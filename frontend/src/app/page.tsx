@@ -1,19 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getUpcomingAgendaEvents } from "@/data/events";
 import { formatPrice, products } from "@/data/products";
 import styles from "./page.module.css";
 
-const upcomingEvents = [
-  { date: "22/09 · 18h", title: "Treino de Basquete", type: "Treino" },
-  { date: "24/09 · 17h", title: "Seletiva de Vôlei", type: "Seletiva" },
-  { date: "27/09 · 20h", title: "Octa x Atlética X", type: "Jogo" },
-  { date: "03/10 · 22h", title: "Festa Octacore", type: "Evento" },
-  {date: "20/11 · 15:00", title: "Octa x Protendidos", type: "Jogo"},
-];
+export const dynamic = "force-dynamic";
 
 const sports = ["Futsal", "Basquete", "Vôlei", "Handebol", "E-sports"];
 
 export default function Home() {
+  const upcomingEvents = getUpcomingAgendaEvents();
+
   return (
     <main className={styles.main}>
       <div className={styles.container}>
@@ -69,9 +66,11 @@ export default function Home() {
           <aside className={styles.rightColumn} aria-label="Agenda e modalidades">
             <section className={styles.eventsCard} aria-labelledby="events-title">
               <h2 id="events-title">Próximos compromissos</h2>
-              <ul>{upcomingEvents.map((event) => (
-                <li key={event.title}><time>{event.date}</time><div><strong>{event.title}</strong><span>{event.type}</span></div></li>
+              <ul>{upcomingEvents.slice(0, 3).map((event) => (
+                <li key={event.id}><Link href={`/agenda/${event.detailSlug}`} aria-label={`Ver detalhes de ${event.title}`}><time dateTime={event.dateTime}>{event.day}/{event.month} · {event.time}</time><div><strong>{event.title}</strong><span>{event.category}</span></div></Link></li>
               ))}</ul>
+              {upcomingEvents.length === 0 && <p className={styles.noUpcomingEvents}>Nenhum compromisso futuro cadastrado.</p>}
+              <Link className={styles.moreEvents} href="/agenda">Ver mais</Link>
             </section>
             <section className={styles.sportsSection} aria-labelledby="sports-title">
               <h2 id="sports-title">Nossas modalidades</h2>

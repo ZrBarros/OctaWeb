@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { adminActivities, adminMetrics, demoSales } from "@/data/admin";
-import { AdminIcon } from "./admin-shell";
+import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "./admin-shell";
 import styles from "./admin.module.css";
 
 export function AdminDashboard() {
@@ -10,16 +10,10 @@ export function AdminDashboard() {
   const activities = adminActivities.filter((activity) => `${activity.description} ${activity.person}`.toLocaleLowerCase("pt-BR").includes(query.toLocaleLowerCase("pt-BR")));
 
   return <>
-    <header className={styles.topbar}>
-      <div className={styles.titleGroup}><h1>Visão Geral do Reino</h1><span className={styles.roleBadge}>Diretoria</span></div>
-      <div className={styles.topbarRight}>
-        <label className={styles.search}><AdminIcon name="search" /><span className={styles.srOnly}>Buscar nas atividades recentes</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar atividades..." /></label>
-        <div className={styles.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI</small></div>
-        <span className={styles.adminAvatar} aria-hidden="true">AP</span>
-      </div>
-    </header>
+    <AdminToolbarSearch><label className={styles.search}><AdminIcon name="search" /><span className={styles.srOnly}>Buscar nas atividades recentes</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar atividades..." /></label></AdminToolbarSearch>
 
     <div className={styles.content}>
+      <AdminPageHeading title="Visão Geral do Reino" />
       <p className={styles.demoNotice}>Prévia demonstrativa · acesso livre e dados fictícios</p>
 
       <section className={styles.metricGrid} aria-label="Indicadores de exemplo">

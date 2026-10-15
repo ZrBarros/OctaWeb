@@ -3,9 +3,9 @@
 .viewButton, .selectedView { min-height: 36px; padding: 0 16px; border: 1px solid transparent; border-radius: 5px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
 .viewButton { background: #1c1c1c; color: #ccc3d0; }
 .viewButton:hover { border-color: #85438e; color: white; }
-.selectedView { background: #a200ae; color: white; }
-.newButton { min-height: 39px; padding: 0 20px; border: 0; border-radius: 6px; background: var(--orange); color: #190820; cursor: pointer; font: inherit; font-size: 12px; font-weight: 900; white-space: nowrap; }
-.newButton:hover { filter: brightness(1.12); }
+.selectedView { background: var(--orange); color: #190820; }
+.newButton { min-height: 39px; padding: 0 20px; border: 0; border-radius: 6px; background: #a200ae; color: white; cursor: pointer; font: inherit; font-size: 12px; font-weight: 900; white-space: nowrap; }
+.newButton:hover { background: #c20dcc; }
 .resultCount { display: flex; align-items: center; gap: 12px; margin: -7px 0 17px; color: #aaa0ae; font-size: 11px; }
 .resultCount button { border: 0; background: transparent; color: var(--orange); cursor: pointer; font: inherit; font-weight: 800; }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }

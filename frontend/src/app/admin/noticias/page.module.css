@@ -37,7 +37,7 @@
 .empty { margin: 0; padding: 25px; color: #c9bdce; font-size: 13px; }
 .overlay { position: fixed; z-index: 50; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 18px; background: #09000be0; }
 .dialog { min-width: 0; width: min(100%, 520px); padding: 25px; border: 1px solid #853791; border-radius: 11px; background: #1c1c1c; box-shadow: 0 20px 75px #0009; }
-.editorDialog { width: min(100%, 720px); max-height: calc(100vh - 36px); overflow-y: auto; }
+.editorDialog { width: min(100%, 720px); max-height: calc(100vh - 36px); max-height: calc(100dvh - 36px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
 .dialogHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .dialog h2 { margin: 0; font-size: 23px; font-weight: 900; text-transform: uppercase; }
 .dialogHeader button { border: 0; background: none; color: #d9cadc; cursor: pointer; font-size: 28px; line-height: 1; }
@@ -45,6 +45,7 @@
 .form { display: grid; gap: 15px; }
 .form label { display: grid; gap: 7px; color: #f1eaf2; font-size: 12px; font-weight: 800; }
 .form input, .form select, .form textarea { width: 100%; min-height: 40px; padding: 10px 11px; border: 1px solid #5a3b62; border-radius: 5px; outline: 0; background: #100719; color: white; font: inherit; font-size: 13px; }
+.form select { appearance: none; padding-right: 40px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c9bdce' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 14px; }
 .form textarea { min-height: 88px; resize: vertical; line-height: 1.5; }
 .form textarea::placeholder, .form input::placeholder { color: #8c8091; }
 .form input:focus, .form select:focus, .form textarea:focus { border-color: var(--orange); }
@@ -77,4 +78,40 @@
 .saveButton { border: 0; background: #a200ae; color: white; }
 .deleteConfirm { border: 0; background: #a1323d; color: white; }
 @media (max-width: 1050px) { .newsTable { min-width: 840px; } }
-@media (max-width: 650px) { .toolbar { align-items: stretch; flex-direction: column; margin-bottom: 12px; } .filters { gap: 6px; } .filter, .selectedFilter { min-height: 33px; padding-inline: 12px; font-size: 11px; } .newButton { align-self: flex-start; } .formRow { grid-template-columns: 1fr; } .dialog { padding: 18px; } .dialogActions { flex-wrap: wrap; } .articlePreview { padding: 17px; } }
+@media (max-width: 1366px) {
+  .overlay { display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; overscroll-behavior: contain; padding: 18px; }
+  .editorDialog { max-height: none; overflow: visible; margin: 0 auto; }
+}
+@media (max-width: 650px) {
+  .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .filters { min-width: 0; flex-wrap: nowrap; gap: 6px; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter, .selectedFilter { min-height: 34px; flex: 0 0 auto; padding-inline: 12px; font-size: 11px; }
+  .newButton { min-height: 36px; padding-inline: 11px; font-size: 11px; }
+  .newButton span { white-space: nowrap; }
+  .resultBar { align-items: flex-start; margin-bottom: 12px; }
+  .tablePanel { overflow: visible; border: 0; background: transparent; }
+  .tableScroll { overflow: visible; }
+  .newsTable { display: block; width: 100%; min-width: 0; border-collapse: separate; table-layout: auto; }
+  .newsTable thead { display: none; }
+  .newsTable tbody { display: grid; gap: 10px; }
+  .newsTable tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 12px; padding: 10px 12px; border: 1px solid #3a1642; border-radius: 8px; background: #1c1c1c; }
+  .newsTable td { display: flex; min-width: 0; height: auto; align-items: baseline; gap: 7px; padding: 6px 0; border: 0; font-size: 11px; overflow-wrap: anywhere; }
+  .newsTable td::before { flex: 0 0 auto; color: #a99aac; content: attr(data-label); font-size: 9px; font-weight: 700; }
+  .newsTable .titleCell { grid-column: 1 / -1; padding: 2px 0 9px; font-size: 13px; line-height: 1.35; }
+  .newsTable .titleCell::before { display: none; }
+  .newsTable td:nth-child(2) { grid-column: 1; }
+  .newsTable td:nth-child(3) { grid-column: 2; }
+  .newsTable td:nth-child(4) { grid-column: 1; }
+  .newsTable td:nth-child(5) { grid-column: 2; }
+  .newsTable td:nth-child(6) { grid-column: 1 / -1; justify-content: flex-end; margin-top: 4px; padding-top: 8px; border-top: 1px solid #302735; }
+  .newsTable td:nth-child(6)::before { margin-right: auto; }
+  .dateCell { white-space: normal; }
+  .published, .draft { padding: 3px 5px; font-size: 9px; }
+  .formRow { grid-template-columns: 1fr; }
+  .dialog { padding: 18px; }
+  .overlay { display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+  .editorDialog { width: 100%; max-height: none; overflow: visible; margin: 0 auto; }
+  .dialogActions { flex-wrap: wrap; }
+  .articlePreview { padding: 17px; }
+}

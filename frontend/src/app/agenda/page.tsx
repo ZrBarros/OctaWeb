@@ -1,14 +1,16 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { agendaEvents, eventCategories } from "@/data/events";
 import styles from "./page.module.css";
 
 export default function AgendaPage() {
   const [category, setCategory] = useState<(typeof eventCategories)[number]>("Todos");
-  const visibleEvents = category === "Todos"
-    ? agendaEvents
-    : agendaEvents.filter((event) => event.category === category);
+  const visibleEvents = (category === "Todos"
+    ? [...agendaEvents]
+    : agendaEvents.filter((event) => event.category === category))
+    .sort((first, second) => first.dateTime.localeCompare(second.dateTime));
 
   return (
     <main className={styles.main}>
@@ -37,8 +39,9 @@ export default function AgendaPage() {
                   <strong>{event.day}</strong><span>{event.month}</span>
                 </time>
                 <div className={styles.eventDetails}>
-                  <h2>{event.title}</h2>
+                  <h2>{event.detailSlug ? <Link href={`/agenda/${event.detailSlug}`}>{event.title}</Link> : event.title}</h2>
                   <p><time dateTime={event.dateTime}>◷ {event.time}</time><span>·</span><span>▣ {event.place}</span></p>
+                  {event.detailSlug && <Link className={styles.detailLink} href={`/agenda/${event.detailSlug}`}>Ver detalhes e presença <span aria-hidden="true">→</span></Link>}
                 </div>
                 <span className={styles.badge}>{event.category}</span>
               </article>

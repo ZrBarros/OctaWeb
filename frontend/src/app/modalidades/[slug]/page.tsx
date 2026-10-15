@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { athleteProfileHref } from "@/data/athletes";
 import { basqueteDetails, futsalDetails, modalities } from "@/data/modalities";
 import styles from "./page.module.css";
 
@@ -65,7 +66,10 @@ export default async function ModalityDetailPage({ params }: Props) {
             </div>
             <aside className={`${styles.roster} hoverCard`} aria-labelledby="roster-title">
               <h2 id="roster-title">Elenco {modality.name}</h2>
-              <ul>{details.roster.map((member) => <li key={member}>{member}</li>)}</ul>
+              <ul>{details.roster.map((member) => {
+                const profileHref = athleteProfileHref(member.replace(/\s*\([^)]*\)$/, ""));
+                return <li key={member}>{profileHref ? <Link href={profileHref} className={styles.profileLink}>{member}<span aria-hidden="true">↗</span></Link> : member}</li>;
+              })}</ul>
             </aside>
           </div>
         ) : (

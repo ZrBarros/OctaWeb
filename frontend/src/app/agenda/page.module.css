@@ -15,7 +15,10 @@
 .dateBox span { margin-top: 3px; font-size: 12px; font-weight: 900; }
 .eventDetails { min-width: 0; flex: 1; }
 .eventDetails h2 { margin: 0 0 7px; font-size: 19px; font-weight: 900; line-height: 1.2; }
+.eventDetails h2 a:hover { color: var(--orange); }
 .eventDetails p { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: #bdb4c1; font-size: 13px; }
+.detailLink { display: inline-flex; align-items: center; gap: 7px; margin-top: 9px; color: var(--orange); font-size: 11px; font-weight: 800; }
+.detailLink:hover { text-decoration: underline; }
 .badge { flex: 0 0 auto; padding: 6px 9px; border-radius: 3px; background: #3a0051; color: #fff; font-size: 11px; font-weight: 900; text-transform: uppercase; }
 .info { padding: 31px; border-radius: 13px; background: var(--surface); }
 .info h2 { margin: 0 0 17px; font-size: 19px; font-weight: 900; text-transform: uppercase; }

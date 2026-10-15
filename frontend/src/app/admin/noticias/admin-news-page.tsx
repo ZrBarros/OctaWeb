@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AdminIcon } from "../admin-shell";
+import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import { adminNews, adminNewsCategories, type AdminNewsItem, type AdminNewsCategory, type AdminNewsStatus } from "@/data/admin-news";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
@@ -101,16 +101,10 @@ export function AdminNewsPage() {
   }
 
   return <>
-    <header className={shared.topbar}>
-      <div className={shared.titleGroup}><h1>Mural de Notícias</h1><span className={shared.roleBadge}>Diretoria</span></div>
-      <div className={shared.topbarRight}>
-        <label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar notícias no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar notícias..." /></label>
-        <div className={shared.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI</small></div>
-        <span className={shared.adminAvatar} aria-hidden="true">AP</span>
-      </div>
-    </header>
+    <AdminToolbarSearch><label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar notícias no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar notícias..." /></label></AdminToolbarSearch>
 
     <div className={shared.content}>
+      <AdminPageHeading title="Mural de Notícias" />
       <p className={shared.demoNotice}>Prévia demonstrativa · alterações temporárias e sem publicação</p>
       {message && <p className={styles.message} role="status">{message}</p>}
 
@@ -131,12 +125,12 @@ export function AdminNewsPage() {
           <table className={styles.newsTable}>
             <thead><tr><th scope="col">Título</th><th scope="col">Categoria</th><th scope="col">Autor</th><th scope="col">Data</th><th scope="col">Status</th><th scope="col">Ações</th></tr></thead>
             <tbody>{filteredItems.map((item) => <tr key={item.id}>
-              <td className={styles.titleCell}>{item.title}</td>
-              <td>{item.category}</td>
-              <td>{item.author}</td>
-              <td className={styles.dateCell}>{item.date}</td>
-              <td><span className={item.status === "Publicado" ? styles.published : styles.draft}>{item.status}</span></td>
-              <td><div className={styles.actions}>
+              <td className={styles.titleCell} data-label="Título">{item.title}</td>
+              <td data-label="Categoria">{item.category}</td>
+              <td data-label="Autor">{item.author}</td>
+              <td className={styles.dateCell} data-label="Data">{item.date}</td>
+              <td data-label="Status"><span className={item.status === "Publicado" ? styles.published : styles.draft}>{item.status}</span></td>
+              <td data-label="Ações"><div className={styles.actions}>
                 <button className={styles.editButton} type="button" aria-label={`Editar ${item.title}`} title="Editar" onClick={() => openEditor(item)}><PencilIcon /></button>
                 <button className={styles.deleteButton} type="button" aria-label={`Excluir ${item.title}`} title="Excluir" onClick={() => setDeletingId(item.id)}><TrashIcon /></button>
               </div></td>
@@ -149,11 +143,11 @@ export function AdminNewsPage() {
 
     {draft && <div className={styles.overlay} role="presentation">
       <section className={`${styles.dialog} ${styles.editorDialog}`} role="dialog" aria-modal="true" aria-labelledby="news-dialog-title" onKeyDown={(event) => { if (event.key === "Escape") closeEditor(); }}>
-        <div className={styles.dialogHeader}><h2 id="news-dialog-title">{editorStep === "preview" ? "Prévia da notícia" : editingId === null ? "Nova notícia" : "Editar notícia"}</h2><button type="button" aria-label="Fechar" onClick={closeEditor}>×</button></div>
+        <div className={styles.dialogHeader}><h2 id="news-dialog-title">{editorStep === "preview" ? "Prévia da notícia" : editingId === null ? "Nova notícia" : "Editar notícia"}</h2><button autoFocus type="button" aria-label="Fechar" onClick={closeEditor}>×</button></div>
         <p>Esta é uma simulação: salvar aqui não publica no site e recarregar a página restaura os exemplos.</p>
 
         {editorStep === "edit" ? <form onSubmit={(event) => { event.preventDefault(); setEditorStep("preview"); }} className={styles.form}>
-          <label>Título<input autoFocus required maxLength={160} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
+          <label>Título<input required maxLength={160} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
           <label>Resumo<textarea required rows={3} maxLength={300} value={draft.summary} onChange={(event) => setDraft({ ...draft, summary: event.target.value })} placeholder="Uma apresentação curta da notícia" /></label>
           <label>Texto da notícia<textarea required rows={8} value={draft.body} onChange={(event) => setDraft({ ...draft, body: event.target.value })} placeholder="Escreva o conteúdo completo. Separe os parágrafos com uma linha em branco." /></label>
           <div className={styles.formRow}>
@@ -182,7 +176,7 @@ export function AdminNewsPage() {
             <p className={styles.previewLead}>{draft.summary.trim()}</p>
             <div className={styles.previewBody}>{draft.body.trim().split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
           </article>
-          <div className={styles.dialogActions}><button autoFocus type="button" className={styles.cancelButton} onClick={() => setEditorStep("edit")}>Voltar à edição</button><button type="button" className={styles.saveButton} onClick={saveDraft}>Salvar na prévia</button></div>
+          <div className={styles.dialogActions}><button type="button" className={styles.cancelButton} onClick={() => setEditorStep("edit")}>Voltar à edição</button><button type="button" className={styles.saveButton} onClick={saveDraft}>Salvar na prévia</button></div>
         </>}
       </section>
     </div>}

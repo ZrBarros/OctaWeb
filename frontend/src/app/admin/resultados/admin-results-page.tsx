@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { AdminIcon } from "../admin-shell";
+import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import { adminResults, resultStatus, type AdminResult } from "@/data/admin-results";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
@@ -67,15 +67,9 @@ export function AdminResultsPage() {
   }
 
   return <>
-    <header className={shared.topbar}>
-      <div className={shared.titleGroup}><h1>Placar de Arena - Resultados</h1><span className={shared.roleBadge}>Diretoria</span></div>
-      <div className={shared.topbarRight}>
-        <label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar resultados no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar no painel..." /></label>
-        <div className={shared.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI</small></div>
-        <span className={shared.adminAvatar} aria-hidden="true">AP</span>
-      </div>
-    </header>
+    <AdminToolbarSearch><label className={shared.search}><AdminIcon name="search" /><span className={shared.srOnly}>Buscar resultados no painel</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar resultados..." /></label></AdminToolbarSearch>
     <div className={shared.content}>
+      <AdminPageHeading title="Placar de Arena - Resultados" />
       <p className={shared.demoNotice}>Prévia demonstrativa · placares e alterações temporários</p>
       {message && <p className={styles.message} role="status">{message}</p>}
       <div className={styles.toolbar}>
