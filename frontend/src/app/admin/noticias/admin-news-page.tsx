@@ -112,6 +112,12 @@ export function AdminNewsPage() {
         <div className={styles.filters} role="group" aria-label="Filtrar notícias por categoria">
           {availableFilters.map((category) => <button key={category} type="button" className={filter === category ? styles.selectedFilter : styles.filter} aria-pressed={filter === category} onClick={() => setFilter(category)}>{category}</button>)}
         </div>
+        <label className={styles.mobileFilter}>
+          <span>Filtrar por categoria</span>
+          <select value={filter} onChange={(event) => setFilter(event.target.value as "Todos" | AdminNewsCategory)}>
+            {availableFilters.map((category) => <option key={category} value={category}>{category}</option>)}
+          </select>
+        </label>
         <button className={styles.newButton} type="button" onClick={() => openEditor()}>＋ <span>Nova Notícia</span></button>
       </div>
 

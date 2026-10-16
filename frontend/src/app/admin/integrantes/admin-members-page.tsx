@@ -83,8 +83,11 @@ export function AdminMembersPage() {
       {query && <p className={styles.resultCount}>{filtered.length} {filtered.length === 1 ? "integrante encontrado" : "integrantes encontrados"}<button type="button" onClick={() => setQuery("")}>Limpar busca</button></p>}
       <div className={styles.grid}>
         {filtered.map((item) => <article className={styles.card} key={item.id}>
-          <div className={styles.avatar}>{item.image ? <Image src={item.image} alt={`Foto de ${item.name}`} width={76} height={76} unoptimized={item.image.startsWith("data:")} /> : <span aria-label={`Foto de ${item.name} pendente`}>{initials(item.name)}</span>}</div>
-          <div className={styles.cardContent}><h2>{item.name}</h2><p className={styles.role}>{item.role}</p><p className={styles.course}>{item.course}</p><p className={styles.instagram}><InstagramIcon /><span>@{item.instagram}</span></p><div className={styles.cardActions}><button type="button" onClick={() => openEditor(item)} aria-label={`Editar ${item.name}`}>Editar</button><button type="button" onClick={() => setRemovingId(item.id)} aria-label={`Remover ${item.name}`}>Remover</button></div></div>
+          <button className={styles.cardMain} type="button" onClick={() => openEditor(item)} aria-label={`Editar ${item.name}`}>
+            <div className={styles.avatar}>{item.image ? <Image src={item.image} alt={`Foto de ${item.name}`} width={76} height={76} unoptimized={item.image.startsWith("data:")} /> : <span aria-label={`Foto de ${item.name} pendente`}>{initials(item.name)}</span>}</div>
+            <div className={styles.cardContent}><h2>{item.name}</h2><p className={styles.role}>{item.role}</p><p className={styles.course}>{item.course}</p><p className={styles.instagram}><InstagramIcon /><span>@{item.instagram}</span></p></div>
+          </button>
+          <div className={styles.cardActions}><button type="button" onClick={() => openEditor(item)} aria-label={`Editar ${item.name}`}>Editar</button><button type="button" onClick={() => setRemovingId(item.id)} aria-label={`Remover ${item.name}`}>Remover</button></div>
         </article>)}
         {filtered.length === 0 && <p className={styles.empty}>Nenhum integrante encontrado. Tente outro nome ou cadastre um integrante.</p>}
       </div>

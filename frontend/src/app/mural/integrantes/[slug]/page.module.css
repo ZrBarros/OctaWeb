@@ -1,0 +1,27 @@
+.main { min-height: 760px; padding: 38px 0 90px; background: var(--background); }
+.container { width: min(1080px, calc(100% - 48px)); margin: 0 auto; }
+.breadcrumb { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 34px; color: #bcb0c1; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.breadcrumb a:hover, .breadcrumb span:last-child { color: var(--orange); }
+.profile { display: grid; grid-template-columns: minmax(250px, .8fr) minmax(0, 1.2fr); overflow: hidden; border: 1px solid #32113e; border-radius: 12px; background: var(--surface); }
+.photo { min-height: 390px; background: #fff; }
+.content { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(24px, 5vw, 56px); }
+.kicker { margin: 0 0 12px; color: var(--orange); font-size: 12px; font-weight: 900; text-transform: uppercase; }
+.content h1 { margin: 0; font-size: clamp(34px, 5vw, 56px); font-weight: 900; line-height: 1.05; text-transform: uppercase; }
+.role { margin: 11px 0 28px; color: #d0c5d3; font-size: 15px; font-weight: 700; }
+.details { display: grid; width: 100%; gap: 12px; margin: 0; }
+.details div { padding: 14px 16px; border: 1px solid #37243d; border-radius: 7px; background: #140a19; }
+.details dt { color: var(--orange); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.details dd { margin: 5px 0 0; color: white; font-size: 14px; font-weight: 700; }
+.backLink { margin-top: 27px; color: var(--orange); font-size: 13px; font-weight: 800; }
+.backLink:hover { text-decoration: underline; }
+.demoNotice { margin: 13px 0 0; color: #a892ad; font-size: 11px; }
+.backLink:focus-visible, .breadcrumb a:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+@media (max-width: 650px) {
+  .main { min-height: 0; padding: 30px 0 70px; }
+  .container { width: min(100% - 32px, 1080px); }
+  .breadcrumb { gap: 7px; margin-bottom: 22px; font-size: 10px; }
+  .profile { grid-template-columns: 1fr; }
+  .photo { min-height: 0; aspect-ratio: 1.1; }
+  .content { padding: 23px 20px; }
+  .role { margin-bottom: 20px; }
+}

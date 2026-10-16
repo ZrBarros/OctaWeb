@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { adminProfile } from "@/data/admin-profile";
 import styles from "./admin.module.css";
 
 export type AdminIconName = "dashboard" | "news" | "products" | "events" | "users" | "results" | "orders" | "search" | "logout";
@@ -56,7 +57,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [toolbarSearchTarget, setToolbarSearchTarget] = useState<HTMLElement | null>(null);
   const [mobileToolbarSearchTarget, setMobileToolbarSearchTarget] = useState<HTMLElement | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
-  const currentSection = sections.find((section) => section.href === pathname)?.label ?? "Painel";
+  const currentSection = pathname === "/admin/perfil" ? "Meu perfil" : sections.find((section) => section.href === pathname)?.label ?? "Painel";
 
   useEffect(() => {
     const closeOnOutsidePointer = (event: PointerEvent) => {
@@ -98,8 +99,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className={styles.navbarActions}>
           <div id="admin-toolbar-search" ref={setToolbarSearchTarget} className={styles.toolbarSearchSlot} />
-          <div className={styles.adminIdentity}><strong>Arthur Pendragon</strong><small>Diretor de TI</small></div>
-          <span className={styles.adminAvatar} aria-hidden="true">AP</span>
+          <Link className={styles.adminProfileLink} href="/admin/perfil" aria-label={`Abrir perfil de ${adminProfile.name}`}>
+            <span className={styles.adminIdentity}><strong>{adminProfile.name}</strong><small>{adminProfile.role}</small></span>
+            <span className={styles.adminAvatar} aria-hidden="true">{adminProfile.initials}</span>
+          </Link>
           <AdminLogoutButton placement="desktop" />
         </div>
       </div>
@@ -112,6 +115,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             ? <Link className={active ? styles.activeNav : styles.navItem} href={section.href} aria-current={active ? "page" : undefined} onClick={() => { setFeedback(""); setMobileMenuOpen(false); }} key={section.label}>{content}</Link>
             : <button className={styles.navItem} type="button" onClick={() => { setFeedback(`A área de ${section.label.toLowerCase()} será construída nas próximas etapas.`); setMobileMenuOpen(false); }} key={section.label}>{content}</button>;
         })}
+        <Link className={styles.mobileProfileNav} href="/admin/perfil" aria-current={pathname === "/admin/perfil" ? "page" : undefined} onClick={() => { setFeedback(""); setMobileMenuOpen(false); }}><AdminIcon name="users" /><span>Meu perfil</span>{pathname === "/admin/perfil" && <span className={styles.activeDot} aria-hidden="true" />}</Link>
       </nav>
 
     </aside>

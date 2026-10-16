@@ -29,11 +29,17 @@ export default function MembersPage() {
             >{item}</button>
           ))}
         </div>
+        <label className={styles.mobileFilter}>
+          <span>Filtrar integrantes</span>
+          <select value={filter} onChange={(event) => setFilter(event.target.value as (typeof memberFilters)[number])}>
+            {memberFilters.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
 
         {visibleMembers.length > 0 ? (
           <div className={styles.grid}>
             {visibleMembers.map((member) => (
-              <article className={`${styles.card} hoverCard`} key={member.name}>
+              <Link className={`${styles.card} hoverCard`} key={member.slug} href={`/mural/integrantes/${member.slug}`} aria-label={`Ver perfil de ${member.name}`}>
                 <div className={styles.photo} role="img" aria-label={`Foto de ${member.name} pendente`} />
                 <div className={styles.cardContent}>
                   <h2>{member.name}</h2>
@@ -44,7 +50,7 @@ export default function MembersPage() {
                     <InstagramIcon />
                   </span>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         ) : (

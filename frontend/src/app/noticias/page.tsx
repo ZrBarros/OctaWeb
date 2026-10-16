@@ -27,6 +27,12 @@ export default function NewsPage() {
             >{item}</button>
           ))}
         </div>
+        <label className={styles.mobileCategory}>
+          <span>Filtrar por categoria</span>
+          <select value={category} onChange={(event) => setCategory(event.target.value as (typeof newsCategories)[number])}>
+            {newsCategories.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
 
         {visibleNews.length > 0 ? (
           <div className={styles.grid}>{visibleNews.map((article) => <NewsCard key={article.slug} article={article} />)}</div>

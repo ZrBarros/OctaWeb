@@ -7,6 +7,7 @@
 .filters button { min-height: 36px; padding: 7px 17px; border: 1px solid #382840; border-radius: 5px; background: var(--surface); color: #fff; cursor: pointer; font-size: 12px; font-weight: 800; }
 .filters button:hover, .filters .selected { border-color: var(--purple); background: var(--purple); }
 .filters button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+.mobileFilter { display: none; }
 .layout { display: grid; grid-template-columns: minmax(0, 1.85fr) minmax(280px, 1fr); align-items: start; gap: 43px; }
 .eventList { display: grid; gap: 17px; }
 .eventCard { display: flex; min-width: 0; align-items: center; gap: 21px; min-height: 104px; padding: 16px 21px; border: 1px solid #32113e; border-radius: 12px; background: var(--surface); }
@@ -25,4 +26,5 @@
 .info p { margin: 0; color: #c7bdca; font-size: 14px; line-height: 1.6; }
 .empty { margin: 0; padding: 30px; border-radius: 10px; background: var(--surface); color: #c7bdca; }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 28px; } }
-@media (max-width: 600px) { .main { min-height: 0; padding: 50px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 30px; } .filters { margin-bottom: 30px; } .eventCard { gap: 12px; padding: 13px; } .dateBox { flex-basis: 54px; min-height: 59px; } .dateBox strong { font-size: 23px; } .eventDetails h2 { font-size: 15px; } .eventDetails p { gap: 4px; font-size: 11px; } .badge { font-size: 9px; padding: 5px 6px; } .info { padding: 24px; } }
+@media (max-width: 600px) { .main { min-height: 0; padding: 50px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 24px; } .filters { display: none; } .mobileFilter { display: grid; gap: 7px; margin-bottom: 30px; color: #d9c9de; font-size: 11px; font-weight: 800; text-transform: uppercase; } .mobileFilter select { width: 100%; min-height: 44px; padding: 0 40px 0 12px; appearance: none; border: 1px solid #56305e; border-radius: 6px; background: #1c1c1c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff7f3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 13px center / 14px; color: white; font: inherit; font-size: 13px; text-transform: none; } .mobileFilter select:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; } .eventCard { gap: 12px; padding: 13px; } .dateBox { flex-basis: 54px; min-height: 59px; } .dateBox strong { font-size: 23px; } .eventDetails h2 { font-size: 15px; } .eventDetails p { gap: 4px; font-size: 11px; } .badge { font-size: 9px; padding: 5px 6px; } .info { padding: 24px; } }
+@media (max-width: 650px) { .mobileFilter select:focus-visible, .mobileCategory select:focus-visible { outline: none; outline-offset: 0; border-color: #56305e; box-shadow: none; } }

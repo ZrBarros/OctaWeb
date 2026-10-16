@@ -78,6 +78,12 @@ export function AdminResultsPage() {
           <button type="button" className={resultFilter === "wins" ? styles.selectedFilter : styles.filter} aria-pressed={resultFilter === "wins"} onClick={() => setResultFilter("wins")}>Só Vitórias</button>
           <button type="button" className={resultFilter === "losses" ? styles.selectedFilter : styles.filter} aria-pressed={resultFilter === "losses"} onClick={() => setResultFilter("losses")}>Só Derrotas</button>
         </div>
+        <label className={styles.mobileFilter}>
+          <span>Filtrar resultados</span>
+          <select value={resultFilter} onChange={(event) => setResultFilter(event.target.value as ResultFilter)}>
+            <option value="all">Todos os Resultados</option><option value="wins">Só Vitórias</option><option value="losses">Só Derrotas</option>
+          </select>
+        </label>
         <button className={styles.newButton} type="button" onClick={() => openEditor()}>+ <span>Registrar Resultado</span></button>
       </div>
       {(query || resultFilter !== "all") && <p className={styles.resultCount}>{filtered.length} {filtered.length === 1 ? "resultado encontrado" : "resultados encontrados"}<button type="button" onClick={() => { setQuery(""); setResultFilter("all"); }}>Limpar filtros</button></p>}

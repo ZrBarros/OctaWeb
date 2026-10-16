@@ -30,6 +30,12 @@ export default function AgendaPage() {
             >{item}</button>
           ))}
         </div>
+        <label className={styles.mobileFilter}>
+          <span>Filtrar por tipo</span>
+          <select value={category} onChange={(event) => setCategory(event.target.value as (typeof eventCategories)[number])}>
+            {eventCategories.map((item) => <option key={item} value={item}>{item}</option>)}
+          </select>
+        </label>
 
         <div className={styles.layout}>
           <section className={styles.eventList} aria-label="Compromissos da Octacore">

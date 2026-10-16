@@ -107,12 +107,12 @@ export function AdminProductsPage() {
             <thead><tr><th>Imagem</th><th>Nome do Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead>
             <tbody>
               {filteredItems.map((item) => <tr key={item.id}>
-                <td><span className={styles.thumbnail}>{item.image ? <Image src={item.image} alt="" width={48} height={48} unoptimized={item.image.startsWith("data:")} /> : <AdminIcon name="products" />}</span></td>
-                <td className={styles.productName}>{item.name}</td>
-                <td>{item.category}</td>
-                <td className={styles.price}>{formatPrice(item.priceCents)}</td>
-                <td><div className={styles.stockControl} aria-label={`Estoque de ${item.name}: ${item.stock}`}><button type="button" aria-label={`Diminuir estoque de ${item.name}`} disabled={item.stock === 0} onClick={() => changeStock(item.id, -1)}>−</button><output>{item.stock}</output><button type="button" aria-label={`Aumentar estoque de ${item.name}`} onClick={() => changeStock(item.id, 1)}>+</button></div></td>
-                <td><div className={styles.actions}><button className={styles.editButton} type="button" aria-label={`Editar ${item.name}`} onClick={() => openEditor(item)}><PencilIcon /></button><button className={styles.deleteButton} type="button" aria-label={`Excluir ${item.name}`} onClick={() => setDeletingId(item.id)}><TrashIcon /></button></div></td>
+                <td data-label="Imagem"><span className={styles.thumbnail}>{item.image ? <Image src={item.image} alt="" width={48} height={48} unoptimized={item.image.startsWith("data:")} /> : <AdminIcon name="products" />}</span></td>
+                <td data-label="Produto" className={styles.productName}>{item.name}</td>
+                <td data-label="Categoria">{item.category}</td>
+                <td data-label="Preço" className={styles.price}>{formatPrice(item.priceCents)}</td>
+                <td data-label="Estoque"><div className={styles.stockControl} aria-label={`Estoque de ${item.name}: ${item.stock}`}><button type="button" aria-label={`Diminuir estoque de ${item.name}`} disabled={item.stock === 0} onClick={() => changeStock(item.id, -1)}>−</button><output>{item.stock}</output><button type="button" aria-label={`Aumentar estoque de ${item.name}`} onClick={() => changeStock(item.id, 1)}>+</button></div></td>
+                <td data-label="Ações"><div className={styles.actions}><button className={styles.editButton} type="button" aria-label={`Editar ${item.name}`} onClick={() => openEditor(item)}><PencilIcon /></button><button className={styles.deleteButton} type="button" aria-label={`Excluir ${item.name}`} onClick={() => setDeletingId(item.id)}><TrashIcon /></button></div></td>
               </tr>)}
             </tbody>
           </table>

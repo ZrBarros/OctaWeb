@@ -1,6 +1,6 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 15/10/2026
+**Última atualização:** 16/10/2026
 
 **Estado:** MVP em desenvolvimento; interfaces do front end em construção
 
@@ -19,32 +19,46 @@ O site reúne informações da atlética, notícias, modalidades, agenda, mural 
 
 Os documentos de planejamento originais estão em `assets/`. Esta página registra o estado **implementado**; ideias desses documentos só passam para “pronto” depois de aparecerem no código e serem verificadas.
 
+## 1.1 Perfis de acesso planejados
+
+O MVP prevê três tipos de acesso. Esta divisão descreve o comportamento esperado depois da integração; **ainda não está implementada como controle de permissões**.
+
+| Perfil | Acesso previsto | Estado atual |
+| --- | --- | --- |
+| Visitante | Navegar pelas páginas públicas, consultar notícias, modalidades, agenda, mural e loja; montar carrinho no navegador. | A navegação pública existe. O carrinho é local e não exige conta. |
+| Usuário autenticado | Tudo do visitante, mais uma conta própria, acompanhamento de pedidos e inscrições/favoritos de eventos associados ao usuário. | Login/cadastro não criam sessão. `/minha-conta` e `/meus-pedidos` mostram exemplos; inscrição e favorito de evento não persistem. |
+| Administrador | Tudo do usuário autenticado, mais acesso autorizado ao painel e gestão de conteúdo, integrantes, resultados e pedidos. | `/admin` está acessível sem autenticação; alterações são simulações locais. |
+
+A separação real deverá ser verificada no backend NestJS para cada rota e operação. A interface pode esconder ações conforme o perfil, mas isso não substitui a autorização no servidor.
+
 ## 2. Estado das telas
 
 | Rota | O que existe hoje | Estado |
 | --- | --- | --- |
 | `/` | Página inicial com apresentação, destaques, loja e até três compromissos futuros com links para detalhes e acesso à agenda completa. | Interface pronta; lista filtrada por data, conteúdo local |
-| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia. | Interface pronta; notícias locais |
+| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. | Interface pronta; notícias locais |
 | `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades. Futsal e basquete têm dados de detalhes próprios. | Interface pronta; conteúdo local |
 | `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
 | `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. | **Prévia visual:** números de exemplo, sem cálculo automático |
-| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e links para páginas de detalhe. | Interface pronta; eventos locais |
+| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e links para páginas de detalhe; filtro compacto em celular. | Interface pronta; eventos locais |
 | `/agenda/[slug]` | Detalhe demonstrativo do treino de Vôlei, da reunião do Intereng e do jogo Octa x Protendidos. | **Simulação no navegador:** presença e favorito não são persistidos; imagens e confirmações dos próximos eventos pendentes |
-| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro na lista de integrantes. | Interface pronta; parte das imagens é placeholder |
-| `/loja` | Catálogo com busca por nome e filtro por categoria. | Interface pronta; produtos locais |
+| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto em celular na lista de integrantes. Os cartões de integrantes abrem seus perfis. | Interface pronta; parte das imagens é placeholder |
+| `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidade, acessado pelo cartão no mural. | **Prévia visual:** conteúdo local de exemplo; foto pendente |
+| `/loja` | Catálogo com busca por nome e filtro por categoria; em celular, a categoria usa seletor compacto. | Interface pronta; produtos locais |
 | `/loja/[slug]` | Detalhe de produto, escolha de tamanho quando necessário e adição ao carrinho. | Interação local funcionando |
 | `/carrinho` | Alteração de quantidade, remoção de itens e cálculo do total. | Funciona no navegador; sem servidor |
 | `/checkout` | Formulário, validação básica e confirmação visual. | **Simulação:** não cria pedido, envia dados ou cobra |
 | `/login` e `/cadastro` | Formulários visuais, validação de campos, alternância entre as telas e aviso ao enviar. | **Simulação:** não autentica nem cria conta |
 | `/minha-conta` | Painel com perfil de exemplo e ações de conta. | **Demonstração:** sem usuário autenticado |
 | `/meus-pedidos` | Pedido de exemplo, etapas de entrega e área de histórico vazia. | **Demonstração:** sem pedido registrado |
-| `/admin` | Dashboard da diretoria com indicadores, gráfico de vendas e atividades recentes de exemplo; busca local nas atividades. | **Prévia visual:** acesso livre, sem dados reais ou autenticação |
-| `/admin/noticias` | Mural administrativo com filtros, busca e tabela no desktop; no celular, filtros deslizáveis e notícias em cartões. Em telas de celular e iPad, o modal inteiro rola, com cabeçalho e ações no fluxo normal. | **Simulação no navegador:** não publica nem altera as notícias públicas |
-| `/admin/produtos` | Tabela demonstrativa do Figma com busca, ajuste de estoque, cadastro, edição e exclusão de produtos; imagem opcional no formulário. | **Simulação no navegador:** não altera os produtos nem o estoque da loja pública |
+| `/admin` | Indicadores clicáveis para abrir áreas administrativas; gráfico demonstrativo com seleção entre 6 e 12 meses e detalhe por barra; atividades filtráveis por área, busca e expansão da lista. | **Simulação no navegador:** indicadores, vendas e atividades são fictícios e não há autenticação |
+| `/admin/perfil` | Perfil demonstrativo de Zeca Rocha, com cargo, nível de acesso e atalhos para as áreas do painel; acessível pelo nome/avatar no cabeçalho e pelo menu mobile. | **Prévia visual:** não há conta conectada; edição de perfil e senha dependem da autenticação |
+| `/admin/noticias` | Mural administrativo com filtros, busca e tabela no desktop; no celular, filtro compacto e notícias em cartões. Em telas de celular e iPad, o modal inteiro rola, com cabeçalho e ações no fluxo normal. | **Simulação no navegador:** não publica nem altera as notícias públicas |
+| `/admin/produtos` | Tabela no desktop e cartões no celular, com busca, ajuste de estoque, cadastro, edição e exclusão; as ações ficam visíveis no cartão mobile. | **Simulação no navegador:** não altera os produtos nem o estoque da loja pública |
 | `/admin/eventos` | Cronograma com lista em cartões, calendário mensal, busca e formulário para criar/editar; exclusão com confirmação. | **Simulação no navegador:** não altera a agenda pública |
 | `/admin/integrantes` | Cartões de integrantes, busca por nome, cadastro, edição, remoção e foto opcional. | **Simulação no navegador:** não altera o mural público |
-| `/admin/resultados` | Tabela de partidas, busca, filtros de vitórias e derrotas, cadastro, edição e remoção; status calculado pelo placar. | **Simulação no navegador:** não altera os resultados públicos |
-| `/admin/pedidos` | Tabela no desktop e cartões no celular, com busca, filtros, itens do pedido selecionado e alteração de status. | **Simulação no navegador:** não registra compras nem avisa clientes |
+| `/admin/resultados` | Tabela de partidas, busca, filtros de vitórias e derrotas, cadastro, edição e remoção; no celular, filtro compacto; status calculado pelo placar. | **Simulação no navegador:** não altera os resultados públicos |
+| `/admin/pedidos` | Tabela no desktop e cartões no celular, com busca, filtros compactos no celular e edição de status em painel individual com os itens do pedido. | **Simulação no navegador:** não registra compras nem avisa clientes |
 
 “Interface pronta” indica que a página foi construída no front end, não que seu conteúdo esteja aprovado para publicação ou conectado à API.
 
@@ -90,6 +104,7 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/data/admin-members.ts` | Integrantes de exemplo do quadro administrativo do Figma. |
 | `frontend/src/data/admin-results.ts` | Partidas de exemplo do quadro administrativo do Figma. |
 | `frontend/src/data/admin-orders.ts` | Pedidos de exemplo do quadro administrativo do Figma. |
+| `frontend/src/data/admin-profile.ts` | Identidade demonstrativa exibida no cabeçalho e no perfil administrativo. |
 | `frontend/public/images/` | Imagens servidas pelo site; originais e referências ficam em `assets/`. |
 | `frontend/README.md` | Guia rápido de execução e mapa resumido do front end. |
 
@@ -184,6 +199,41 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 16/10/2026 — Perfil administrativo demonstrativo
+
+- Criada `/admin/perfil` com os dados demonstrativos de Zeca Rocha, cargo, nível de acesso, atalhos administrativos e avisos sobre autenticação ainda ausente. O nome/avatar no cabeçalho abre essa página; no celular, ela também está disponível no menu.
+- Conferidos lint, TypeScript, build e `git diff --check`. A página não autentica o usuário nem altera dados; edição de perfil, senha e permissões reais dependem do backend.
+
+### 16/10/2026 — Registro dos perfis de acesso previstos
+
+- Documentados os três perfis do produto (visitante, usuário autenticado e administrador), suas permissões esperadas e o estado atual do front. Registrado que login, presença em eventos e proteção do painel ainda não estão integrados.
+- Conferi a descrição com o formulário de acesso, o layout administrativo e as prévias de conta/evento; o código confirma que ainda não há sessão nem controle de permissões.
+
+### 16/10/2026 — Interações adicionais no dashboard
+
+- Os cinco indicadores agora levam às áreas correspondentes. O gráfico permite selecionar 6 ou 12 meses e clicar em uma barra para ver o valor demonstrativo. Atividades recentes podem ser filtradas por área, pesquisadas e expandidas.
+- Conferidos lint, TypeScript, build e `git diff --check`. Os indicadores, valores, filtros e atividades ainda usam exemplos locais; sem API, autenticação ou registro real de ações.
+
+### 16/10/2026 — Filtros compactos nas demais telas
+
+- Mantidos os botões de filtro em telas maiores e adicionado o mesmo seletor compacto usado no mural de notícias para celular nas páginas de Agenda, Loja, Integrantes, Notícias administrativas, Resultados e Pedidos. A seleção atual continua sincronizada com a lista filtrada.
+- Conferidos lint, TypeScript, build e `git diff --check`; o build gerou as rotas das telas. Os filtros continuam operando sobre dados locais, sem integração com backend.
+
+### 16/10/2026 — Acesso aos perfis de integrantes
+
+- Os dados na área principal do cartão administrativo abrem o formulário de edição; as ações Editar e Remover continuam disponíveis separadamente. Os cartões do mural agora abrem perfis individuais em `/mural/integrantes/[slug]`.
+- Conferidos lint, TypeScript, build e rotas geradas para os quatro perfis demonstrativos. Os dados permanecem em memória/local; imagens e integração com backend pendentes.
+
+### 16/10/2026 — Edição de pedido em painel individual
+
+- “Gerenciar pedido” agora abre um painel do pedido selecionado com itens, total e opções de status. Salvar aplica a alteração apenas na prévia e fecha o painel; também é possível fechar pelo botão, Escape ou tocando fora.
+- Conferidos lint, TypeScript, build e diff. Os pedidos seguem fictícios e nenhuma notificação é enviada ao cliente.
+
+### 16/10/2026 — Filtros de notícias e cartões de produto no mobile
+
+- Na página pública de notícias, as categorias agora usam um seletor compacto em telas estreitas. No admin de produtos, a tabela vira cartões e mantém estoque e ações de editar/excluir visíveis sem rolagem horizontal.
+- Conferidos lint, TypeScript, build e diff. Filtros, estoque e alterações continuam sendo interações locais, sem integração com backend.
 
 ### 15/10/2026 — Agenda compacta na Home
 

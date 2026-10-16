@@ -31,6 +31,7 @@ export const memberFilters = ["Todos", "Diretoria", "Futsal", "Basquete", "Vôle
 export type MemberGroup = Exclude<(typeof memberFilters)[number], "Todos">;
 
 export type MuralMember = {
+  slug: string;
   name: string;
   role: string;
   course: string;
@@ -39,10 +40,10 @@ export type MuralMember = {
 };
 
 export const muralMembers: MuralMember[] = [
-  { name: "Zeca Rocha", role: "Presidente · Diretoria", course: "Ciência da Computação", modality: "Basquete", groups: ["Diretoria", "Basquete"] },
-  { name: "Maria Clara", role: "Vice-presidente · Diretoria", course: "Ciência da Computação", modality: "Vôlei", groups: ["Diretoria", "Vôlei"] },
-  { name: "Henry Puton", role: "Diretor de Esportes · Futsal", course: "Ciência da Computação", modality: "Futsal", groups: ["Diretoria", "Futsal"] },
-  { name: "Carlos Eduardo", role: "Diretor de Tecnologia", course: "Ciência da Computação", modality: "Futsal", groups: ["Diretoria", "Futsal"] },
+  { slug: "zeca-rocha", name: "Zeca Rocha", role: "Presidente · Diretoria", course: "Ciência da Computação", modality: "Basquete", groups: ["Diretoria", "Basquete"] },
+  { slug: "maria-clara", name: "Maria Clara", role: "Vice-presidente · Diretoria", course: "Ciência da Computação", modality: "Vôlei", groups: ["Diretoria", "Vôlei"] },
+  { slug: "henry-puton", name: "Henry Puton", role: "Diretor de Esportes · Futsal", course: "Ciência da Computação", modality: "Futsal", groups: ["Diretoria", "Futsal"] },
+  { slug: "carlos-eduardo", name: "Carlos Eduardo", role: "Diretor de Tecnologia", course: "Ciência da Computação", modality: "Futsal", groups: ["Diretoria", "Futsal"] },
 ];
 
 export const achievements = [

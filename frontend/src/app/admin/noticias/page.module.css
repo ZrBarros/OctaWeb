@@ -1,5 +1,6 @@
 .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
 .filters { display: flex; flex-wrap: wrap; gap: 9px; }
+.mobileFilter { display: none; }
 .filter, .selectedFilter { min-height: 36px; padding: 0 17px; border: 1px solid transparent; border-radius: 6px; background: #1d1d1d; color: #d2cbd4; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
 .filter:hover { border-color: #884391; color: white; }
 .selectedFilter { background: var(--orange); color: #18001d; }
@@ -11,7 +12,8 @@
 .resultBar button { padding: 0; border: 0; background: transparent; color: var(--orange); cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; white-space: nowrap; }
 .resultBar button:hover { text-decoration: underline; }
 .tablePanel { overflow: hidden; border: 1px solid #3a1642; border-radius: 9px; background: #1c1c1c; }
-.tableScroll { overflow-x: auto; }
+.tableScroll { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; }
+.tableScroll::-webkit-scrollbar { display: none; }
 .newsTable { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: left; }
 .newsTable th { height: 48px; padding: 0 14px; border-bottom: 1px solid #302735; color: var(--orange); font-size: 11px; font-weight: 900; }
 .newsTable td { height: 61px; padding: 10px 14px; border-bottom: 1px solid #302735; color: #d0c8d2; font-size: 12px; line-height: 1.35; }
@@ -83,10 +85,11 @@
   .editorDialog { max-height: none; overflow: visible; margin: 0 auto; }
 }
 @media (max-width: 650px) {
-  .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .filters { min-width: 0; flex-wrap: nowrap; gap: 6px; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
-  .filters::-webkit-scrollbar { display: none; }
-  .filter, .selectedFilter { min-height: 34px; flex: 0 0 auto; padding-inline: 12px; font-size: 11px; }
+  .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; margin-bottom: 12px; }
+  .filters { display: none; }
+  .mobileFilter { display: grid; min-width: 0; gap: 5px; color: #d9c9de; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+  .mobileFilter select { width: 100%; min-width: 0; min-height: 38px; padding: 0 32px 0 9px; appearance: none; border: 1px solid #56305e; border-radius: 6px; background: #1c1c1c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff7f3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center / 13px; color: white; font: inherit; font-size: 11px; text-transform: none; }
+  .mobileFilter select:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
   .newButton { min-height: 36px; padding-inline: 11px; font-size: 11px; }
   .newButton span { white-space: nowrap; }
   .resultBar { align-items: flex-start; margin-bottom: 12px; }
@@ -115,3 +118,4 @@
   .dialogActions { flex-wrap: wrap; }
   .articlePreview { padding: 17px; }
 }
+@media (max-width: 650px) { .mobileFilter select:focus-visible, .mobileCategory select:focus-visible { outline: none; outline-offset: 0; border-color: #56305e; box-shadow: none; } }

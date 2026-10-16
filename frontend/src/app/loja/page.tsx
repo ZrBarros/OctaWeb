@@ -38,6 +38,12 @@ export default function StorePage() {
               >{item}</button>
             ))}
           </div>
+          <label className={styles.mobileCategory}>
+            <span>Filtrar por categoria</span>
+            <select value={category} onChange={(event) => setCategory(event.target.value)}>
+              {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          </label>
           <label className={styles.search}>
             <span className={styles.visuallyHidden}>Buscar produtos</span>
             <input type="search" placeholder="Buscar na Octa Store..." value={search} onChange={(event) => setSearch(event.target.value)} />
