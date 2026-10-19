@@ -9,7 +9,7 @@
 .resultCount { display: flex; align-items: center; gap: 12px; margin: -7px 0 17px; color: #aaa0ae; font-size: 11px; }
 .resultCount button { border: 0; background: transparent; color: var(--orange); cursor: pointer; font: inherit; font-weight: 800; }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.card { min-width: 0; overflow: hidden; border: 1px solid #2b202e; border-radius: 8px; background: #1c1c1c; transition: transform .18s ease, border-color .18s ease; }
+.card { min-width: 0; overflow: hidden; border: 1px solid #2b202e; border-radius: 8px; background: #1c1c1c; transition: transform var(--motion-normal) var(--motion-ease), border-color var(--motion-normal) var(--motion-ease); }
 .card:hover { transform: translateY(-3px); border-color: #8d389c; }
 .cardImage { height: clamp(145px, 15vw, 190px); overflow: hidden; background: #24102e; }
 .cardImage img { display: block; width: 100%; height: 100%; object-fit: cover; }

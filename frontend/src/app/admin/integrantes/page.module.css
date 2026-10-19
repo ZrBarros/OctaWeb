@@ -9,7 +9,7 @@
 .resultCount { display: flex; align-items: center; gap: 12px; margin: -13px 0 17px; color: #aaa0ae; font-size: 11px; }
 .resultCount button { border: 0; background: transparent; color: var(--orange); cursor: pointer; font: inherit; font-weight: 800; }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 360px)); gap: 18px 20px; align-items: stretch; }
-.card { display: grid; min-width: 0; min-height: 138px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 14px; border: 1px solid #332138; border-radius: 8px; background: #1c1c1c; transition: transform .18s ease, border-color .18s ease; }
+.card { display: grid; min-width: 0; min-height: 138px; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 13px; padding: 14px; border: 1px solid #332138; border-radius: 8px; background: #1c1c1c; transition: transform var(--motion-normal) var(--motion-ease), border-color var(--motion-normal) var(--motion-ease); }
 .card:hover { transform: translateY(-3px); border-color: #8d389c; }
 .cardMain { display: flex; min-width: 0; align-items: center; gap: 14px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: inherit; cursor: pointer; font: inherit; text-align: left; }
 .cardMain:focus-visible { outline: 2px solid var(--orange); outline-offset: 4px; }

@@ -13,7 +13,7 @@
 .filters button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 .mobileFilter { display: none; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px; }
-.card { display: block; min-width: 0; overflow: hidden; border: 1px solid #32113e; border-radius: 11px; background: var(--surface); color: inherit; text-decoration: none; transition: transform .18s ease, border-color .18s ease; }
+.card { display: block; min-width: 0; overflow: hidden; border: 1px solid #32113e; border-radius: 11px; background: var(--surface); color: inherit; text-decoration: none; transition: transform var(--motion-normal) var(--motion-ease), border-color var(--motion-normal) var(--motion-ease); }
 .card:hover { border-color: var(--purple); }
 .card:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 .photo { width: 100%; aspect-ratio: .95; background: #fff; }

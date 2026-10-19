@@ -7,6 +7,10 @@
   --orange-dark: #b95a2e;
   --text: #fff;
   --muted: #c7becb;
+  --motion-fast: 140ms;
+  --motion-normal: 200ms;
+  --motion-ease: cubic-bezier(.2, .7, .2, 1);
+  --motion-ease-out: cubic-bezier(.16, 1, .3, 1);
 }
 
 * { box-sizing: border-box; }
@@ -15,6 +19,18 @@ body { margin: 0; background: var(--background); color: var(--text); font-family
 a { color: inherit; text-decoration: none; }
 button, input { font: inherit; }
 img { display: block; max-width: 100%; }
+:where(a, button, input, select, textarea, summary) {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity, filter;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--motion-ease);
+}
+
+@keyframes dialog-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+[role="dialog"] { animation: dialog-enter var(--motion-normal) var(--motion-ease-out) both; }
 
 .button {
   min-height: 48px;
@@ -28,7 +44,7 @@ img { display: block; max-width: 100%; }
   font-weight: 800;
   text-align: center;
   text-transform: uppercase;
-  transition: transform .2s ease, background-color .2s ease;
+  transition: transform var(--motion-normal) var(--motion-ease), background-color var(--motion-normal) var(--motion-ease);
 }
 .button:hover { transform: translateY(-2px); }
 .button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
@@ -37,12 +53,12 @@ img { display: block; max-width: 100%; }
 .buttonOutline { border: 1px solid #d5cbd8; background: transparent; color: white; }
 .buttonOutline:hover { background: #ffffff14; }
 
-.hoverCard { transition: transform .2s ease, box-shadow .2s ease; }
+.hoverCard { transition: transform var(--motion-normal) var(--motion-ease), box-shadow var(--motion-normal) var(--motion-ease); }
 .hoverCard:hover, .hoverCard:focus-within {
   transform: translateY(-2px);
   box-shadow: 0 0 0 1px var(--purple);
 }
 @media (prefers-reduced-motion: reduce) {
-  .hoverCard { transition: none; }
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   .hoverCard:hover, .hoverCard:focus-within { transform: none; }
 }

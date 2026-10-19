@@ -1,6 +1,6 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 16/10/2026
+**Última atualização:** 19/10/2026
 
 **Estado:** MVP em desenvolvimento; interfaces do front end em construção
 
@@ -35,7 +35,9 @@ A separação real deverá ser verificada no backend NestJS para cada rota e ope
 
 | Rota | O que existe hoje | Estado |
 | --- | --- | --- |
-| `/` | Página inicial com apresentação, destaques, loja e até três compromissos futuros com links para detalhes e acesso à agenda completa. | Interface pronta; lista filtrada por data, conteúdo local |
+| `/` | Página inicial com apresentação, mascote laranja isolado e animado discretamente no fundo do hero, destaques, loja e até três compromissos futuros com links para detalhes e acesso à agenda completa. | Interface pronta; arte gerada com referência na logo e aprovada pelo usuário; animação local no navegador, lista filtrada por data e conteúdo local |
+| Todas as rotas do App Router | O conteúdo da rota entra com fade e deslocamento vertical discreto em 180 ms; cabeçalho/estrutura compartilhada permanecem estáveis. | Animação de interface local; sem dependência de backend |
+| `/motion-octaweb.html` | Peça animada de apresentação do OctaWeb, com identidade visual da Octacore, apresentação da plataforma e seus principais espaços. | Apresentação em HTML/CSS; animação local no navegador, sem exportação de vídeo |
 | `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. | Interface pronta; notícias locais |
 | `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades. Futsal e basquete têm dados de detalhes próprios. | Interface pronta; conteúdo local |
 | `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
@@ -86,7 +88,8 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | --- | --- |
 | `frontend/src/app/` | Rotas, estrutura e estilos de cada página. Uma pasta com `page.tsx` representa uma rota. |
 | `frontend/src/app/layout.tsx` | Estrutura compartilhada e fonte Outfit. |
-| `frontend/src/app/globals.css` | Cores e estilos globais. |
+| `frontend/src/app/globals.css` | Cores, tokens de movimento, transições para controles, entrada de diálogos e estilos globais. |
+| `frontend/src/app/template.tsx` e `template.module.css` | Entrada animada curta do conteúdo de cada rota; respeita movimento reduzido definido globalmente. |
 | `frontend/src/components/` | Componentes reutilizados, como cabeçalho, rodapé e cards. |
 | `frontend/src/data/` | Conteúdo local de notícias, eventos, modalidades, mural e produtos. |
 | `frontend/src/lib/cart.ts` | Regras do carrinho e armazenamento no navegador. |
@@ -172,7 +175,7 @@ Após a tentativa de login, aparece um link para explorar a prévia de `/minha-c
 
 `/agenda/treino-volei-octacore` segue o quadro `octacore-evento-presenca` do Figma. A imagem de capa foi exportada do próprio protótipo para `public/images/treino-volei-hero.png`. O treino foi acrescentado à Agenda e seu cartão abre o detalhe. Favoritar e confirmar presença mudam apenas a interface aberta: a confirmação mostra “Você (prévia)” e soma um ao contador demonstrativo, mas tudo é descartado ao sair ou recarregar. O quadro mostra 18 confirmados e só fornece cinco nomes; “Ver todos os confirmados” explica essa limitação, sem inventar as demais pessoas. A Agenda ordena os compromissos por data. **Não há autenticação, inscrição ou registro de presença no backend.**
 
-A navegação administrativa fica recolhida atrás de um ícone simples de três linhas no canto superior esquerdo em PC e iPad; no celular, usa o botão “Menu”, que também mostra a seção atual. Os destinos abrem em um card flutuante sobre a página, liberando a coluna lateral fixa sem deslocar o conteúdo. O card usa três colunas em telas maiores e duas em celulares; fecha ao escolher uma rota, tocar fora ou pressionar Escape. A navbar reúne marca, busca da página, perfil e saída; os títulos ficam no início da área principal, sem seta de retorno. O ícone de saída apenas informa que a prévia não tem sessão para encerrar. No menu público, além da seleção de uma rota, tocar fora do card ou pressionar Escape também fecha a navegação móvel. Tabelas mais largas rolam dentro do próprio painel; em `/admin/pedidos`, os cartões substituem a tabela no celular.
+A navegação administrativa fica recolhida atrás de um ícone simples de três linhas no canto superior esquerdo em PC e iPad; no celular, usa o botão “Menu”, que também mostra a seção atual. Os destinos abrem em um card flutuante sobre a página, liberando a coluna lateral fixa sem deslocar o conteúdo. O card usa três colunas em telas maiores e duas em celulares; fecha ao escolher uma rota, tocar fora ou pressionar Escape. A navbar reúne marca, busca da página, perfil e saída; clicar na marca retorna ao dashboard `/admin`, e os títulos ficam no início da área principal, sem seta de retorno. O ícone de saída apenas informa que a prévia não tem sessão para encerrar. No menu público, além da seleção de uma rota, tocar fora do card ou pressionar Escape também fecha a navegação móvel. Tabelas mais largas rolam dentro do próprio painel; em `/admin/pedidos`, os cartões substituem a tabela no celular.
 
 ## 7. Próximos passos
 
@@ -199,6 +202,40 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 19/10/2026 — Transição discreta entre páginas
+
+- Adicionada animação de entrada de 180 ms ao conteúdo das rotas por meio do template global do App Router. O cabeçalho compartilhado permanece fora do wrapper e não é animado; movimento reduzido desativa o efeito pela regra global.
+- Conferida a hierarquia oficial do template na documentação local do Next.js 16 e verificada a formatação do diff. A inspeção visual no navegador continua pendente.
+
+### 19/10/2026 — Animação reforçada nas rotas administrativas
+
+- A navegação entre telas do painel agora reinicia uma animação de entrada no conteúdo da página, enquanto a barra superior e o menu permanecem estáveis. O template global continua cobrindo as demais rotas.
+- Estado: comportamento visual implementado no front end; não envolve simulação de dados nem integração com backend.
+- Verificação: lint e build de produção executados após a alteração.
+
+### 19/10/2026 — Mascote isolado animado na página inicial
+
+- Adicionada ao hero da Home uma versão PNG isolada do polvo laranja, gerada a partir da logo oficial e aprovada pelo usuário, com movimento lento de flutuação, rotação e escala; o conteúdo textual fica acima da arte. O efeito é mais discreto em telas móveis e é desligado quando o sistema solicita movimento reduzido. A ilustração gerada pode diferir de detalhes do arquivo original.
+- Estado: arte em PNG transparente e animação CSS executada localmente no navegador, sem vídeo ou backend.
+- Verificação: lint e build de produção executados; inspeção visual manual em dispositivos continua pendente.
+
+- Verificação: lint, build de produção e `git diff --check` executados; inspeção visual manual em dispositivos continua pendente.
+
+### 19/10/2026 — Padrão de transições e movimento reduzido
+
+- Definidos tempos e curvas de movimento globais para controles, cards e botões; diálogos administrativos agora entram com animação curta de opacidade e deslocamento discreto. A preferência do sistema por movimento reduzido desativa animações, transições e rolagem suave.
+- Conferidos os estilos compartilhados e os componentes administrativos que usam `role="dialog"`; `git diff --check` passou. A animação foi validada estaticamente; a inspeção visual manual em dispositivos continua pendente.
+
+### 19/10/2026 — Logo do painel retorna ao Dashboard
+
+- Alterado o destino da logo administrativa de `/` para `/admin`, para que o clique retorne à página inicial do painel. Atualizado também o nome acessível do link para descrever esse destino.
+- Conferido o destino no componente compartilhado do painel e a formatação da alteração; a navegação continua sendo apenas front end, sem autenticação.
+
+### 16/10/2026 — Apresentação animada do OctaWeb
+
+- Criada uma apresentação animada curta em formato 16:9, com logo e mascote disponíveis no projeto, paleta da Octacore e cenas sobre notícias, modalidades, agenda e loja. A página inclui adaptação para telas estreitas e opção para assistir novamente.
+- Verificado o HTML/CSS e os caminhos das imagens no projeto; a peça roda no navegador como página estática. Não foi exportada como arquivo de vídeo.
 
 ### 16/10/2026 — Perfil administrativo demonstrativo
 

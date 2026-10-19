@@ -15,6 +15,9 @@ export default function Home() {
     <main className={styles.main}>
       <div className={styles.container}>
         <section className={styles.hero} aria-labelledby="hero-title">
+          <div className={styles.heroMascot} aria-hidden="true">
+            <Image src="/images/polvo-octacore-isolado.png" alt="" width={1254} height={1254} priority />
+          </div>
           <p className={styles.eyebrow}>Bem-vindo à maior do estado</p>
           <h1 id="hero-title">Somos a Octacore.<br />Esporte, integração e história.</h1>
           <div className={styles.heroActions}>

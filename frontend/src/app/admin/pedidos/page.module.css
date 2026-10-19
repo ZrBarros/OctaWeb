@@ -32,7 +32,7 @@
 .separation, .pickup { background: #33183e; color: #e1a2eb; }
 .entregue { background: #343137; color: #b2aeb4; }
 .cancelado { background: #411e26; color: #ed8792; }
-.manage { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 0 13px; border: 1px solid #9c27aa; border-radius: 5px; background: #3a0051; color: white; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease; }
+.manage { display: inline-flex; min-height: 34px; align-items: center; justify-content: center; padding: 0 13px; border: 1px solid #9c27aa; border-radius: 5px; background: #3a0051; color: white; cursor: pointer; font: inherit; font-size: 11px; font-weight: 900; transition: background-color var(--motion-fast) var(--motion-ease), border-color var(--motion-fast) var(--motion-ease), transform var(--motion-fast) var(--motion-ease); }
 .manage:hover { border-color: #d43ee5; background: #80118c; }
 .manage:active { transform: translateY(1px); }
 .manage:focus-visible, .orderCard > button:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; }

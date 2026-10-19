@@ -79,7 +79,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <aside ref={sidebarRef} className={styles.sidebar} aria-label="Painel administrativo">
       <div className={styles.adminNavbar}>
         <div className={styles.brandHeader}>
-          <Link className={styles.brand} href="/" aria-label="Octacore, página inicial">
+          <Link className={styles.brand} href="/admin" aria-label="Octacore, abrir dashboard administrativo">
             <span className={styles.brandMark}><Image src="/images/logo-octacore.png" alt="" width={48} height={48} /></span>
             <span className={styles.brandText}><strong>Octacore</strong><small>Painel Admin</small></span>
           </Link>
@@ -122,7 +122,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
     <main className={styles.main}>
       {feedback && <p className={styles.shellFeedback} role="status">{feedback}</p>}
-      {children}
+      <div className={styles.pageTransition} key={pathname}>
+        {children}
+      </div>
     </main>
   </div></AdminToolbarTargetContext.Provider></AdminFeedbackContext.Provider>;
 }
