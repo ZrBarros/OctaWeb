@@ -1,3 +1,5 @@
+Website desenvolvido para a Atlética do Instituto de Computação da UFAL como trabalho da disciplina de Programação 3
+
 # Documentação de desenvolvimento — Octacore
 
 **Última atualização:** 21/10/2026
