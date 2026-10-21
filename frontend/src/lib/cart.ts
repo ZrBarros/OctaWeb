@@ -73,16 +73,19 @@ export function useCart() {
   return useMemo(() => isReady ? parseCart(snapshot) : null, [isReady, snapshot]);
 }
 
-export function addToCart(slug: string, size?: string) {
+export function addToCart(slug: string, size?: string, quantity = 1) {
   const product = products.find((item) => item.slug === slug);
-  if (!product || (product.sizes && (!size || !product.sizes.includes(size)))) return;
+  if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > 99 ||
+    (product.sizes && (!size || !product.sizes.includes(size)))) return false;
 
   const items = parseCart(readSnapshot());
   const selectedSize = product.sizes ? size : undefined;
   const existing = items.find((item) => item.slug === slug && item.size === selectedSize);
-  if (existing) existing.quantity = Math.min(99, existing.quantity + 1);
-  else items.push({ slug, size: selectedSize, quantity: 1 });
+  if (existing?.quantity === 99) return false;
+  if (existing) existing.quantity = Math.min(99, existing.quantity + quantity);
+  else items.push({ slug, size: selectedSize, quantity });
   writeCart(items);
+  return true;
 }
 
 export function changeCartQuantity(slug: string, size: string | undefined, quantity: number) {

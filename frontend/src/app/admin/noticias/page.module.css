@@ -37,9 +37,9 @@
 .actions button:hover { filter: brightness(1.4); }
 .message { margin: 0 0 17px; padding: 12px 15px; border: 1px solid #7c3e87; border-radius: 6px; background: #260e30; color: #f0d5f1; font-size: 13px; }
 .empty { margin: 0; padding: 25px; color: #c9bdce; font-size: 13px; }
-.overlay { position: fixed; z-index: 50; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 18px; background: #09000be0; }
+.overlay { position: fixed; z-index: 50; inset: 0; display: flex; align-items: center; justify-content: center; overflow-y: auto; overscroll-behavior: contain; padding: 18px; background: #09000be0; }
 .dialog { min-width: 0; width: min(100%, 520px); padding: 25px; border: 1px solid #853791; border-radius: 11px; background: #1c1c1c; box-shadow: 0 20px 75px #0009; }
-.editorDialog { width: min(100%, 720px); max-height: calc(100vh - 36px); max-height: calc(100dvh - 36px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.editorDialog { width: min(100%, 720px); max-height: calc(100vh - 36px); max-height: calc(100dvh - 36px); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; margin-block: auto; }
 .dialogHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
 .dialog h2 { margin: 0; font-size: 23px; font-weight: 900; text-transform: uppercase; }
 .dialogHeader button { border: 0; background: none; color: #d9cadc; cursor: pointer; font-size: 28px; line-height: 1; }
@@ -80,10 +80,6 @@
 .saveButton { border: 0; background: #a200ae; color: white; }
 .deleteConfirm { border: 0; background: #a1323d; color: white; }
 @media (max-width: 1050px) { .newsTable { min-width: 840px; } }
-@media (max-width: 1366px) {
-  .overlay { display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; overscroll-behavior: contain; padding: 18px; }
-  .editorDialog { max-height: none; overflow: visible; margin: 0 auto; }
-}
 @media (max-width: 650px) {
   .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; margin-bottom: 12px; }
   .filters { display: none; }
@@ -114,7 +110,7 @@
   .formRow { grid-template-columns: 1fr; }
   .dialog { padding: 18px; }
   .overlay { display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
-  .editorDialog { width: 100%; max-height: none; overflow: visible; margin: 0 auto; }
+  .editorDialog { width: 100%; }
   .dialogActions { flex-wrap: wrap; }
   .articlePreview { padding: 17px; }
 }

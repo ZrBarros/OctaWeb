@@ -1,6 +1,6 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 19/10/2026
+**Última atualização:** 21/10/2026
 
 **Estado:** MVP em desenvolvimento; interfaces do front end em construção
 
@@ -36,7 +36,7 @@ A separação real deverá ser verificada no backend NestJS para cada rota e ope
 | Rota | O que existe hoje | Estado |
 | --- | --- | --- |
 | `/` | Página inicial com apresentação, mascote laranja isolado e animado discretamente no fundo do hero, destaques, loja e até três compromissos futuros com links para detalhes e acesso à agenda completa. | Interface pronta; arte gerada com referência na logo e aprovada pelo usuário; animação local no navegador, lista filtrada por data e conteúdo local |
-| Todas as rotas do App Router | O conteúdo da rota entra com fade e deslocamento vertical discreto em 180 ms; cabeçalho/estrutura compartilhada permanecem estáveis. | Animação de interface local; sem dependência de backend |
+| Todas as rotas do App Router | O conteúdo da rota entra com fade em 180 ms; cabeçalho/estrutura compartilhada permanecem estáveis. | Animação de interface local; sem dependência de backend |
 | `/motion-octaweb.html` | Peça animada de apresentação do OctaWeb, com identidade visual da Octacore, apresentação da plataforma e seus principais espaços. | Apresentação em HTML/CSS; animação local no navegador, sem exportação de vídeo |
 | `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. | Interface pronta; notícias locais |
 | `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades. Futsal e basquete têm dados de detalhes próprios. | Interface pronta; conteúdo local |
@@ -46,8 +46,8 @@ A separação real deverá ser verificada no backend NestJS para cada rota e ope
 | `/agenda/[slug]` | Detalhe demonstrativo do treino de Vôlei, da reunião do Intereng e do jogo Octa x Protendidos. | **Simulação no navegador:** presença e favorito não são persistidos; imagens e confirmações dos próximos eventos pendentes |
 | `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto em celular na lista de integrantes. Os cartões de integrantes abrem seus perfis. | Interface pronta; parte das imagens é placeholder |
 | `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidade, acessado pelo cartão no mural. | **Prévia visual:** conteúdo local de exemplo; foto pendente |
-| `/loja` | Catálogo com busca por nome e filtro por categoria; em celular, a categoria usa seletor compacto. | Interface pronta; produtos locais |
-| `/loja/[slug]` | Detalhe de produto, escolha de tamanho quando necessário e adição ao carrinho. | Interação local funcionando |
+| `/loja` | Catálogo com busca e filtro; uma faixa fixa durante a rolagem reúne categorias, busca e carrinho com contador nessa ordem. Cada card tem acesso ao detalhe, tamanho para camisas, quantidade e adição com confirmação. No celular, a faixa usa duas linhas e os cards ficam em uma coluna. | Interface e carrinho locais; sem consulta de estoque |
+| `/loja/[slug]` | Detalhe de produto com tamanho e quantidade, confirmação da adição sem sair da página e acesso ao carrinho; camisa, caneca e tirante exibem suas imagens próprias. | Interação local funcionando |
 | `/carrinho` | Alteração de quantidade, remoção de itens e cálculo do total. | Funciona no navegador; sem servidor |
 | `/checkout` | Formulário, validação básica e confirmação visual. | **Simulação:** não cria pedido, envia dados ou cobra |
 | `/login` e `/cadastro` | Formulários visuais, validação de campos, alternância entre as telas e aviso ao enviar. | **Simulação:** não autentica nem cria conta |
@@ -55,7 +55,7 @@ A separação real deverá ser verificada no backend NestJS para cada rota e ope
 | `/meus-pedidos` | Pedido de exemplo, etapas de entrega e área de histórico vazia. | **Demonstração:** sem pedido registrado |
 | `/admin` | Indicadores clicáveis para abrir áreas administrativas; gráfico demonstrativo com seleção entre 6 e 12 meses e detalhe por barra; atividades filtráveis por área, busca e expansão da lista. | **Simulação no navegador:** indicadores, vendas e atividades são fictícios e não há autenticação |
 | `/admin/perfil` | Perfil demonstrativo de Zeca Rocha, com cargo, nível de acesso e atalhos para as áreas do painel; acessível pelo nome/avatar no cabeçalho e pelo menu mobile. | **Prévia visual:** não há conta conectada; edição de perfil e senha dependem da autenticação |
-| `/admin/noticias` | Mural administrativo com filtros, busca e tabela no desktop; no celular, filtro compacto e notícias em cartões. Em telas de celular e iPad, o modal inteiro rola, com cabeçalho e ações no fluxo normal. | **Simulação no navegador:** não publica nem altera as notícias públicas |
+| `/admin/noticias` | Mural administrativo com filtros, busca e tabela no desktop; no celular, filtro compacto e notícias em cartões. O editor e a prévia cabem na altura visível e rolam por dentro em desktop, iPad e celular; ações continuam dentro do modal. | **Simulação no navegador:** não publica nem altera as notícias públicas |
 | `/admin/produtos` | Tabela no desktop e cartões no celular, com busca, ajuste de estoque, cadastro, edição e exclusão; as ações ficam visíveis no cartão mobile. | **Simulação no navegador:** não altera os produtos nem o estoque da loja pública |
 | `/admin/eventos` | Cronograma com lista em cartões, calendário mensal, busca e formulário para criar/editar; exclusão com confirmação. | **Simulação no navegador:** não altera a agenda pública |
 | `/admin/integrantes` | Cartões de integrantes, busca por nome, cadastro, edição, remoção e foto opcional. | **Simulação no navegador:** não altera o mural público |
@@ -139,9 +139,9 @@ Exemplo: para atualizar o técnico do basquete, procure `basqueteDetails` em `fr
 
 ## 6. Fluxo atual da loja
 
-1. A lista em `/loja` lê `products.ts`; cada card abre `/loja/<slug>`.
-2. O detalhe lê o produto pelo `slug` e exige um tamanho se o produto tiver `sizes`.
-3. Ao adicionar o produto, `cart.ts` grava identificador, tamanho e quantidade em `localStorage`, na chave `octacore-cart`.
+1. A lista em `/loja` lê `products.ts`; cada card oferece compra rápida e link explícito para `/loja/<slug>`. Camisas exigem tamanho; o controle permite escolher de 1 a 99 unidades. No celular, os cards ficam em uma coluna para preservar os controles.
+2. O detalhe lê o produto pelo `slug` e também permite escolher tamanho e quantidade.
+3. Ao adicionar, `cart.ts` grava identificador, tamanho e quantidade em `localStorage`, na chave `octacore-cart`. A pessoa permanece na loja ou no detalhe e vê uma confirmação por 3,5 segundos; o acesso ao carrinho exibe a contagem de itens. A quantidade por produto e tamanho é limitada a 99.
 4. `/carrinho` lê esses itens, consulta os preços atuais de `products.ts` e calcula o total.
 5. `/checkout` solicita nome, telefone e retirada, mas a confirmação existe apenas na tela enquanto a página estiver aberta. O formulário não envia esses dados e não cria pedido.
 
@@ -202,6 +202,48 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 21/10/2026 — Cabeçalho visível após navegar pela home
+
+- A rolagem suave global foi declarada ao Next.js no layout raiz para que a troca de rota interrompa corretamente a rolagem em andamento. Links da home para agenda, modalidades e detalhes da loja passam a abrir no topo, com o cabeçalho visível.
+- Estado: correção de navegação da interface; não envolve backend.
+- Verificação: navegação visual no navegador a partir dos cartões e botões da home para agenda, modalidades e detalhe de produto; lint e checagem de tipos.
+
+### 21/10/2026 — Faixa de navegação da loja
+
+- O acesso ao carrinho foi movido para junto dos filtros e da busca, imediatamente depois do campo de pesquisa. A faixa permanece visível durante a rolagem dos produtos; em tablet e celular, divide-se em duas linhas para preservar o espaço dos controles.
+- Estado: ajuste de interface; filtros, busca e carrinho continuam funcionando somente com dados e armazenamento locais.
+- Verificação: lint, checagem de tipos e inspeção visual da faixa no topo e durante a rolagem em desktop, tablet e celular.
+
+### 21/10/2026 — Ajuste do hover e da confirmação na loja
+
+- O destaque do cartão agora responde somente à posição do mouse; selecionar tamanho ou quantidade não mantém a borda roxa quando o cursor sai. Mensagens de adição e avisos de validação desaparecem após 3,5 segundos, inclusive na página de detalhe. A quantidade total continua visível no acesso ao carrinho.
+- Estado: ajuste de interface e feedback local; não há integração com estoque ou backend.
+- Verificação: lint e checagem de tipos passaram; regra de hover revisada sem `focus-within`. No navegador, a mensagem de adição apareceu e desapareceu após 3,5 segundos, enquanto a contagem do carrinho permaneceu; o item usado no teste foi removido em seguida.
+
+### 21/10/2026 — Compra rápida e clareza na loja
+
+- Os cartões da loja agora separam “Ver detalhes” de “Adicionar ao carrinho”, oferecem tamanho para camisas e controle de quantidade. A adição confirma a ação sem redirecionar e o acesso ao carrinho mostra o total de unidades. O detalhe do produto também aceita quantidade e mantém a pessoa na página após adicionar. No celular, a lista usa uma coluna para acomodar os controles.
+- Estado: interações e carrinho locais no navegador; não há estoque real nem integração com pedidos ou backend.
+- Verificação: lint, checagem de tipos, inspeção visual da loja em desktop e celular e teste de adicionar itens ao carrinho.
+
+### 21/10/2026 — Imagens da Caneca e do Tirante
+
+- Criadas imagens quadradas separadas em fundo branco para a Caneca Octacore e o Tirante Octacore, com base na referência enviada. As novas prévias de duas vistas substituíram as imagens anteriormente usadas no catálogo e nas páginas de detalhe; os arquivos de origem ficam em `assets/` e as cópias exibidas pelo site em `frontend/public/images/`.
+- Estado: imagens geradas por IA para apresentação visual; preço e demais informações seguem como dados locais, sem integração com estoque ou pedidos.
+- Verificação: cópias de `assets/` e `frontend/public/images/` conferidas por hash; lint e `git diff --check` executados. Revisar fidelidade dos logotipos e detalhes de fabricação antes de tratar as imagens como fotos oficiais dos produtos.
+
+### 21/10/2026 — Imagem da Camisa Passeio 2026
+
+- Criada uma imagem quadrada de produto em fundo branco com as vistas frontal e traseira da camisa baseada na referência enviada; removidos o fundo de apresentação e o texto externo. A imagem foi adicionada ao cartão da Camisa Passeio 2026 e também aparece em sua página de detalhe.
+- Estado: imagem gerada por IA a partir da arte fornecida; preço, tamanhos e demais dados continuam locais, sem integração de estoque ou pedidos.
+- Verificação: lint e `git diff --check` concluídos. O build foi tentado, mas não conseguiu baixar a fonte Outfit do Google Fonts por indisponibilidade de conexão. Revisar visualmente a fidelidade dos logotipos e detalhes da camisa antes de tratar a imagem como fotografia oficial do produto.
+
+### 19/10/2026 — Correção do modal de notícias cortado
+
+- O editor de criação/edição mantinha altura ilimitada em larguras de iPad e podia ficar parcialmente atrás da barra administrativa porque as transições global e administrativa aplicavam `transform` aos ancestrais do modal fixo. As duas entradas agora usam fade sem deslocamento; o editor e a confirmação de exclusão são renderizados diretamente no `body`, e o editor mantém altura máxima baseada na janela e rolagem interna em toda a viewport.
+- Estado: correção de interface; o formulário ainda salva somente na prévia local e não publica notícias.
+- Verificação: lint e build de produção executados; no Chrome, título e botão de fechar aparecem no topo, e a rolagem interna alcança imagem e ações no fim. Ainda falta conferir diretamente em iPad e celular.
 
 ### 19/10/2026 — Transição discreta entre páginas
 

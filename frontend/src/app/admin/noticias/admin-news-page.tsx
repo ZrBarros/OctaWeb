@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import { adminNews, adminNewsCategories, type AdminNewsItem, type AdminNewsCategory, type AdminNewsStatus } from "@/data/admin-news";
@@ -147,7 +148,7 @@ export function AdminNewsPage() {
       </div>
     </div>
 
-    {draft && <div className={styles.overlay} role="presentation">
+    {draft && typeof document !== "undefined" && createPortal(<div className={styles.overlay} role="presentation">
       <section className={`${styles.dialog} ${styles.editorDialog}`} role="dialog" aria-modal="true" aria-labelledby="news-dialog-title" onKeyDown={(event) => { if (event.key === "Escape") closeEditor(); }}>
         <div className={styles.dialogHeader}><h2 id="news-dialog-title">{editorStep === "preview" ? "Prévia da notícia" : editingId === null ? "Nova notícia" : "Editar notícia"}</h2><button autoFocus type="button" aria-label="Fechar" onClick={closeEditor}>×</button></div>
         <p>Esta é uma simulação: salvar aqui não publica no site e recarregar a página restaura os exemplos.</p>
@@ -185,12 +186,12 @@ export function AdminNewsPage() {
           <div className={styles.dialogActions}><button type="button" className={styles.cancelButton} onClick={() => setEditorStep("edit")}>Voltar à edição</button><button type="button" className={styles.saveButton} onClick={saveDraft}>Salvar na prévia</button></div>
         </>}
       </section>
-    </div>}
+    </div>, document.body)}
 
-    {deletingItem && <div className={styles.overlay} role="presentation"><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" onKeyDown={(event) => { if (event.key === "Escape") setDeletingId(null); }}>
+    {deletingItem && typeof document !== "undefined" && createPortal(<div className={styles.overlay} role="presentation"><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" onKeyDown={(event) => { if (event.key === "Escape") setDeletingId(null); }}>
       <div className={styles.dialogHeader}><h2 id="delete-dialog-title">Excluir notícia?</h2><button type="button" aria-label="Fechar" onClick={() => setDeletingId(null)}>×</button></div>
       <p>“{deletingItem.title}” será removida somente desta prévia. Recarregar a página restaura os dados de exemplo.</p>
       <div className={styles.dialogActions}><button autoFocus type="button" className={styles.cancelButton} onClick={() => setDeletingId(null)}>Cancelar</button><button type="button" className={styles.deleteConfirm} onClick={deleteItem}>Excluir da prévia</button></div>
-    </section></div>}
+    </section></div>, document.body)}
   </>;
 }

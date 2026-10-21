@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={outfit.variable}>
+    <html lang="pt-BR" className={outfit.variable} data-scroll-behavior="smooth">
       <body>
         <SiteChrome>{children}</SiteChrome>
       </body>

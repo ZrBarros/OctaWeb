@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { formatPrice, products } from "@/data/products";
+import { products } from "@/data/products";
+import { useCart } from "@/lib/cart";
+import { ProductCard } from "./product-card";
 import styles from "./page.module.css";
 
 const categories = ["Todos", "Camisas", "Tirantes", "Copos", "Acessórios", "Kits"];
@@ -11,6 +12,8 @@ const categories = ["Todos", "Camisas", "Tirantes", "Copos", "Acessórios", "Kit
 export default function StorePage() {
   const [category, setCategory] = useState("Todos");
   const [search, setSearch] = useState("");
+  const cart = useCart();
+  const cartCount = cart?.reduce((total, item) => total + item.quantity, 0) ?? 0;
   const visibleProducts = products.filter((product) =>
     (category === "Todos" || product.category === category) &&
     product.name.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")),
@@ -22,7 +25,6 @@ export default function StorePage() {
         <div className={styles.kicker}><span>Faz o pix!</span><i /></div>
         <div className={styles.headingRow}>
           <h1>Loja oficial Octacore</h1>
-          <Link className={styles.cartLink} href="/carrinho">Ver carrinho <span aria-hidden="true">→</span></Link>
         </div>
         <p className={styles.intro}>Vista as cores da maior associação acadêmica do estado.</p>
 
@@ -48,24 +50,15 @@ export default function StorePage() {
             <span className={styles.visuallyHidden}>Buscar produtos</span>
             <input type="search" placeholder="Buscar na Octa Store..." value={search} onChange={(event) => setSearch(event.target.value)} />
           </label>
+          <Link className={styles.cartLink} href="/carrinho">
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h3l2.5 14h13l2-10H5" /></svg>
+            Ver carrinho <span className={styles.cartCount} aria-label={`${cartCount} ${cartCount === 1 ? "item" : "itens"} no carrinho`}>{cartCount}</span>
+          </Link>
         </div>
 
         {visibleProducts.length > 0 ? (
           <div className={styles.grid}>
-            {visibleProducts.map((product) => (
-              <article className={`${styles.card} hoverCard`} key={product.slug}>
-                <Link className={styles.productLink} href={`/loja/${product.slug}`} aria-label={`Ver detalhes de ${product.name}`}>
-                  {product.image ? (
-                    <Image className={styles.image} src={product.image} alt={product.alt ?? ""} width={400} height={300} />
-                  ) : (
-                    <div className={styles.placeholder} role="img" aria-label={`Imagem de ${product.name} pendente`} />
-                  )}
-                  <h2>{product.name}</h2>
-                  <p>{product.description}</p>
-                  <strong>{formatPrice(product.priceCents)}</strong>
-                </Link>
-              </article>
-            ))}
+            {visibleProducts.map((product) => <ProductCard product={product} key={product.slug} />)}
           </div>
         ) : (
           <p className={styles.empty}>Nenhum produto encontrado nessa categoria.</p>
