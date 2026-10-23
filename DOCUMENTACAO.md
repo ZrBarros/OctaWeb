@@ -1,6 +1,6 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 21/10/2026
+**Última atualização:** 22/10/2026
 
 **Estado:** MVP em desenvolvimento; interfaces do front end em construção
 
@@ -180,7 +180,7 @@ A navegação administrativa fica recolhida atrás de um ícone simples de três
 ## 7. Próximos passos
 
 1. Revisar com a equipe as telas implementadas, textos, eventos, integrantes, produtos, tamanhos e formas de retirada; disponibilizar as fotos dos quatro eventos do painel, dos seis integrantes e de João Silva, e substituir os demais placeholders pelas imagens aprovadas.
-2. Definir os contratos da API NestJS e integrar autenticação, conteúdo, presença em eventos e pedidos reais. Nessa integração, acrescentar estados de carregamento, erro e sucesso aos formulários de acesso.
+2. Implementar a API NestJS sobre o banco definido em `database/` e integrar autenticação, conteúdo, presença em eventos e pedidos reais. Nessa integração, acrescentar estados de carregamento, erro e sucesso aos formulários de acesso.
 3. Continuar a revisão de acessibilidade e responsividade em larguras intermediárias e celulares menores; incluir indicação visual de rolagem nas tabelas administrativas que ainda não a mostram. Conferir seleção de imagens em um navegador sem as restrições da extensão de automação.
 
 Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando acontecer.
@@ -188,6 +188,7 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 ## 8. Decisões e limites conhecidos
 
 - A equipe escolheu **Next.js + TypeScript** para o front end e **NestJS** para o backend futuro.
+- O banco de dados é **PostgreSQL**, com as tabelas no schema `octacore`. A estrutura oficial fica em `database/01_schema.sql`, derivada do MER do projeto; mudanças de estrutura devem ser feitas nesse arquivo e versionadas. Os slugs de notícias, eventos, modalidades, integrantes e produtos seguem as rotas do front end.
 - O protótipo do Figma orienta a interface; a fonte Outfit e os arquivos em `assets/` compõem a identidade visual atual.
 - Fotos ainda indisponíveis permanecem como placeholders, conforme combinado para galeria, mural e integrantes.
 - Conteúdo, preços e detalhes de produtos são dados de exemplo e precisam de confirmação da atlética.
@@ -202,6 +203,13 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 22/10/2026 — Esquema do banco de dados PostgreSQL
+
+- Criada a pasta `database/` com o esquema do MVP (`01_schema.sql`, 14 tabelas no schema `octacore`), dados de exemplo (`02_seed.sql`), `docker-compose.yml` opcional e instruções de conexão para o backend em `database/README.md`.
+- O banco garante: autor de notícia apenas `ADMIN`, estoque não negativo por tamanho (`produto_variacao`), e-mail único e recálculo automático do total do pedido. Slugs, categorias, status e formas de retirada foram alinhados aos dados atuais de `frontend/src/data` e ao checkout.
+- Estado: estrutura do banco pronta; **o front end continua sem integração** e a API NestJS ainda não existe. Confirmação de presença, ranking, estatísticas, perfil de atleta, favoritos e notificações não têm tabelas.
+- Verificação: scripts executados do zero e reexecutados no PostgreSQL 16; a versão anterior, sem os slugs, foi aplicada no PostgreSQL 18 pelo pgAdmin. Conferidas as 14 tabelas, o total do pedido de exemplo e os bloqueios de autor não administrador, estoque negativo e e-mail duplicado.
 
 ### 21/10/2026 — Cabeçalho visível após navegar pela home
 

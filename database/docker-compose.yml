@@ -1,0 +1,22 @@
+# PostgreSQL do OctaWeb via Docker (opcional — alternativa a instalar o PostgreSQL).
+# Uso, dentro da pasta database/:   docker compose up -d
+# Na primeira inicialização, 01_schema.sql e 02_seed.sql são executados automaticamente.
+# Para recriar do zero:              docker compose down -v && docker compose up -d
+# A porta 5433 evita conflito com um PostgreSQL já instalado na máquina (que usa 5432).
+services:
+  db:
+    image: postgres:18
+    container_name: octaweb-db
+    environment:
+      POSTGRES_DB: octacore
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres   # apenas para desenvolvimento local
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./01_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./02_seed.sql:/docker-entrypoint-initdb.d/02_seed.sql:ro
+      - octaweb-pgdata:/var/lib/postgresql
+
+volumes:
+  octaweb-pgdata:

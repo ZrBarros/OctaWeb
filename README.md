@@ -2,7 +2,7 @@
 
 Site da **Associação Atlética Acadêmica de Computação da UFAL (Octacore)**, desenvolvido como projeto da disciplina de Programação Web. O objetivo é reunir notícias, modalidades, agenda, mural da atlética e loja em um só lugar.
 
-O projeto está na fase de **MVP do front end**. As telas foram construídas com **Next.js, React e TypeScript**, seguindo o [protótipo no Figma](https://www.figma.com/design/BcgJnC6UWsDG5W5B5mO7V6/Projeto-P3---Octacore?node-id=0-1). Uma API em **NestJS** está planejada para uma etapa posterior; ela ainda não faz parte deste repositório.
+O projeto está na fase de **MVP do front end**. As telas foram construídas com **Next.js, React e TypeScript**, seguindo o [protótipo no Figma](https://www.figma.com/design/BcgJnC6UWsDG5W5B5mO7V6/Projeto-P3---Octacore?node-id=0-1). Uma API em **NestJS** está planejada para uma etapa posterior; ela ainda não faz parte deste repositório. O banco de dados **PostgreSQL** já está modelado em [`database/`](database/).
 
 ## Como executar
 
@@ -35,6 +35,7 @@ Os conteúdos ainda são, em grande parte, dados locais de exemplo. Login e cada
 ## Estrutura e documentação
 
 - [`frontend/`](frontend/) — aplicação Next.js. O [README do front end](frontend/README.md) explica onde estão as principais partes do código.
+- [`database/`](database/) — esquema PostgreSQL do MVP, dados de exemplo e instruções de conexão para o backend.
 - [`assets/`](assets/) — materiais de identidade visual e documentos de referência do projeto.
 - [`DOCUMENTACAO.md`](DOCUMENTACAO.md) — estado de cada tela, limites das simulações, decisões, próximos passos e histórico de desenvolvimento. Consulte este arquivo para saber o que já funciona e o que ainda está planejado.
 
