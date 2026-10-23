@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { agendaEvents, eventCategories } from "@/data/events";
+import { eventCategories } from "@/data/events";
+import { mapEvent } from "@/lib/api-mappers";
+import type { ApiEvent, ApiPage } from "@/lib/api-types";
+import { useApiData } from "@/lib/use-api";
 import styles from "./page.module.css";
 
 export default function AgendaPage() {
   const [category, setCategory] = useState<(typeof eventCategories)[number]>("Todos");
+  const { data: response, loading, error } = useApiData<ApiPage<ApiEvent>>("/events?pageSize=100&sort=asc", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
+  const agendaEvents = response.data.map(mapEvent);
   const visibleEvents = (category === "Todos"
     ? [...agendaEvents]
     : agendaEvents.filter((event) => event.category === category))
@@ -39,7 +44,7 @@ export default function AgendaPage() {
 
         <div className={styles.layout}>
           <section className={styles.eventList} aria-label="Compromissos da Octacore">
-            {visibleEvents.length > 0 ? visibleEvents.map((event) => (
+            {loading ? <p className={styles.empty}>Carregando agenda...</p> : error ? <p className={styles.empty}>{error}</p> : visibleEvents.length > 0 ? visibleEvents.map((event) => (
               <article className={`${styles.eventCard} hoverCard`} key={event.id}>
                 <time className={styles.dateBox} dateTime={event.dateTime}>
                   <strong>{event.day}</strong><span>{event.month}</span>

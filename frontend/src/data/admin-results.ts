@@ -7,6 +7,8 @@ export type AdminResult = {
   opponentScore: number;
   competition: string;
   date: string;
+  modalityId?: number;
+  eventId?: number | null;
 };
 
 export type ResultStatus = "Vitória" | "Empate" | "Derrota";

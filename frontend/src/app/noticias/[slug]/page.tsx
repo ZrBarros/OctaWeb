@@ -2,26 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { NewsCard } from "@/components/news-card";
-import { news } from "@/data/news";
+import { mapNews } from "@/lib/api-mappers";
+import { apiServer } from "@/lib/server-api";
+import { ApiError, type ApiItem, type ApiNews, type ApiPage } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return news.map(({ slug }) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const article = news.find((item) => item.slug === slug);
-  return { title: article ? `${article.title} | Octacore` : "Notícia não encontrada | Octacore" };
+  try { const { data } = await apiServer<ApiItem<ApiNews>>(`/news/${encodeURIComponent(slug)}`); return { title: `${data.titulo} | Octacore` }; }
+  catch { return { title: "Notícia não encontrada | Octacore" }; }
 }
 
 export default async function NewsDetailPage({ params }: Props) {
   const { slug } = await params;
-  const article = news.find((item) => item.slug === slug);
-  if (!article) notFound();
-  const relatedNews = news.filter((item) => item.slug !== slug).slice(0, 2);
+  let article;
+  try { article = mapNews((await apiServer<ApiItem<ApiNews>>(`/news/${encodeURIComponent(slug)}`)).data); }
+  catch (error) { if (error instanceof ApiError && error.status === 404) notFound(); throw error; }
+  const relatedNews = (await apiServer<ApiPage<ApiNews>>("/news?pageSize=3")).data.map(mapNews).filter((item) => item.slug !== slug).slice(0, 2);
 
   return (
     <main className={styles.main}>

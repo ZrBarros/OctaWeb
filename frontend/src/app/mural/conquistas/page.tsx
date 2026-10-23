@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { achievements } from "@/data/mural";
+import { apiServer } from "@/lib/server-api";
+import type { ApiAchievement, ApiItem } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "Conquistas e galeria | Octacore" };
 
-export default function AchievementsPage() {
+export default async function AchievementsPage() {
+  const achievements = (await apiServer<ApiItem<ApiAchievement[]>>("/achievements")).data.map((item) => ({ year: String(item.ano), result: item.colocacao, title: item.titulo, description: item.descricao ?? item.campeonato }));
   return (
     <main className={styles.main}>
       <div className={styles.container}>

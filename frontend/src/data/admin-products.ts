@@ -6,9 +6,12 @@ export type AdminProduct = {
   priceCents: number;
   stock: number;
   image?: string;
+  description?: string;
+  active?: boolean;
+  variations?: { id?: number; size: string; stock: number }[];
 };
 
-export const adminProductCategories = ["Uniformes", "Acessórios", "Utilitários"] as const;
+export const adminProductCategories = ["Camisas", "Tirantes", "Copos", "Bonés", "Acessórios", "Kits"] as const;
 
 export const adminProducts: AdminProduct[] = [
   { id: 1, name: "Camisa Oficial Octacore 2026", category: "Uniformes", priceCents: 5990, stock: 45, image: "/images/camisa-edicao-especial.jpg" },

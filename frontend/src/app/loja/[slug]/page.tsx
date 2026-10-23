@@ -2,26 +2,26 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { formatPrice, products } from "@/data/products";
+import { formatPrice } from "@/data/products";
+import { mapProduct } from "@/lib/api-mappers";
+import { apiServer } from "@/lib/server-api";
+import { ApiError, type ApiItem, type ApiProduct } from "@/lib/api-types";
 import { ProductPurchase } from "./product-purchase";
 import styles from "./page.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return products.map(({ slug }) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
-  return { title: product ? `${product.name} | Loja Octacore` : "Produto não encontrado | Octacore" };
+  try { const { data } = await apiServer<ApiItem<ApiProduct>>(`/products/${encodeURIComponent(slug)}`); return { title: `${data.nome} | Loja Octacore` }; }
+  catch { return { title: "Produto não encontrado | Octacore" }; }
 }
 
 export default async function ProductDetailPage({ params }: Props) {
   const { slug } = await params;
-  const product = products.find((item) => item.slug === slug);
-  if (!product) notFound();
+  let product;
+  try { product = mapProduct((await apiServer<ApiItem<ApiProduct>>(`/products/${encodeURIComponent(slug)}`)).data); }
+  catch (error) { if (error instanceof ApiError && error.status === 404) notFound(); throw error; }
 
   return (
     <main className={styles.main}>

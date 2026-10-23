@@ -1,27 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { athleteProfileHref } from "@/data/athletes";
-import { basqueteDetails, futsalDetails, modalities } from "@/data/modalities";
+import { apiServer } from "@/lib/server-api";
+import { ApiError, type ApiItem, type ApiModality } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return modalities.map(({ slug }) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const modality = modalities.find((item) => item.slug === slug);
-  return { title: modality ? `${modality.name} | Modalidades Octacore` : "Modalidade não encontrada | Octacore" };
+  try { const { data } = await apiServer<ApiItem<ApiModality>>(`/modalities/${encodeURIComponent(slug)}`); return { title: `${data.nome} | Modalidades Octacore` }; }
+  catch { return { title: "Modalidade não encontrada | Octacore" }; }
 }
 
 export default async function ModalityDetailPage({ params }: Props) {
   const { slug } = await params;
-  const modality = modalities.find((item) => item.slug === slug);
-  if (!modality) notFound();
-  const details = slug === "futsal" ? futsalDetails : slug === "basquete" ? basqueteDetails : null;
+  let data: ApiModality;
+  try { data = (await apiServer<ApiItem<ApiModality>>(`/modalities/${encodeURIComponent(slug)}`)).data; }
+  catch (error) { if (error instanceof ApiError && error.status === 404) notFound(); throw error; }
+  const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  const modality = { name: data.nome, description: data.descricao ?? "" };
+  const details = { trainingTime: data.horarios.map((item) => `${days[item.diaSemana]} ${new Date(item.horaInicio).toISOString().slice(11, 16)}`).join(" · ") || "A confirmar", coach: data.responsavel ?? "A confirmar", trainingPlace: data.localTreino ?? "A confirmar", roster: data.integrantes?.map((item) => item.integrante.nome) ?? [] };
 
   return (
     <main className={styles.main}>
@@ -33,12 +32,12 @@ export default async function ModalityDetailPage({ params }: Props) {
           <div>
             <p className={styles.eyebrow}>Modalidade oficial</p>
             <h1>{modality.name} Octacore</h1>
-            <p className={styles.intro}>{modality.introduction ?? modality.description}</p>
+            <p className={styles.intro}>{modality.description}</p>
           </div>
           <div className={styles.heroPlaceholder} role="img" aria-label={`Imagem de ${modality.name} pendente`} />
         </div>
 
-        {details ? (
+        {(
           <div className={styles.contentGrid}>
             <div className={styles.leftColumn}>
               <section className={`${styles.information} hoverCard`} aria-labelledby="information-title">
@@ -49,34 +48,26 @@ export default async function ModalityDetailPage({ params }: Props) {
                   <div><h3>Local dos treinos</h3><p>{details.trainingPlace}</p></div>
                 </div>
               </section>
-              {slug === "futsal" && (
+              {(data.resultados?.length || data.eventos?.length) ? (
                 <div className={styles.matches}>
                   <section className="hoverCard" aria-labelledby="result-title">
                     <h2 id="result-title">Último resultado</h2>
-                    <strong>{futsalDetails.lastResult}</strong>
-                    <p>{futsalDetails.lastResultContext}</p>
+                    <strong>{data.resultados?.[0] ? `Octa ${data.resultados[0].placarOcta} × ${data.resultados[0].placarAdversario} ${data.resultados[0].adversario}` : "Nenhum resultado"}</strong>
+                    <p>{data.resultados?.[0]?.campeonato ?? ""}</p>
                   </section>
                   <section className="hoverCard" aria-labelledby="next-title">
                     <h2 id="next-title">Próximo desafio</h2>
-                    <strong>{futsalDetails.nextMatch}</strong>
-                    <p>{futsalDetails.nextMatchDate}</p>
+                    <strong>{data.eventos?.[0]?.titulo ?? "Nenhum evento futuro"}</strong>
+                    <p>{data.eventos?.[0] ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short" }).format(new Date(data.eventos[0].dataHora)) : ""}</p>
                   </section>
                 </div>
-              )}
+              ) : null}
             </div>
             <aside className={`${styles.roster} hoverCard`} aria-labelledby="roster-title">
               <h2 id="roster-title">Elenco {modality.name}</h2>
-              <ul>{details.roster.map((member) => {
-                const profileHref = athleteProfileHref(member.replace(/\s*\([^)]*\)$/, ""));
-                return <li key={member}>{profileHref ? <Link href={profileHref} className={styles.profileLink}>{member}<span aria-hidden="true">↗</span></Link> : member}</li>;
-              })}</ul>
+              <ul>{details.roster.map((member) => <li key={member}>{member}</li>)}</ul>
             </aside>
           </div>
-        ) : (
-          <section className={`${styles.pending} hoverCard`} aria-labelledby="pending-title">
-            <h2 id="pending-title">Informações da modalidade</h2>
-            <p>Horários, elenco e resultados serão adicionados quando a atlética confirmar esses dados.</p>
-          </section>
         )}
       </div>
     </main>

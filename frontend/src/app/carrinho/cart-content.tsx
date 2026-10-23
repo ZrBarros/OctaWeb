@@ -2,12 +2,17 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { formatPrice, products } from "@/data/products";
+import { formatPrice } from "@/data/products";
+import { mapProduct } from "@/lib/api-mappers";
+import type { ApiPage, ApiProduct } from "@/lib/api-types";
+import { useApiData } from "@/lib/use-api";
 import { changeCartQuantity, removeFromCart, useCart } from "@/lib/cart";
 import styles from "./page.module.css";
 
 export function CartContent() {
   const items = useCart();
+  const { data: response, loading, error } = useApiData<ApiPage<ApiProduct>>("/products?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
+  const products = response.data.map(mapProduct);
   const lines = items?.flatMap((item) => {
     const product = products.find((candidate) => candidate.slug === item.slug);
     return product ? [{ ...item, product }] : [];
@@ -25,8 +30,10 @@ export function CartContent() {
         <h1>Seu carrinho</h1>
         <p className={styles.intro}>Confira os produtos escolhidos antes de continuar.</p>
 
-        {items === null ? (
+        {items === null || loading ? (
           <p className={styles.loading} role="status">Carregando carrinho...</p>
+        ) : error ? (
+          <p className={styles.loading} role="alert">{error}</p>
         ) : lines.length === 0 ? (
           <section className={styles.empty} aria-label="Carrinho vazio">
             <h2>Seu carrinho está vazio</h2>
@@ -68,7 +75,7 @@ export function CartContent() {
               <div className={styles.summaryRow}><span>Produtos ({itemCount})</span><strong>{formatPrice(totalCents)}</strong></div>
               <div className={`${styles.summaryRow} ${styles.total}`}><span>Total</span><strong>{formatPrice(totalCents)}</strong></div>
               <Link className={`button buttonPrimary ${styles.checkoutLink}`} href="/checkout">Ir para checkout</Link>
-              <p>Checkout de demonstração, sem cobrança real.</p>
+              <p>O pedido será registrado sem cobrança online.</p>
               <Link className={styles.continueLink} href="/loja">← Continuar comprando</Link>
             </aside>
           </div>

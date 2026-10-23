@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
-import { products } from "@/data/products";
 
 const storageKey = "octacore-cart";
 const changeEvent = "octacore-cart-change";
@@ -32,14 +31,12 @@ function parseCart(raw: string): CartItem[] {
     for (const candidate of saved) {
       if (!candidate || typeof candidate !== "object") continue;
       const { slug, size, quantity } = candidate as Partial<CartItem>;
-      const product = products.find((item) => item.slug === slug);
-      if (!product || !Number.isInteger(quantity) || !quantity || quantity < 1) continue;
-      if (product.sizes && (typeof size !== "string" || !product.sizes.includes(size))) continue;
-
-      const validSize = product.sizes ? size : undefined;
+      if (typeof slug !== "string" || !slug || !Number.isInteger(quantity) || !quantity || quantity < 1) continue;
+      if (size !== undefined && typeof size !== "string") continue;
+      const validSize = size;
       const existing = items.find((item) => item.slug === slug && item.size === validSize);
       if (existing) existing.quantity = Math.min(99, existing.quantity + quantity);
-      else items.push({ slug: product.slug, size: validSize, quantity: Math.min(99, quantity) });
+      else items.push({ slug, size: validSize, quantity: Math.min(99, quantity) });
     }
     return items;
   } catch {
@@ -74,12 +71,10 @@ export function useCart() {
 }
 
 export function addToCart(slug: string, size?: string, quantity = 1) {
-  const product = products.find((item) => item.slug === slug);
-  if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > 99 ||
-    (product.sizes && (!size || !product.sizes.includes(size)))) return false;
+  if (!slug || !Number.isInteger(quantity) || quantity < 1 || quantity > 99) return false;
 
   const items = parseCart(readSnapshot());
-  const selectedSize = product.sizes ? size : undefined;
+  const selectedSize = size;
   const existing = items.find((item) => item.slug === slug && item.size === selectedSize);
   if (existing?.quantity === 99) return false;
   if (existing) existing.quantity = Math.min(99, existing.quantity + quantity);
@@ -100,4 +95,8 @@ export function changeCartQuantity(slug: string, size: string | undefined, quant
 export function removeFromCart(slug: string, size?: string) {
   const items = parseCart(readSnapshot()).filter((item) => item.slug !== slug || item.size !== size);
   writeCart(items);
+}
+
+export function clearCart() {
+  writeCart([]);
 }

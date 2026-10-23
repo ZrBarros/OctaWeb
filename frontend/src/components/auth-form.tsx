@@ -1,31 +1,54 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
+import { apiClient } from "@/lib/api";
+import type { ApiItem, ApiUser } from "@/lib/api-types";
 import styles from "./auth-form.module.css";
 
 type AuthMode = "login" | "cadastro";
 
-export function AuthForm({ mode }: { mode: AuthMode }) {
+export function AuthForm({ mode, initialMessage = "" }: { mode: AuthMode; initialMessage?: string }) {
   const isSignup = mode === "cadastro";
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(initialMessage);
+  const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const router = useRouter();
+  const { establishSession } = useAuth();
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
 
+    const data = new FormData(event.currentTarget);
     if (isSignup) {
-      const data = new FormData(event.currentTarget);
       if (data.get("password") !== data.get("confirmPassword")) {
         setMessage("As senhas precisam ser iguais.");
         return;
       }
     }
 
-    setMessage(isSignup
-      ? "O cadastro ainda não está disponível. Seus dados não foram enviados nem salvos."
-      : "O acesso ainda não está disponível. Seus dados não foram enviados nem salvos.");
+    setSubmitting(true);
+    try {
+      const body = isSignup
+        ? { name: data.get("name"), email: data.get("email"), course: data.get("course"), password: data.get("password") }
+        : { email: data.get("email"), password: data.get("password") };
+      const response = await apiClient<{ data: { user: ApiUser; accessToken: string } }>(`/auth/${isSignup ? "register" : "login"}`, { method: "POST", body: JSON.stringify(body) });
+      establishSession(response.data.user, response.data.accessToken);
+      router.push(response.data.user.perfil === "ADMIN" ? "/admin" : "/minha-conta");
+      router.refresh();
+    } catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível acessar a conta."); }
+    finally { setSubmitting(false); }
+  }
+
+  async function forgotPassword() {
+    const email = String(new FormData(formRef.current ?? undefined).get("email") ?? "").trim();
+    if (!email) { setMessage("Digite seu e-mail para receber as instruções."); return; }
+    try { await apiClient<ApiItem<never>>("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) }); setMessage("Se o e-mail estiver cadastrado, enviaremos as instruções de redefinição."); }
+    catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível solicitar a redefinição."); }
   }
 
   return (
@@ -43,7 +66,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           </header>
         )}
 
-        <form className={styles.form} onSubmit={handleSubmit} onChange={() => setMessage("")}>
+        <form ref={formRef} className={styles.form} onSubmit={handleSubmit} onChange={() => setMessage("")}>
           {isSignup && (
             <label className={styles.field}>
               Nome completo
@@ -62,8 +85,9 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           )}
           <label className={styles.field}>
             {isSignup ? "Senha" : "Sua senha"}
-            <input name="password" type="password" autoComplete={isSignup ? "new-password" : "current-password"} placeholder="••••••••••••" required minLength={isSignup ? 8 : undefined} />
+            <input name="password" type="password" autoComplete={isSignup ? "new-password" : "current-password"} placeholder="••••••••••••" required minLength={isSignup ? 8 : undefined} pattern={isSignup ? "(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,128}" : undefined} title={isSignup ? "Use ao menos 8 caracteres, com letra minúscula, maiúscula e número." : undefined} />
           </label>
+          {isSignup && <p className={styles.passwordHint}>Use ao menos 8 caracteres, com letra minúscula, maiúscula e número.</p>}
           {isSignup && (
             <label className={styles.field}>
               Confirmar senha
@@ -75,16 +99,13 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
             <p className={styles.supportingText}>Ao se cadastrar, você concorda com a integração esportiva acadêmica.</p>
           ) : (
             <div className={styles.loginLinks}>
-              <button type="button" onClick={() => setMessage("A recuperação de senha estará disponível quando a autenticação for integrada.")}>Esqueci minha senha</button>
+              <button type="button" onClick={() => void forgotPassword()}>Esqueci minha senha</button>
               <span>Não tem conta? <Link href="/cadastro">Cadastre-se</Link></span>
             </div>
           )}
 
           {message && <p className={styles.feedback} role="status">{message}</p>}
-          {!isSignup && message.startsWith("O acesso ainda") && (
-            <Link className={styles.previewLink} href="/minha-conta">Explorar prévia de Minha Conta →</Link>
-          )}
-          <button className={`button buttonPrimary ${styles.submit}`} type="submit">{isSignup ? "Criar minha conta" : "Entrar na conta"}</button>
+          <button className={`button buttonPrimary ${styles.submit}`} type="submit" disabled={submitting}>{submitting ? "Aguarde..." : isSignup ? "Criar minha conta" : "Entrar na conta"}</button>
         </form>
         {isSignup && <Link className={`button buttonOutline ${styles.backToLogin}`} href="/login">Fazer login</Link>}
       </section>

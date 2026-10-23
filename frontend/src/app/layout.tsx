@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
+import { AuthProvider } from "@/components/auth-provider";
 import { SiteChrome } from "@/components/site-chrome";
 import "./globals.css";
 
@@ -14,7 +15,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="pt-BR" className={outfit.variable} data-scroll-behavior="smooth">
       <body>
-        <SiteChrome>{children}</SiteChrome>
+        <AuthProvider><SiteChrome>{children}</SiteChrome></AuthProvider>
       </body>
     </html>
   );

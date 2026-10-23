@@ -48,9 +48,9 @@
 .dialog p { margin: 11px 0 22px; color: #c9bdce; font-size: 13px; line-height: 1.5; }
 .form { display: grid; gap: 15px; }
 .form label { display: grid; gap: 7px; color: #f1eaf2; font-size: 12px; font-weight: 800; }
-.form input { width: 100%; min-height: 40px; padding: 10px 11px; border: 1px solid #5a3b62; border-radius: 5px; outline: 0; background: #100719; color: white; font: inherit; font-size: 13px; }
+.form input, .form select { width: 100%; min-height: 40px; padding: 10px 11px; border: 1px solid #5a3b62; border-radius: 5px; outline: 0; background: #100719; color: white; font: inherit; font-size: 13px; }
 .form input::placeholder { color: #8c8091; }
-.form input:focus { border-color: var(--orange); }
+.form input:focus, .form select:focus { border-color: var(--orange); }
 .formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
 .form .calculatedStatus { margin: -3px 0 0; color: #bbb0bf; font-size: 12px; }
 .calculatedStatus strong { color: var(--orange); }

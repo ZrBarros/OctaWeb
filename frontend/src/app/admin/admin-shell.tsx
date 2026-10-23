@@ -6,10 +6,11 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { adminProfile } from "@/data/admin-profile";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth-provider";
 import styles from "./admin.module.css";
 
-export type AdminIconName = "dashboard" | "news" | "products" | "events" | "users" | "results" | "orders" | "search" | "logout";
+export type AdminIconName = "dashboard" | "news" | "products" | "events" | "users" | "modalities" | "history" | "results" | "orders" | "search" | "logout";
 
 const AdminFeedbackContext = createContext<(message: string) => void>(() => {});
 const AdminToolbarTargetContext = createContext<{ desktop: HTMLElement | null; mobile: HTMLElement | null; setMobile: (target: HTMLElement | null) => void }>({ desktop: null, mobile: null, setMobile: () => {} });
@@ -31,6 +32,8 @@ export function AdminIcon({ name }: { name: AdminIconName }) {
     products: <><rect x="4" y="7" width="16" height="14" rx="2" /><path d="M8 9V6a4 4 0 0 1 8 0v3" /></>,
     events: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4M17 3v4M3 10h18" /></>,
     users: <><circle cx="9" cy="8" r="3" /><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1" /></>,
+    modalities: <><circle cx="12" cy="12" r="9" /><path d="M12 3c2.5 2.4 4 5.4 4 9s-1.5 6.6-4 9M3 12h18M12 3c-2.5 2.4-4 5.4-4 9s1.5 6.6 4 9" /></>,
+    history: <><path d="M12 3a9 9 0 1 1-8.2 5.3M3 3v5h5M12 7v5l3 2" /></>,
     results: <><path d="M7 3h10v7a5 5 0 0 1-10 0V3ZM7 5H4v3a4 4 0 0 0 4 4M17 5h3v3a4 4 0 0 1-4 4M12 15v4M8 21h8" /></>,
     orders: <><path d="M3 4h2l2 12h12l2-9H6M8 20h.01M18 20h.01" /></>,
     search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 5 5" /></>,
@@ -40,24 +43,34 @@ export function AdminIcon({ name }: { name: AdminIconName }) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 
-const sections: { label: string; icon: AdminIconName; href?: string }[] = [
+const sections: { label: string; icon: AdminIconName; href: string }[] = [
   { label: "Dashboard", icon: "dashboard", href: "/admin" },
   { label: "Notícias", icon: "news", href: "/admin/noticias" },
   { label: "Produtos", icon: "products", href: "/admin/produtos" },
   { label: "Eventos", icon: "events", href: "/admin/eventos" },
+  { label: "Modalidades", icon: "modalities", href: "/admin/modalidades" },
   { label: "Integrantes", icon: "users", href: "/admin/integrantes" },
+  { label: "Mural", icon: "history", href: "/admin/mural" },
   { label: "Resultados", icon: "results", href: "/admin/resultados" },
   { label: "Pedidos", icon: "orders", href: "/admin/pedidos" },
+  { label: "Usuários", icon: "users", href: "/admin/usuarios" },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user: profile, status } = useAuth();
   const [feedback, setFeedback] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [toolbarSearchTarget, setToolbarSearchTarget] = useState<HTMLElement | null>(null);
   const [mobileToolbarSearchTarget, setMobileToolbarSearchTarget] = useState<HTMLElement | null>(null);
   const sidebarRef = useRef<HTMLElement>(null);
   const currentSection = pathname === "/admin/perfil" ? "Meu perfil" : sections.find((section) => section.href === pathname)?.label ?? "Painel";
+
+  useEffect(() => {
+    if (status === "anonymous") router.replace("/login");
+    else if (status === "authenticated" && profile?.perfil !== "ADMIN") router.replace("/minha-conta");
+  }, [profile, router, status]);
 
   useEffect(() => {
     const closeOnOutsidePointer = (event: PointerEvent) => {
@@ -99,9 +112,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className={styles.navbarActions}>
           <div id="admin-toolbar-search" ref={setToolbarSearchTarget} className={styles.toolbarSearchSlot} />
-          <Link className={styles.adminProfileLink} href="/admin/perfil" aria-label={`Abrir perfil de ${adminProfile.name}`}>
-            <span className={styles.adminIdentity}><strong>{adminProfile.name}</strong><small>{adminProfile.role}</small></span>
-            <span className={styles.adminAvatar} aria-hidden="true">{adminProfile.initials}</span>
+          <Link className={styles.adminProfileLink} href="/admin/perfil" aria-label={`Abrir perfil de ${profile?.nome ?? "administrador"}`}>
+            <span className={styles.adminIdentity}><strong>{profile?.nome ?? "Carregando..."}</strong><small>Administrador</small></span>
+            <span className={styles.adminAvatar} aria-hidden="true">{profile?.nome.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("pt-BR") ?? "AD"}</span>
           </Link>
           <AdminLogoutButton placement="desktop" />
         </div>
@@ -111,9 +124,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         {sections.map((section) => {
           const active = pathname === section.href;
           const content = <><AdminIcon name={section.icon} /><span>{section.label}</span>{active && <span className={styles.activeDot} aria-hidden="true" />}</>;
-          return section.href
-            ? <Link className={active ? styles.activeNav : styles.navItem} href={section.href} aria-current={active ? "page" : undefined} onClick={() => { setFeedback(""); setMobileMenuOpen(false); }} key={section.label}>{content}</Link>
-            : <button className={styles.navItem} type="button" onClick={() => { setFeedback(`A área de ${section.label.toLowerCase()} será construída nas próximas etapas.`); setMobileMenuOpen(false); }} key={section.label}>{content}</button>;
+          return <Link className={active ? styles.activeNav : styles.navItem} href={section.href} aria-current={active ? "page" : undefined} onClick={() => { setFeedback(""); setMobileMenuOpen(false); }} key={section.label}>{content}</Link>;
         })}
         <Link className={styles.mobileProfileNav} href="/admin/perfil" aria-current={pathname === "/admin/perfil" ? "page" : undefined} onClick={() => { setFeedback(""); setMobileMenuOpen(false); }}><AdminIcon name="users" /><span>Meu perfil</span>{pathname === "/admin/perfil" && <span className={styles.activeDot} aria-hidden="true" />}</Link>
       </nav>
@@ -130,9 +141,11 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 }
 
 export function AdminLogoutButton({ placement }: { placement: "desktop" | "mobile" }) {
-  const setFeedback = useContext(AdminFeedbackContext);
+  const router = useRouter();
+  const { logout } = useAuth();
   const placementClass = placement === "mobile" ? styles.logoutMobile : styles.logoutTopbar;
-  return <button className={`${styles.logoutIcon} ${placementClass}`} type="button" aria-label="Sair do painel" title="Sair do painel" onClick={() => setFeedback("Esta é uma prévia. Ainda não existe uma sessão administrativa para encerrar.")}>
+  async function signOut() { await logout(); router.push("/login"); router.refresh(); }
+  return <button className={`${styles.logoutIcon} ${placementClass}`} type="button" aria-label="Sair do painel" title="Sair do painel" onClick={() => void signOut()}>
     <AdminIcon name="logout" />
   </button>;
 }

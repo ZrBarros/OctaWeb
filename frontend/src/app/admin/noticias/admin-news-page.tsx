@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
-import { adminNews, adminNewsCategories, type AdminNewsItem, type AdminNewsCategory, type AdminNewsStatus } from "@/data/admin-news";
+import { adminNewsCategories, type AdminNewsItem, type AdminNewsCategory, type AdminNewsStatus } from "@/data/admin-news";
+import { apiCategory } from "@/lib/api-mappers";
+import { apiClient, uploadImage } from "@/lib/api";
+import type { ApiItem, ApiNews, ApiPage } from "@/lib/api-types";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
 
 type NewsDraft = Omit<AdminNewsItem, "id" | "date">;
-const emptyDraft: NewsDraft = { title: "", summary: "", body: "", category: "Comunicados", author: "", status: "Rascunho", imageAlt: "" };
+const emptyDraft: NewsDraft = { title: "", summary: "", body: "", category: "Comunicados", author: "Diretoria Octacore", status: "Publicado", imageAlt: "" };
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 const maxImageBytes = 2 * 1024 * 1024;
 
@@ -22,7 +25,7 @@ function TrashIcon() {
 }
 
 export function AdminNewsPage() {
-  const [items, setItems] = useState<AdminNewsItem[]>(adminNews);
+  const [items, setItems] = useState<AdminNewsItem[]>([]);
   const [filter, setFilter] = useState<"Todos" | AdminNewsCategory>("Todos");
   const [query, setQuery] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -34,6 +37,8 @@ export function AdminNewsPage() {
   const availableFilters = ["Todos", ...adminNewsCategories.filter((category) => items.some((item) => item.category === category))] as const;
   const filteredItems = items.filter((item) => (filter === "Todos" || item.category === filter) && `${item.title} ${item.category} ${item.author}`.toLocaleLowerCase("pt-BR").includes(query.trim().toLocaleLowerCase("pt-BR")));
   const deletingItem = items.find((item) => item.id === deletingId);
+
+  useEffect(() => { void apiClient<ApiPage<ApiNews>>("/admin/news?pageSize=100", { auth: true }).then((response) => setItems(response.data.map((item) => ({ id: item.id, title: item.titulo, summary: item.resumo ?? "", body: item.conteudo, category: ({ CAMPEONATOS: "Campeonatos", SELETIVAS: "Seletivas", JOGOS: "Jogos", RESULTADOS: "Resultados", COMUNICADOS: "Comunicados", TREINOS: "Treinos", FESTAS: "Festas", EVENTOS: "Eventos" } as Record<string, AdminNewsCategory>)[item.categoria] ?? "Comunicados", author: item.autor.nome, date: new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(item.criadoEm)), status: "Publicado", imageSrc: item.imagemCapaUrl ?? undefined, imageAlt: item.titulo })))).catch((reason) => setMessage(reason instanceof Error ? reason.message : "Não foi possível carregar as notícias.")); }, []);
 
   function closeEditor() {
     setDraft(null);
@@ -49,7 +54,7 @@ export function AdminNewsPage() {
     setMessage("");
   }
 
-  function readImage(event: React.ChangeEvent<HTMLInputElement>) {
+  async function readImage(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.currentTarget.files?.[0];
     event.currentTarget.value = "";
     if (!file) return;
@@ -62,43 +67,35 @@ export function AdminNewsPage() {
       return;
     }
     setImageError("");
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") setDraft((current) => current ? { ...current, imageSrc: reader.result as string } : null);
-      else setImageError("Não foi possível ler a imagem. Tente outra.");
-    };
-    reader.onerror = () => setImageError("Não foi possível ler a imagem. Tente outra.");
-    reader.readAsDataURL(file);
+    try { const url = await uploadImage(file); setDraft((current) => current ? { ...current, imageSrc: url } : null); }
+    catch (reason) { setImageError(reason instanceof Error ? reason.message : "Não foi possível enviar a imagem."); }
   }
 
-  function saveDraft() {
+  async function saveDraft() {
     if (!draft) return;
     const normalized: NewsDraft = { ...draft, title: draft.title.trim(), summary: draft.summary.trim(), body: draft.body.trim(), author: draft.author.trim(), imageAlt: draft.imageAlt.trim() };
     if (!normalized.title || !normalized.summary || !normalized.body || !normalized.author || (normalized.imageSrc && !normalized.imageAlt)) return;
-    if (editingId === null) {
-      const dateParts = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).formatToParts(new Date());
-      const day = dateParts.find((part) => part.type === "day")?.value ?? "";
-      const month = (dateParts.find((part) => part.type === "month")?.value ?? "").replace(".", "");
-      const year = dateParts.find((part) => part.type === "year")?.value ?? "";
-      const date = `${day} ${month.charAt(0).toLocaleUpperCase("pt-BR")}${month.slice(1)} ${year}`;
-      setItems((current) => [{ id: Date.now(), ...normalized, date }, ...current]);
-      setMessage("Notícia criada apenas nesta prévia. Ela não aparece no site público.");
-    } else {
-      setItems((current) => current.map((item) => item.id === editingId ? { ...item, ...normalized } : item));
-      setMessage("Alteração aplicada apenas nesta prévia. Ela não aparece no site público.");
-    }
+    try {
+      const response = await apiClient<ApiItem<ApiNews>>(`/admin/news${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ title: normalized.title, summary: normalized.summary, content: normalized.body, category: apiCategory(normalized.category), imageUrl: normalized.imageSrc ?? null, status: "Publicado" }) });
+      const item = response.data; const mapped: AdminNewsItem = { id: item.id, title: item.titulo, summary: item.resumo ?? "", body: item.conteudo, category: normalized.category, author: item.autor.nome, date: new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(item.criadoEm)), status: "Publicado", imageSrc: item.imagemCapaUrl ?? undefined, imageAlt: normalized.imageAlt };
+      setItems((current) => editingId === null ? [mapped, ...current] : current.map((old) => old.id === editingId ? mapped : old));
+      setMessage(editingId === null ? "Notícia publicada." : "Notícia atualizada.");
+    } catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível salvar a notícia."); return; }
     closeEditor();
     setEditingId(null);
     setFilter(normalized.category);
     setQuery("");
   }
 
-  function deleteItem() {
+  async function deleteItem() {
+    if (deletingId === null) return;
+    try { await apiClient<void>(`/admin/news/${deletingId}`, { method: "DELETE", auth: true }); }
+    catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível excluir a notícia."); return; }
     const remaining = items.filter((item) => item.id !== deletingId);
     setItems(remaining);
     if (filter !== "Todos" && !remaining.some((item) => item.category === filter)) setFilter("Todos");
     setDeletingId(null);
-    setMessage("Notícia removida apenas desta prévia.");
+    setMessage("Notícia excluída.");
   }
 
   return <>
@@ -106,7 +103,7 @@ export function AdminNewsPage() {
 
     <div className={shared.content}>
       <AdminPageHeading title="Mural de Notícias" />
-      <p className={shared.demoNotice}>Prévia demonstrativa · alterações temporárias e sem publicação</p>
+      <p className={shared.demoNotice}>Notícias publicadas no site</p>
       {message && <p className={styles.message} role="status">{message}</p>}
 
       <div className={styles.toolbar}>
@@ -151,7 +148,7 @@ export function AdminNewsPage() {
     {draft && typeof document !== "undefined" && createPortal(<div className={styles.overlay} role="presentation">
       <section className={`${styles.dialog} ${styles.editorDialog}`} role="dialog" aria-modal="true" aria-labelledby="news-dialog-title" onKeyDown={(event) => { if (event.key === "Escape") closeEditor(); }}>
         <div className={styles.dialogHeader}><h2 id="news-dialog-title">{editorStep === "preview" ? "Prévia da notícia" : editingId === null ? "Nova notícia" : "Editar notícia"}</h2><button autoFocus type="button" aria-label="Fechar" onClick={closeEditor}>×</button></div>
-        <p>Esta é uma simulação: salvar aqui não publica no site e recarregar a página restaura os exemplos.</p>
+        <p>Salvar publica a notícia no site. O schema atual não possui estado de rascunho.</p>
 
         {editorStep === "edit" ? <form onSubmit={(event) => { event.preventDefault(); setEditorStep("preview"); }} className={styles.form}>
           <label>Título<input required maxLength={160} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
@@ -159,12 +156,12 @@ export function AdminNewsPage() {
           <label>Texto da notícia<textarea required rows={8} value={draft.body} onChange={(event) => setDraft({ ...draft, body: event.target.value })} placeholder="Escreva o conteúdo completo. Separe os parágrafos com uma linha em branco." /></label>
           <div className={styles.formRow}>
             <label>Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value as AdminNewsCategory })}>{adminNewsCategories.map((category) => <option key={category}>{category}</option>)}</select></label>
-            <label>Status<select value={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.value as AdminNewsStatus })}><option>Rascunho</option><option>Publicado</option></select></label>
+            <label>Status<select value={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.value as AdminNewsStatus })}><option>Publicado</option></select></label>
           </div>
-          <label>Autor<input required value={draft.author} onChange={(event) => setDraft({ ...draft, author: event.target.value })} /></label>
+          <label>Autor<input required readOnly value={draft.author} /><small>O autor será confirmado pela conta administrativa conectada.</small></label>
           <div className={styles.imageInput}>
-            <label>Imagem de destaque (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={readImage} /></label>
-            <small>JPG, PNG ou WebP, até 2 MB. A imagem fica apenas nesta prévia.</small>
+            <label>Imagem de destaque (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /></label>
+            <small>JPG, PNG ou WebP, até 2 MB.</small>
             <button className={styles.sampleImageButton} type="button" onClick={() => { setDraft({ ...draft, imageSrc: "/images/imagem-galeria.png", imageAlt: "Registro da galeria da Octacore" }); setImageError(""); }}>Usar imagem da galeria como exemplo</button>
             {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}
             {draft.imageSrc && <div className={styles.selectedImage}>
@@ -176,22 +173,22 @@ export function AdminNewsPage() {
           <div className={styles.dialogActions}><button type="button" className={styles.cancelButton} onClick={closeEditor}>Cancelar</button><button type="submit" className={styles.saveButton}>Pré-visualizar</button></div>
         </form> : <>
           <article className={styles.articlePreview} aria-label="Prévia visual da notícia">
-            <div className={styles.previewTop}><span className={styles.previewCategory}>{draft.category}</span><span className={draft.status === "Publicado" ? styles.published : styles.draft}>{draft.status} na prévia</span></div>
+            <div className={styles.previewTop}><span className={styles.previewCategory}>{draft.category}</span><span className={styles.published}>{draft.status}</span></div>
             <h3>{draft.title.trim()}</h3>
             <div className={styles.previewMeta}>Por {draft.author.trim()} <span aria-hidden="true">•</span> {editingId === null ? "Hoje" : items.find((item) => item.id === editingId)?.date}</div>
             {draft.imageSrc ? <Image className={styles.previewImage} src={draft.imageSrc} alt={draft.imageAlt.trim()} width={960} height={540} unoptimized /> : <div className={styles.previewPlaceholder} role="img" aria-label="Imagem da notícia ainda não adicionada" />}
             <p className={styles.previewLead}>{draft.summary.trim()}</p>
             <div className={styles.previewBody}>{draft.body.trim().split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
           </article>
-          <div className={styles.dialogActions}><button type="button" className={styles.cancelButton} onClick={() => setEditorStep("edit")}>Voltar à edição</button><button type="button" className={styles.saveButton} onClick={saveDraft}>Salvar na prévia</button></div>
+          <div className={styles.dialogActions}><button type="button" className={styles.cancelButton} onClick={() => setEditorStep("edit")}>Voltar à edição</button><button type="button" className={styles.saveButton} onClick={() => void saveDraft()}>Publicar notícia</button></div>
         </>}
       </section>
     </div>, document.body)}
 
     {deletingItem && typeof document !== "undefined" && createPortal(<div className={styles.overlay} role="presentation"><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title" onKeyDown={(event) => { if (event.key === "Escape") setDeletingId(null); }}>
       <div className={styles.dialogHeader}><h2 id="delete-dialog-title">Excluir notícia?</h2><button type="button" aria-label="Fechar" onClick={() => setDeletingId(null)}>×</button></div>
-      <p>“{deletingItem.title}” será removida somente desta prévia. Recarregar a página restaura os dados de exemplo.</p>
-      <div className={styles.dialogActions}><button autoFocus type="button" className={styles.cancelButton} onClick={() => setDeletingId(null)}>Cancelar</button><button type="button" className={styles.deleteConfirm} onClick={deleteItem}>Excluir da prévia</button></div>
+      <p>“{deletingItem.title}” será removida do site e do banco.</p>
+      <div className={styles.dialogActions}><button autoFocus type="button" className={styles.cancelButton} onClick={() => setDeletingId(null)}>Cancelar</button><button type="button" className={styles.deleteConfirm} onClick={() => void deleteItem()}>Excluir notícia</button></div>
     </section></div>, document.body)}
   </>;
 }

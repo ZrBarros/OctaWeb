@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { historyMilestones } from "@/data/mural";
+import { apiServer } from "@/lib/server-api";
+import type { ApiItem, ApiMilestone } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "Nossa história | Octacore" };
 
-export default function HistoryPage() {
+export default async function HistoryPage() {
+  const historyMilestones = (await apiServer<ApiItem<ApiMilestone[]>>("/history")).data.map((item) => ({ year: String(item.ano), label: "Marco histórico", title: item.titulo, description: item.descricao ?? "" }));
   return (
     <main className={styles.main}>
       <div className={styles.container}>

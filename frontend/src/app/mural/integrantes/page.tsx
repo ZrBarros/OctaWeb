@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { InstagramIcon } from "@/components/instagram-icon";
-import { memberFilters, muralMembers } from "@/data/mural";
+import { memberFilters } from "@/data/mural";
+import type { ApiMember, ApiPage } from "@/lib/api-types";
+import { useApiData } from "@/lib/use-api";
 import { useState } from "react";
 import styles from "./page.module.css";
 
 export default function MembersPage() {
   const [filter, setFilter] = useState<(typeof memberFilters)[number]>("Todos");
+  const { data: response, loading, error } = useApiData<ApiPage<ApiMember>>("/members?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
+  const muralMembers = response.data.map((member) => ({ slug: member.slug, name: member.nome, role: member.funcao ?? "Integrante", course: member.curso ?? "Curso não informado", modality: member.modalidades[0]?.modalidade.nome ?? "Sem modalidade", groups: [...(member.diretoria ? ["Diretoria"] : []), ...member.modalidades.map((item) => item.modalidade.nome)] }));
   const visibleMembers = filter === "Todos" ? muralMembers : muralMembers.filter((member) => member.groups.includes(filter));
 
   return (
@@ -36,7 +40,7 @@ export default function MembersPage() {
           </select>
         </label>
 
-        {visibleMembers.length > 0 ? (
+        {loading ? <p className={styles.empty}>Carregando integrantes...</p> : error ? <p className={styles.empty}>{error}</p> : visibleMembers.length > 0 ? (
           <div className={styles.grid}>
             {visibleMembers.map((member) => (
               <Link className={`${styles.card} hoverCard`} key={member.slug} href={`/mural/integrantes/${member.slug}`} aria-label={`Ver perfil de ${member.name}`}>

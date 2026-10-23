@@ -2,11 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { adminActivities, adminMetrics, demoSales } from "@/data/admin";
+import { useApiData } from "@/lib/use-api";
+import type { ApiItem } from "@/lib/api-types";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "./admin-shell";
 import styles from "./admin.module.css";
 
 export function AdminDashboard() {
+  const { data: dashboard, loading, error } = useApiData<ApiItem<{ metrics: { users: number; products: number; pendingOrders: number; upcomingEvents: number; news: number }; sales: { month: string; amountCents: number }[]; activities: { description: string; person: string; time: string; category: string }[] }>>("/admin/dashboard", { data: { metrics: { users: 0, products: 0, pendingOrders: 0, upcomingEvents: 0, news: 0 }, sales: [], activities: [] } }, true);
+  const adminMetrics = [
+    { label: "Usuários cadastrados", value: String(dashboard.data.metrics.users), detail: "Contas no banco", tone: "orange", icon: "users", href: "/admin/usuarios", action: "Gerenciar usuários" },
+    { label: "Produtos cadastrados", value: String(dashboard.data.metrics.products), detail: "Produtos ativos", tone: "purple", icon: "products", href: "/admin/produtos", action: "Ver produtos" },
+    { label: "Pedidos pendentes", value: String(dashboard.data.metrics.pendingOrders), detail: "Requer atenção", tone: "orange", icon: "orders", href: "/admin/pedidos", action: "Ver pedidos" },
+    { label: "Eventos próximos", value: String(dashboard.data.metrics.upcomingEvents), detail: "Dentro dos próximos 15 dias", tone: "mint", icon: "events", href: "/admin/eventos", action: "Ver eventos" },
+    { label: "Notícias publicadas", value: String(dashboard.data.metrics.news), detail: "Registros publicados", tone: "white", icon: "news", href: "/admin/noticias", action: "Ver notícias" },
+  ] as const;
+  const demoSales = dashboard.data.sales.map((sale) => ({ month: new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(new Date(sale.month)).replace(".", ""), amount: sale.amountCents / 100 }));
+  const adminActivities = dashboard.data.activities;
   const [query, setQuery] = useState("");
   const [activityCategory, setActivityCategory] = useState("Todas");
   const [showAllActivities, setShowAllActivities] = useState(false);
@@ -19,7 +30,7 @@ export function AdminDashboard() {
   );
   const activities = showAllActivities ? filteredActivities : filteredActivities.slice(0, 3);
   const sales = demoSales.slice(-salesPeriod);
-  const maxSales = Math.max(...sales.map((sale) => sale.amount));
+  const maxSales = Math.max(1, ...sales.map((sale) => sale.amount));
   const formatSales = (amount: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(amount);
 
   return <>
@@ -27,7 +38,7 @@ export function AdminDashboard() {
 
     <div className={styles.content}>
       <AdminPageHeading title="Visão Geral do Reino" />
-      <p className={styles.demoNotice}>Prévia demonstrativa · acesso livre e dados fictícios</p>
+      <p className={styles.demoNotice}>{loading ? "Carregando indicadores..." : error || "Indicadores calculados a partir do banco"}</p>
 
       <section className={styles.metricGrid} aria-label="Indicadores de exemplo">
         {adminMetrics.map((metric) => <Link className={styles.metricCard} href={metric.href} aria-label={`${metric.label}: ${metric.value}. ${metric.action}.`} key={metric.label}>
@@ -43,14 +54,14 @@ export function AdminDashboard() {
           <div className={styles.panelHeader}><h2 id="sales-title">Desempenho de Vendas (Octa Store)</h2>
             <label className={styles.chartPeriod}><span className={styles.srOnly}>Período do gráfico</span><select value={salesPeriod} onChange={(event) => { setSalesPeriod(Number(event.target.value) as 6 | 12); setSelectedSale(null); }}><option value={6}>6 meses</option><option value={12}>12 meses</option></select></label>
           </div>
-          <div className={`${styles.chart} ${salesPeriod === 12 ? styles.chartTwelve : ""}`} aria-label={`Vendas demonstrativas nos últimos ${salesPeriod} meses`}>
-            {sales.map((sale) => <button className={`${styles.barGroup} ${selectedSale?.month === sale.month ? styles.selectedBar : ""}`} type="button" aria-label={`${sale.month}: ${formatSales(sale.amount)} em vendas de demonstração`} aria-pressed={selectedSale?.month === sale.month} onClick={() => setSelectedSale((current) => current?.month === sale.month ? null : sale)} key={sale.month}>
+          <div className={`${styles.chart} ${salesPeriod === 12 ? styles.chartTwelve : ""}`} aria-label={`Pedidos nos últimos ${salesPeriod} meses`}>
+            {sales.map((sale) => <button className={`${styles.barGroup} ${selectedSale?.month === sale.month ? styles.selectedBar : ""}`} type="button" aria-label={`${sale.month}: ${formatSales(sale.amount)} em pedidos`} aria-pressed={selectedSale?.month === sale.month} onClick={() => setSelectedSale((current) => current?.month === sale.month ? null : sale)} key={sale.month}>
               <span className={styles.barValue}>{formatSales(sale.amount)}</span>
               <span className={styles.bar} style={{ height: `${Math.max(8, Math.round(sale.amount / maxSales * 100))}%` }} />
               <span className={styles.barMonth}>{sale.month}</span>
             </button>)}
           </div>
-          <p className={styles.chartSelection} aria-live="polite">{selectedSale ? <><strong>{selectedSale.month}</strong> · {formatSales(selectedSale.amount)} em vendas demonstrativas</> : "Selecione uma barra para ver o valor do mês."}</p>
+          <p className={styles.chartSelection} aria-live="polite">{selectedSale ? <><strong>{selectedSale.month}</strong> · {formatSales(selectedSale.amount)} em pedidos</> : "Selecione uma barra para ver o valor do mês."}</p>
         </section>
 
         <section className={styles.panel} aria-labelledby="activity-title">

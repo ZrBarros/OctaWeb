@@ -1,15 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getUpcomingAgendaEvents } from "@/data/events";
-import { formatPrice, products } from "@/data/products";
+import { formatPrice } from "@/data/products";
+import { mapEvent, mapProduct } from "@/lib/api-mappers";
+import { apiServer } from "@/lib/server-api";
+import type { ApiEvent, ApiPage, ApiProduct } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
 const sports = ["Futsal", "Basquete", "Vôlei", "Handebol", "E-sports"];
 
-export default function Home() {
-  const upcomingEvents = getUpcomingAgendaEvents();
+export default async function Home() {
+  const [eventResponse, productResponse] = await Promise.all([apiServer<ApiPage<ApiEvent>>("/events?pageSize=10&sort=asc&from=" + encodeURIComponent(new Date().toISOString())), apiServer<ApiPage<ApiProduct>>("/products?pageSize=4")]);
+  const upcomingEvents = eventResponse.data.map(mapEvent);
+  const products = productResponse.data.map(mapProduct);
 
   return (
     <main className={styles.main}>

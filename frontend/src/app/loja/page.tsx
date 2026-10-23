@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { products } from "@/data/products";
+import { mapProduct } from "@/lib/api-mappers";
+import type { ApiPage, ApiProduct } from "@/lib/api-types";
+import { useApiData } from "@/lib/use-api";
 import { useCart } from "@/lib/cart";
 import { ProductCard } from "./product-card";
 import styles from "./page.module.css";
@@ -13,6 +15,8 @@ export default function StorePage() {
   const [category, setCategory] = useState("Todos");
   const [search, setSearch] = useState("");
   const cart = useCart();
+  const { data: response, loading, error } = useApiData<ApiPage<ApiProduct>>("/products?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
+  const products = response.data.map(mapProduct);
   const cartCount = cart?.reduce((total, item) => total + item.quantity, 0) ?? 0;
   const visibleProducts = products.filter((product) =>
     (category === "Todos" || product.category === category) &&
@@ -56,7 +60,7 @@ export default function StorePage() {
           </Link>
         </div>
 
-        {visibleProducts.length > 0 ? (
+        {loading ? <p className={styles.empty}>Carregando produtos...</p> : error ? <p className={styles.empty}>{error}</p> : visibleProducts.length > 0 ? (
           <div className={styles.grid}>
             {visibleProducts.map((product) => <ProductCard product={product} key={product.slug} />)}
           </div>

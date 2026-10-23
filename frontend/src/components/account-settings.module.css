@@ -1,0 +1,20 @@
+.overlay { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; padding: 18px; background: #09000be8; }
+.dialog { width: min(100%, 520px); max-height: calc(100vh - 36px); overflow-y: auto; padding: 26px; border: 1px solid #853791; border-radius: 11px; background: #1c1c1c; box-shadow: 0 20px 75px #000a; }
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.header p { margin: 0 0 4px; color: var(--orange); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.header h2 { margin: 0; color: white; font-size: 23px; font-weight: 900; text-transform: uppercase; }
+.header > button { border: 0; background: transparent; color: #d9cadc; cursor: pointer; font: inherit; font-size: 28px; line-height: 1; }
+.form { display: grid; gap: 15px; margin-top: 24px; }
+.form label { display: grid; gap: 7px; color: #f1eaf2; font-size: 12px; font-weight: 800; }
+.form input { width: 100%; min-height: 43px; padding: 10px 12px; border: 1px solid #5a3b62; border-radius: 5px; outline: 0; background: #100719; color: white; font: inherit; font-size: 13px; }
+.form input:focus { border-color: var(--orange); box-shadow: 0 0 0 2px #ff7f3f2e; }
+.form input[readonly] { color: #aaa0ae; cursor: not-allowed; }
+.help { margin: -4px 0 0; color: #b2a5b7; font-size: 11px; line-height: 1.5; }
+.feedback { margin: 0; padding: 11px 12px; border: 1px solid #8d4565; border-radius: 5px; background: #351624; color: #ffbdc9; font-size: 12px; line-height: 1.45; }
+.actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 5px; }
+.actions button { min-height: 40px; padding: 0 16px; border-radius: 5px; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
+.actions button:first-child { border: 1px solid #756579; background: transparent; color: white; }
+.actions button:last-child { border: 0; background: #a200ae; color: white; }
+.actions button:last-child:hover { background: #c20dcc; }
+.actions button:disabled { cursor: wait; opacity: .65; }
+@media (max-width: 560px) { .dialog { padding: 20px; } .actions { align-items: stretch; flex-direction: column-reverse; } .actions button { width: 100%; } }

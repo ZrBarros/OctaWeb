@@ -1,8 +1,8 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 22/10/2026
+**Última atualização:** 23/10/2026
 
-**Estado:** MVP em desenvolvimento; interfaces do front end em construção
+**Estado:** MVP full stack integrado; backend e banco prontos para execução, com limitações de schema documentadas
 
 **Referência visual:** protótipo [Projeto P3 — Octacore no Figma](https://www.figma.com/design/BcgJnC6UWsDG5W5B5mO7V6/Projeto-P3---Octacore?node-id=0-1)
 
@@ -10,57 +10,70 @@ Este é o registro contínuo do site da Associação Atlética Acadêmica de Com
 
 ## 1. Objetivo e limites do MVP
 
-O site reúne informações da atlética, notícias, modalidades, agenda, mural e produtos. A primeira etapa prioriza as telas e a navegação. Depois, o front end será conectado a uma API para autenticação, administração de conteúdo e pedidos.
+O site reúne informações da atlética, notícias, modalidades, agenda, mural e produtos. O frontend está conectado a uma API REST que aplica autenticação, autorização, regras de estoque, pedidos e administração de conteúdo sobre o PostgreSQL existente.
 
 - **Front end escolhido:** Next.js, React e TypeScript.
-- **Backend planejado:** NestJS. Ainda não existe nesta pasta de trabalho.
-- **Nesta etapa:** dados de exemplo no código, imagens disponíveis e espaços reservados para as fotos que serão adicionadas depois.
-- **Fora do funcionamento atual:** login real, banco de dados, publicação de conteúdo por administradores, registro de pedidos e pagamento.
+- **Backend implementado:** Node.js, TypeScript, Fastify e Prisma, em `backend/`.
+- **Banco:** PostgreSQL, com as 14 tabelas oficiais do schema `octacore`; o backend apenas mapeia o schema e não o altera.
+- **Integração real:** autenticação, conteúdo público, administração, uploads, estoque e pedidos.
+- **Ainda demonstrativo:** pagamento, presença/favorito em eventos, ranking, estatística individual e atividades administrativas, pois o schema não possui entidades correspondentes.
 
 Os documentos de planejamento originais estão em `assets/`. Esta página registra o estado **implementado**; ideias desses documentos só passam para “pronto” depois de aparecerem no código e serem verificadas.
 
 ## 1.1 Perfis de acesso planejados
 
-O MVP prevê três tipos de acesso. Esta divisão descreve o comportamento esperado depois da integração; **ainda não está implementada como controle de permissões**.
+O MVP possui três tipos de acesso. A API aplica autenticação e autorização nas operações protegidas, e a interface reflete a sessão ativa.
 
 | Perfil | Acesso previsto | Estado atual |
 | --- | --- | --- |
-| Visitante | Navegar pelas páginas públicas, consultar notícias, modalidades, agenda, mural e loja; montar carrinho no navegador. | A navegação pública existe. O carrinho é local e não exige conta. |
-| Usuário autenticado | Tudo do visitante, mais uma conta própria, acompanhamento de pedidos e inscrições/favoritos de eventos associados ao usuário. | Login/cadastro não criam sessão. `/minha-conta` e `/meus-pedidos` mostram exemplos; inscrição e favorito de evento não persistem. |
-| Administrador | Tudo do usuário autenticado, mais acesso autorizado ao painel e gestão de conteúdo, integrantes, resultados e pedidos. | `/admin` está acessível sem autenticação; alterações são simulações locais. |
+| Visitante | Navegar pelas páginas públicas, consultar notícias, modalidades, agenda, mural e loja; montar carrinho no navegador. | Conteúdo vem da API; o carrinho permanece local e não exige conta. |
+| Usuário autenticado | Tudo do visitante, mais conta própria e acompanhamento de pedidos. | Cadastro, login, refresh, logout, perfil e pedidos reais estão integrados; presença e favorito não persistem. |
+| Administrador | Tudo do usuário autenticado, mais acesso autorizado ao painel e gestão de conteúdo, integrantes, resultados e pedidos. | API e interface exigem conta `ADMIN`; CRUD e alterações persistem no PostgreSQL. |
 
-A separação real deverá ser verificada no backend NestJS para cada rota e operação. A interface pode esconder ações conforme o perfil, mas isso não substitui a autorização no servidor.
+A separação é validada pela API em cada rota protegida. A interface também redireciona usuários sem acesso, mas a autorização do servidor é a barreira efetiva.
+
+## 1.2 Arquitetura integrada
+
+- O frontend usa `API_URL` em Server Components e `NEXT_PUBLIC_API_URL` nas telas interativas.
+- A API usa camadas de rotas/controladores, serviços e repositórios, validação Zod, Prisma, erros padronizados, logs com redação de segredos, CORS, Helmet e rate limiting.
+- O access token fica em memória no navegador; o refresh token usa cookie `httpOnly` e é renovado automaticamente. Sem tabela de tokens, logout remove o cookie do cliente, mas não mantém lista de revogação no servidor.
+- O checkout exige usuário autenticado. A criação do pedido usa transação serializável, valida estoque, desconta quantidades e congela o preço nos itens; o trigger do banco recalcula o total.
+- Uploads administrativos aceitam JPG, PNG ou WebP de até 2 MB, conferem assinatura binária e são servidos apenas por nome UUID validado.
+- `docker-compose.yml` inicia frontend, API e PostgreSQL; o OpenAPI fica em `/docs/openapi.json` e o health check em `/health`.
 
 ## 2. Estado das telas
 
 | Rota | O que existe hoje | Estado |
 | --- | --- | --- |
-| `/` | Página inicial com apresentação, mascote laranja isolado e animado discretamente no fundo do hero, destaques, loja e até três compromissos futuros com links para detalhes e acesso à agenda completa. | Interface pronta; arte gerada com referência na logo e aprovada pelo usuário; animação local no navegador, lista filtrada por data e conteúdo local |
+| `/` | Página inicial com apresentação, mascote, destaques, produtos e até três compromissos futuros. | **Integração real:** produtos e agenda vêm da API; destaques esportivos permanecem editoriais na tela |
 | Todas as rotas do App Router | O conteúdo da rota entra com fade em 180 ms; cabeçalho/estrutura compartilhada permanecem estáveis. | Animação de interface local; sem dependência de backend |
 | `/motion-octaweb.html` | Peça animada de apresentação do OctaWeb, com identidade visual da Octacore, apresentação da plataforma e seus principais espaços. | Apresentação em HTML/CSS; animação local no navegador, sem exportação de vídeo |
-| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. | Interface pronta; notícias locais |
-| `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades. Futsal e basquete têm dados de detalhes próprios. | Interface pronta; conteúdo local |
+| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. | **Integração real:** notícias publicadas no PostgreSQL |
+| `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades, horários, responsáveis, elenco, resultados e próximos eventos disponíveis. | **Integração real:** dados relacionais da API |
 | `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
 | `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. | **Prévia visual:** números de exemplo, sem cálculo automático |
-| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e links para páginas de detalhe; filtro compacto em celular. | Interface pronta; eventos locais |
-| `/agenda/[slug]` | Detalhe demonstrativo do treino de Vôlei, da reunião do Intereng e do jogo Octa x Protendidos. | **Simulação no navegador:** presença e favorito não são persistidos; imagens e confirmações dos próximos eventos pendentes |
-| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto em celular na lista de integrantes. Os cartões de integrantes abrem seus perfis. | Interface pronta; parte das imagens é placeholder |
-| `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidade, acessado pelo cartão no mural. | **Prévia visual:** conteúdo local de exemplo; foto pendente |
-| `/loja` | Catálogo com busca e filtro; uma faixa fixa durante a rolagem reúne categorias, busca e carrinho com contador nessa ordem. Cada card tem acesso ao detalhe, tamanho para camisas, quantidade e adição com confirmação. No celular, a faixa usa duas linhas e os cards ficam em uma coluna. | Interface e carrinho locais; sem consulta de estoque |
-| `/loja/[slug]` | Detalhe de produto com tamanho e quantidade, confirmação da adição sem sair da página e acesso ao carrinho; camisa, caneca e tirante exibem suas imagens próprias. | Interação local funcionando |
-| `/carrinho` | Alteração de quantidade, remoção de itens e cálculo do total. | Funciona no navegador; sem servidor |
-| `/checkout` | Formulário, validação básica e confirmação visual. | **Simulação:** não cria pedido, envia dados ou cobra |
-| `/login` e `/cadastro` | Formulários visuais, validação de campos, alternância entre as telas e aviso ao enviar. | **Simulação:** não autentica nem cria conta |
-| `/minha-conta` | Painel com perfil de exemplo e ações de conta. | **Demonstração:** sem usuário autenticado |
-| `/meus-pedidos` | Pedido de exemplo, etapas de entrega e área de histórico vazia. | **Demonstração:** sem pedido registrado |
-| `/admin` | Indicadores clicáveis para abrir áreas administrativas; gráfico demonstrativo com seleção entre 6 e 12 meses e detalhe por barra; atividades filtráveis por área, busca e expansão da lista. | **Simulação no navegador:** indicadores, vendas e atividades são fictícios e não há autenticação |
-| `/admin/perfil` | Perfil demonstrativo de Zeca Rocha, com cargo, nível de acesso e atalhos para as áreas do painel; acessível pelo nome/avatar no cabeçalho e pelo menu mobile. | **Prévia visual:** não há conta conectada; edição de perfil e senha dependem da autenticação |
-| `/admin/noticias` | Mural administrativo com filtros, busca e tabela no desktop; no celular, filtro compacto e notícias em cartões. O editor e a prévia cabem na altura visível e rolam por dentro em desktop, iPad e celular; ações continuam dentro do modal. | **Simulação no navegador:** não publica nem altera as notícias públicas |
-| `/admin/produtos` | Tabela no desktop e cartões no celular, com busca, ajuste de estoque, cadastro, edição e exclusão; as ações ficam visíveis no cartão mobile. | **Simulação no navegador:** não altera os produtos nem o estoque da loja pública |
-| `/admin/eventos` | Cronograma com lista em cartões, calendário mensal, busca e formulário para criar/editar; exclusão com confirmação. | **Simulação no navegador:** não altera a agenda pública |
-| `/admin/integrantes` | Cartões de integrantes, busca por nome, cadastro, edição, remoção e foto opcional. | **Simulação no navegador:** não altera o mural público |
-| `/admin/resultados` | Tabela de partidas, busca, filtros de vitórias e derrotas, cadastro, edição e remoção; no celular, filtro compacto; status calculado pelo placar. | **Simulação no navegador:** não altera os resultados públicos |
-| `/admin/pedidos` | Tabela no desktop e cartões no celular, com busca, filtros compactos no celular e edição de status em painel individual com os itens do pedido. | **Simulação no navegador:** não registra compras nem avisa clientes |
+| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e links para páginas de detalhe; filtro compacto em celular. | **Integração real:** eventos da API |
+| `/agenda/[slug]` | Detalhe do evento persistido, com imagem, modalidade, data, local e descrição. | **Integração parcial:** conteúdo real; presença e favorito continuam simulações no navegador porque não há tabelas correspondentes |
+| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. | **Integração real:** história, integrantes e conquistas vêm da API; parte das imagens é placeholder |
+| `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidades. | **Integração real:** dados do PostgreSQL; foto pode estar pendente |
+| `/loja` | Catálogo com busca, filtro, variações disponíveis, estoque e carrinho. | **Integração real:** catálogo/estoque da API; seleção do carrinho no navegador |
+| `/loja/[slug]` | Detalhe de produto com variação, quantidade e estoque disponível. | **Integração real:** produto da API |
+| `/carrinho` | Alteração de quantidade, remoção e cálculo com preços atuais. | **Integração parcial:** seleção local, catálogo/preços reais |
+| `/checkout` | Dados de retirada e criação de pedido autenticado. | **Integração real:** pedido transacional e estoque; sem cobrança/pagamento |
+| `/login`, `/cadastro` e `/redefinir-senha` | Cadastro, login, recuperação e redefinição. | **Integração real:** bcrypt, JWT e cookie `httpOnly` |
+| `/minha-conta` | Painel do usuário conectado, edição de nome/curso, troca de senha e logout. | **Integração real:** sessão compartilhada, perfil e credenciais da API |
+| `/meus-pedidos` | Pedidos ativos, progresso e histórico. | **Integração real:** pedidos do usuário autenticado |
+| `/admin` | Indicadores e vendas derivados do banco; atividades recentes ficam vazias por falta de tabela de auditoria. | **Integração real:** rota protegida por ADMIN |
+| `/admin/perfil` | Perfil da conta administrativa, edição de dados, troca de senha e atalhos. | **Integração real:** usa a mesma sessão e operações da conta |
+| `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
+| `/admin/produtos` | Busca, estoque, cadastro, edição, desativação e upload. | **Integração real:** altera loja e estoque |
+| `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload. | **Integração real:** altera agenda pública |
+| `/admin/modalidades` | Cadastro, edição, exclusão, imagem, responsável, local e horários de treino. | **Integração real:** altera páginas de modalidades e seus vínculos |
+| `/admin/integrantes` | Busca, cadastro, edição, remoção e foto. | **Integração real:** altera mural público |
+| `/admin/mural` | Gestão de conquistas e marcos históricos. | **Integração real:** altera as duas páginas públicas do mural |
+| `/admin/resultados` | Busca, filtros, cadastro, edição e remoção. | **Integração real:** persiste resultados |
+| `/admin/pedidos` | Busca, filtros, itens e transições válidas de status. | **Integração real:** gerencia pedidos; notificações ao cliente não existem |
+| `/admin/usuarios` | Busca, filtro, edição de dados/perfil e exclusão controlada. | **Integração real:** gerencia contas; impede autoexclusão e autorrebaixamento administrativo |
 
 “Interface pronta” indica que a página foi construída no front end, não que seu conteúdo esteja aprovado para publicação ou conectado à API.
 
@@ -91,23 +104,22 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/app/globals.css` | Cores, tokens de movimento, transições para controles, entrada de diálogos e estilos globais. |
 | `frontend/src/app/template.tsx` e `template.module.css` | Entrada animada curta do conteúdo de cada rota; respeita movimento reduzido definido globalmente. |
 | `frontend/src/components/` | Componentes reutilizados, como cabeçalho, rodapé e cards. |
-| `frontend/src/data/` | Conteúdo local de notícias, eventos, modalidades, mural e produtos. |
-| `frontend/src/lib/cart.ts` | Regras do carrinho e armazenamento no navegador. |
+| `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. |
+| `frontend/src/data/` | Tipos, rótulos e dados que continuam demonstrativos; não é mais a fonte dos módulos integrados. |
+| `frontend/src/lib/cart.ts` | Seleção do carrinho no navegador; a API revalida produto, variação, preço e estoque no checkout. |
+| `backend/src/modules/` | Rotas/controladores, serviços, repositórios e validações de autenticação, conteúdo, loja e administração. |
+| `backend/prisma/schema.prisma` | Mapeamento ORM fiel às 14 tabelas; não cria migrações. |
+| `backend/tests/` | Testes de validação, tokens e endpoints de autenticação. |
+| `docker-compose.yml` | Frontend, API e PostgreSQL com health checks. |
 | `frontend/src/components/auth-form.tsx` | Formulário compartilhado pelas telas de login e cadastro. |
-| `frontend/src/data/account.ts` | Perfil e pedido fictícios usados nas prévias de conta. |
+| `frontend/src/data/account.ts` | Legado visual; conta e pedidos integrados não usam mais estes valores. |
 | `frontend/src/data/athletes.ts` | Perfil esportivo demonstrativo e resultados recentes do atleta no Figma. |
 | `frontend/src/data/ranking.ts` | Indicadores, classificação e aproveitamento demonstrativos do quadro de ranking. |
-| `frontend/src/data/event-details.ts` | Descrição, imagem e nomes demonstrativos do detalhe de evento. |
+| `frontend/src/data/event-details.ts` | Tipo visual do detalhe; presença/confirmados continuam sem persistência. |
 | `frontend/src/components/site-chrome.tsx` | Exibe cabeçalho e rodapé públicos nas rotas do site; omite ambos na área `/admin`, que usa estrutura própria. |
-| `frontend/src/data/admin.ts` | Indicadores, vendas e atividades fictícios do dashboard administrativo. |
+| `frontend/src/data/admin.ts` | Referência visual legada; dashboard integrado usa métricas da API. |
 | `frontend/src/app/admin/layout.tsx` e `admin-shell.tsx` | Estrutura e barra superior compartilhadas entre as telas administrativas; em celular a busca contextual fica abaixo do título. |
-| `frontend/src/data/admin-news.ts` | Notícias fictícias usadas apenas na prévia do mural administrativo. |
-| `frontend/src/data/admin-products.ts` | Produtos e estoques fictícios usados apenas na prévia administrativa. |
-| `frontend/src/data/admin-events.ts` | Eventos fictícios usados apenas na prévia administrativa. |
-| `frontend/src/data/admin-members.ts` | Integrantes de exemplo do quadro administrativo do Figma. |
-| `frontend/src/data/admin-results.ts` | Partidas de exemplo do quadro administrativo do Figma. |
-| `frontend/src/data/admin-orders.ts` | Pedidos de exemplo do quadro administrativo do Figma. |
-| `frontend/src/data/admin-profile.ts` | Identidade demonstrativa exibida no cabeçalho e no perfil administrativo. |
+| `frontend/src/data/admin-*.ts` | Tipos/rótulos e referências visuais legadas; as telas administrativas carregam a API. |
 | `frontend/public/images/` | Imagens servidas pelo site; originais e referências ficam em `assets/`. |
 | `frontend/README.md` | Guia rápido de execução e mapa resumido do front end. |
 
@@ -115,15 +127,15 @@ As páginas usam CSS Modules (`*.module.css`) para estilos próprios. A identida
 
 ## 5. Onde alterar o conteúdo
 
+Notícias, produtos, estoque, modalidades, horários, agenda, integrantes, resultados, conquistas, história, usuários e pedidos devem ser alterados pela API/painel ou diretamente no PostgreSQL em operações controladas. Os arrays antigos em `frontend/src/data` não alimentam mais essas telas integradas.
+
 | Conteúdo | Arquivo |
 | --- | --- |
-| Produtos, preços, categorias, tamanhos e imagem | `frontend/src/data/products.ts` |
-| Notícias e categorias | `frontend/src/data/news.ts` |
-| Modalidades, detalhes de futsal e basquete | `frontend/src/data/modalities.ts` |
-| Agenda | `frontend/src/data/events.ts` |
-| Detalhe do treino de Vôlei | `frontend/src/data/event-details.ts` |
-| História, integrantes e conquistas | `frontend/src/data/mural.ts` |
-| Perfil e pedido exibidos nas prévias | `frontend/src/data/account.ts` |
+| Conteúdo, catálogo, esporte e pedidos integrados | Painel `/admin`, API `/api/v1` e PostgreSQL |
+| Contratos e regras do banco | `database/01_schema.sql` e `backend/prisma/schema.prisma` |
+| Configuração de API no frontend | `frontend/.env.local` |
+| Configuração da API | `backend/.env` |
+| Detalhe visual de presença em evento | `frontend/src/data/event-details.ts` (somente tipos/limitação visual) |
 | Perfil e estatísticas do atleta | `frontend/src/data/athletes.ts` |
 | Ranking e estatísticas esportivas gerais | `frontend/src/data/ranking.ts` |
 | Indicadores, gráfico e atividades do painel | `frontend/src/data/admin.ts` |
@@ -135,39 +147,43 @@ As páginas usam CSS Modules (`*.module.css`) para estilos próprios. A identida
 | Linhas iniciais dos pedidos administrativos | `frontend/src/data/admin-orders.ts` |
 | Textos e destaques específicos da Home | `frontend/src/app/page.tsx` |
 
-Exemplo: para atualizar o técnico do basquete, procure `basqueteDetails` em `frontend/src/data/modalities.ts`. Para cadastrar um produto no protótipo, acrescente um objeto ao array `products` com um `slug` único. O preço é guardado em **centavos**: `5990` aparece como `R$ 59,90`. A função `formatPrice` formata esse valor para exibição.
+Preços são enviados pela interface em centavos e persistidos pelo PostgreSQL como `NUMERIC(10,2)`. A API nunca confia no preço enviado pelo carrinho: consulta o produto no banco e grava `preco_unitario` no momento da compra.
 
 ## 6. Fluxo atual da loja
 
-1. A lista em `/loja` lê `products.ts`; cada card oferece compra rápida e link explícito para `/loja/<slug>`. Camisas exigem tamanho; o controle permite escolher de 1 a 99 unidades. No celular, os cards ficam em uma coluna para preservar os controles.
-2. O detalhe lê o produto pelo `slug` e também permite escolher tamanho e quantidade.
+1. A lista em `/loja` consulta produtos ativos e variações da API; cada card oferece compra rápida e link explícito para `/loja/<slug>`.
+2. O detalhe consulta o produto pelo `slug` e limita a quantidade ao estoque disponível.
 3. Ao adicionar, `cart.ts` grava identificador, tamanho e quantidade em `localStorage`, na chave `octacore-cart`. A pessoa permanece na loja ou no detalhe e vê uma confirmação por 3,5 segundos; o acesso ao carrinho exibe a contagem de itens. A quantidade por produto e tamanho é limitada a 99.
-4. `/carrinho` lê esses itens, consulta os preços atuais de `products.ts` e calcula o total.
-5. `/checkout` solicita nome, telefone e retirada, mas a confirmação existe apenas na tela enquanto a página estiver aberta. O formulário não envia esses dados e não cria pedido.
+4. `/carrinho` lê esses itens, consulta os preços atuais da API e calcula o total.
+5. `/checkout` exige sessão, revalida variações e envia nome, telefone, retirada e observações. A API cria pedido e itens em transação, congela preços e desconta estoque.
 
-O carrinho persiste no mesmo navegador; ele não acompanha o usuário em outros dispositivos. Se o armazenamento do navegador estiver bloqueado, há uma cópia temporária apenas na aba atual. Estoque, frete, desconto e pagamento ainda não estão implementados. A tela de pedidos exibe somente um exemplo fixo; ela não lê o carrinho nem o checkout.
+O carrinho persiste no mesmo navegador; ele não acompanha o usuário em outros dispositivos. Se o armazenamento estiver bloqueado, há uma cópia temporária apenas na aba. Estoque e pedidos estão integrados; frete, desconto e pagamento não existem no schema atual.
 
 ### Acesso e cadastro
 
-O botão de conta do cabeçalho abre `/login`. As telas `/login` e `/cadastro` reutilizam `auth-form.tsx` e fazem apenas validações no navegador, incluindo a conferência das duas senhas no cadastro. O login oferece um link para cadastro, e o cadastro tem um botão para voltar ao login. Ao enviar, aparece um aviso de indisponibilidade. Nenhum dado é enviado, salvo ou usado para criar uma sessão. A autenticação real dependerá do backend NestJS.
+O cabeçalho consulta um estado compartilhado de autenticação: visitantes abrem `/login`, usuários conectados veem o primeiro nome e abrem `/minha-conta`, e administradores abrem `/admin`. Login e cadastro validam localmente e enviam dados à API; após autenticação, usuários vão para `/minha-conta` e administradores para `/admin`. O access token fica em memória e é reemitido pelo refresh cookie após recarregar ou reabrir o site. “Esqueci minha senha” solicita e-mail por SMTP quando configurado e `/redefinir-senha` aplica o token recebido.
 
-Após a tentativa de login, aparece um link para explorar a prévia de `/minha-conta`. O painel mostra um perfil fictício e quatro ações. “Visualizar Pedidos Ativos” abre `/meus-pedidos`; “Histórico de Compras” abre a seção de histórico dessa página, que está vazia. “Editar Perfil”, “Alterar Senha” e “Sair da Conta” apresentam avisos explicando que essas ações dependem da futura autenticação. O pedido #1032 e seus valores foram copiados como exemplo visual do Figma, em `account.ts`; não representam uma compra realizada nem usam os preços atuais da loja.
+`/minha-conta` exibe o usuário autenticado, atualiza nome e curso, troca a senha e encerra a sessão. A troca de senha invalida o refresh cookie e exige novo login. `/meus-pedidos` separa pedidos ativos e históricos vindos da API.
 
 ### Painel administrativo
 
-`/admin` reproduz o dashboard do Figma com barra lateral, indicadores, gráfico de vendas e atividades recentes. Todos os números, nomes e registros vêm de `data/admin.ts` e são fictícios. A busca filtra apenas a lista local de atividades. A barra lateral é compartilhada pelo Dashboard, `/admin/noticias`, `/admin/produtos`, `/admin/eventos`, `/admin/integrantes`, `/admin/resultados` e `/admin/pedidos`; essas rotas navegam entre si. “Sair do Painel” exibe um aviso, sem encerrar uma sessão. “Voltar ao Site” retorna à página pública. As rotas são acessíveis por URL sem autenticação; **não devem exibir dados privados nem oferecer operações reais antes de existir proteção no backend**.
+`/admin` usa sessão real e redireciona quem não possui `ADMIN`. Indicadores, vendas, conteúdo, estoque, eventos, integrantes, resultados e pedidos vêm da API. O logout remove o refresh cookie e limpa o access token. Atividades recentes permanecem vazias, pois o banco não possui auditoria.
 
-`/admin/noticias` segue o quadro `octacore-admin-noticias` do Figma. A busca atua sobre título, categoria e autor. Os filtros mostram somente categorias com linhas na tabela, inclusive categorias criadas temporariamente, e combinam com a busca; há contagem de resultados e ação para limpar os filtros. “Nova Notícia”, editar e excluir alteram uma cópia em memória apenas enquanto essa página está aberta; recarregar restaura os exemplos. O editor inclui título, resumo, texto, categoria, autor, status e imagem opcional com descrição. É preciso visualizar a prévia antes de salvar na tabela. Imagens JPG, PNG ou WebP de até 2 MB podem ser selecionadas localmente; há também um botão para usar a imagem da galeria como exemplo. O arquivo selecionado não é enviado a um servidor. Essas ações não afetam `data/news.ts`, o site público ou qualquer servidor. A publicação real precisará da API NestJS e de autorização administrativa.
+`/admin/noticias` publica, edita e exclui notícias reais. Imagens passam pelo upload validado; o autor é a conta administrativa autenticada. O formulário oferece apenas “Publicado”, porque `noticia` não possui coluna de rascunho.
 
-`/admin/produtos` segue o quadro `octacore-admin-produtos` do Figma: cinco produtos de exemplo, miniaturas (ícone provisório quando não há foto), busca por nome ou categoria, preço e controles de estoque. O formulário permite nome, categoria, preço, estoque e imagem opcional JPG, PNG ou WebP de até 2 MB. Cadastro, edição, exclusão e estoque alteram apenas a cópia em memória; recarregar restaura os exemplos. Os dados do painel ficam em `data/admin-products.ts` e **não alimentam** `data/products.ts`, a Home, a loja, o carrinho ou qualquer servidor. A gestão real exigirá autenticação, autorização e API NestJS.
+`/admin/produtos` consulta produtos/variações reais. Cadastro, edição, desativação, preço, estoque e upload persistem e alimentam Home, Loja e checkout. A interface resume o estoque das variações; ao editar, preserva as variações existentes.
 
-`/admin/eventos` segue o quadro `octacore-admin-eventos` do Figma: quatro eventos de exemplo em cartões, busca por título/categoria/local/descrição, alternância para calendário mensal, navegação entre meses, criação, edição e exclusão. O formulário aceita título, categoria, data e hora, local, descrição e imagem opcional JPG, PNG ou WebP de até 2 MB. As quatro fotos mostradas no Figma ainda não estão em `assets/`; os cartões exibem áreas provisórias e podem receber imagens pelo formulário. As mudanças ficam apenas em memória e são descartadas ao recarregar. `data/admin-events.ts` é independente de `data/events.ts`; o painel **não publica** na agenda, Home ou backend.
+`/admin/eventos` consulta e altera a mesma tabela usada por Agenda e Home. Lista, calendário, busca, CRUD, upload e vínculo opcional com modalidade persistem na API.
 
-`/admin/integrantes` segue o quadro `octacore-admin-integrantes` do Figma: seis cartões de exemplo, busca por nome, criação, edição e confirmação de remoção. O formulário aceita nome, função/modalidade, curso, usuário do Instagram e foto opcional JPG, PNG ou WebP de até 2 MB. As fotos presentes no Figma não estão em `assets/`; até serem fornecidas, os cartões mostram iniciais em círculos. Os nomes e funções do quadro administrativo diferem dos exemplos em `data/mural.ts`, por isso ficam em `data/admin-members.ts`. As alterações são apenas em memória; recarregar restaura os exemplos e **não modifica** o mural público nem envia dados ao backend.
+`/admin/modalidades` gerencia modalidades, imagens, responsáveis, locais e múltiplos horários de treino. `/admin/mural` gerencia conquistas e marcos históricos. As alterações alimentam imediatamente as respectivas páginas públicas.
 
-`/admin/resultados` segue o quadro `octacore-admin-resultados` do Figma: cinco partidas de exemplo, busca por modalidade, adversário ou campeonato, filtros “Só Vitórias” e “Só Derrotas”, cadastro, edição e exclusão com confirmação. O filtro de derrotas foi acrescentado após o protótipo. O formulário recebe modalidade, adversário, placares, campeonato e data. Vitória, empate ou derrota são calculados pelos placares, sem campo de status independente. As alterações ficam em memória e são descartadas ao recarregar; `data/admin-results.ts` é independente dos dados esportivos exibidos no site público. A tabela pode rolar horizontalmente em telas estreitas.
+`/admin/integrantes` consulta e altera integrantes do mural. Nome, função, curso, Instagram, foto, participação na diretoria e múltiplos vínculos com modalidades persistem na edição.
 
-`/admin/pedidos` segue o quadro `octacore-admin-pedidos` do Figma: quatro pedidos de exemplo, busca por número ou cliente, filtros para todos os seis status e um painel para escolher e salvar o novo status. A pedido da equipe, foi acrescentado um quadro com produtos, variações, quantidades e valores do pedido selecionado, além dos filtros “Disponível para retirada” e “Cancelado”. O total da tabela é calculado a partir dos itens. Os valores dos itens são exemplos históricos para reproduzir os totais do Figma e não precisam corresponder aos preços atuais da loja. Em telas de até 650 px, cartões substituem a tabela: o botão “Gerenciar pedido” fica visível sem rolagem horizontal e leva aos detalhes e ao controle de status. As mudanças de status ocorrem apenas em memória e são descartadas ao recarregar. Esses pedidos são independentes do pedido fictício em `data/account.ts`, do checkout simulado e do dashboard; **nenhuma compra é registrada, nenhum cliente é avisado e não há integração com o backend**.
+`/admin/resultados` consulta e persiste partidas ligadas a uma modalidade cadastrada e, opcionalmente, a um evento sem resultado. Busca, filtros, CRUD e cálculo de vitória/empate/derrota continuam na interface; a tabela pode rolar horizontalmente em telas estreitas.
+
+`/admin/pedidos` lista os pedidos criados pelo checkout e seus itens com preço congelado. A API aceita somente transições válidas de status; cancelamento devolve estoque uma única vez. A interface não envia notificações ao cliente porque não há entidade ou integração para isso.
+
+`/admin/usuarios` lista e filtra contas, permite atualizar nome, e-mail, curso e perfil, e oferece exclusão quando os relacionamentos do banco permitem. A própria conta administrativa não pode ser excluída nem perder o perfil `ADMIN`.
 
 `/atletas/joao-silva` segue o quadro `octacore-perfil-atleta` do Figma: perfil de João Silva, Futsal Masculino, camisa 10, quatro estatísticas e três resultados recentes. O elenco da página de Futsal agora leva ao perfil; a posição exibida foi alinhada ao protótipo como “Ala”. A foto do quadro não está nos arquivos fornecidos, então as iniciais “JS” ocupam seu espaço provisoriamente. Os números são exemplos em `data/athletes.ts`, independentes dos resultados administrativos e do perfil de conta; **não há atualização automática nem integração com backend**. Esta é uma página pública de atleta, distinta de `/minha-conta`.
 
@@ -175,34 +191,50 @@ Após a tentativa de login, aparece um link para explorar a prévia de `/minha-c
 
 `/agenda/treino-volei-octacore` segue o quadro `octacore-evento-presenca` do Figma. A imagem de capa foi exportada do próprio protótipo para `public/images/treino-volei-hero.png`. O treino foi acrescentado à Agenda e seu cartão abre o detalhe. Favoritar e confirmar presença mudam apenas a interface aberta: a confirmação mostra “Você (prévia)” e soma um ao contador demonstrativo, mas tudo é descartado ao sair ou recarregar. O quadro mostra 18 confirmados e só fornece cinco nomes; “Ver todos os confirmados” explica essa limitação, sem inventar as demais pessoas. A Agenda ordena os compromissos por data. **Não há autenticação, inscrição ou registro de presença no backend.**
 
-A navegação administrativa fica recolhida atrás de um ícone simples de três linhas no canto superior esquerdo em PC e iPad; no celular, usa o botão “Menu”, que também mostra a seção atual. Os destinos abrem em um card flutuante sobre a página, liberando a coluna lateral fixa sem deslocar o conteúdo. O card usa três colunas em telas maiores e duas em celulares; fecha ao escolher uma rota, tocar fora ou pressionar Escape. A navbar reúne marca, busca da página, perfil e saída; clicar na marca retorna ao dashboard `/admin`, e os títulos ficam no início da área principal, sem seta de retorno. O ícone de saída apenas informa que a prévia não tem sessão para encerrar. No menu público, além da seleção de uma rota, tocar fora do card ou pressionar Escape também fecha a navegação móvel. Tabelas mais largas rolam dentro do próprio painel; em `/admin/pedidos`, os cartões substituem a tabela no celular.
+A navegação administrativa mantém o comportamento responsivo anterior. A navbar reúne marca, busca, perfil autenticado e saída real; a API volta a verificar `ADMIN` em cada operação. Tabelas largas rolam no próprio painel e pedidos usam cartões no celular.
 
 ## 7. Próximos passos
 
-1. Revisar com a equipe as telas implementadas, textos, eventos, integrantes, produtos, tamanhos e formas de retirada; disponibilizar as fotos dos quatro eventos do painel, dos seis integrantes e de João Silva, e substituir os demais placeholders pelas imagens aprovadas.
-2. Implementar a API NestJS sobre o banco definido em `database/` e integrar autenticação, conteúdo, presença em eventos e pedidos reais. Nessa integração, acrescentar estados de carregamento, erro e sucesso aos formulários de acesso.
-3. Continuar a revisão de acessibilidade e responsividade em larguras intermediárias e celulares menores; incluir indicação visual de rolagem nas tabelas administrativas que ainda não a mostram. Conferir seleção de imagens em um navegador sem as restrições da extensão de automação.
+1. Validar o compose e os fluxos de ponta a ponta em uma máquina com Docker/PostgreSQL, incluindo concorrência de estoque, uploads e SMTP.
+2. Decidir e versionar uma evolução de schema para refresh/reset tokens revogáveis, presença/favoritos, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
+3. Revisar acessibilidade/responsividade em dispositivos físicos e substituir placeholders pelas imagens aprovadas.
 
 Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando acontecer.
 
 ## 8. Decisões e limites conhecidos
 
-- A equipe escolheu **Next.js + TypeScript** para o front end e **NestJS** para o backend futuro.
+- O frontend usa **Next.js + TypeScript**; o backend implementado usa **Fastify + TypeScript + Prisma**, escolha feita para compartilhar linguagem, reduzir boilerplate e manter o schema PostgreSQL existente.
 - O banco de dados é **PostgreSQL**, com as tabelas no schema `octacore`. A estrutura oficial fica em `database/01_schema.sql`, derivada do MER do projeto; mudanças de estrutura devem ser feitas nesse arquivo e versionadas. Os slugs de notícias, eventos, modalidades, integrantes e produtos seguem as rotas do front end.
 - O protótipo do Figma orienta a interface; a fonte Outfit e os arquivos em `assets/` compõem a identidade visual atual.
 - Fotos ainda indisponíveis permanecem como placeholders, conforme combinado para galeria, mural e integrantes.
 - Conteúdo, preços e detalhes de produtos são dados de exemplo e precisam de confirmação da atlética.
 - A Home mantém alguns destaques diretamente na página; ao integrar a API, vale reunir dados compartilhados para evitar divergências.
-- O checkout é uma demonstração explícita. Nenhum pedido deve ser tratado como realizado a partir dessa tela.
-- Login e cadastro também são demonstrações visuais; suas credenciais não são enviadas ou persistidas.
-- “Minha Conta” e “Meus Pedidos” usam dados fixos para reproduzir o Figma. Não há sessão, atualização de perfil, troca de senha, saída de conta ou histórico real.
+- O checkout registra pedido real e desconta estoque, mas não cobra: não existe integração de pagamento no schema ou na interface.
+- Login, cadastro, refresh, logout e recuperação de senha são reais. A recuperação só envia e-mail quando SMTP é configurado; sem tabela de token, reset e refresh não têm revogação individual no servidor.
+- “Minha Conta” e “Meus Pedidos” usam sessão, perfil, troca de senha e pedidos reais. O cabeçalho acompanha login, atualização de nome e logout sem depender da rota atual.
 - O perfil público do atleta também usa dados fixos e não compartilha ainda estatísticas com as outras páginas.
 - O ranking público usa números fixos do Figma e não é recalculado a partir das partidas do painel ou das estatísticas individuais.
 - Favoritar evento e confirmar presença alteram somente o estado da tela atual. A contagem de 18 e os cinco nomes visíveis vêm do Figma; nenhuma presença real é criada.
-- O painel administrativo é uma prévia pública com valores fictícios. Em Notícias, Produtos, Eventos, Integrantes, Resultados e Pedidos, as edições existem somente em memória no navegador e não publicam conteúdo nem atualizam a loja, a agenda, o mural ou os resultados do site público. A proteção de acesso e qualquer ação real de gestão dependerão de autenticação, autorização e API no backend.
+- O painel exige `ADMIN` e persiste notícias, produtos, estoque, eventos, integrantes, resultados e status de pedidos. Atividades recentes não são fabricadas: permanecem vazias sem uma tabela de auditoria.
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 23/10/2026 — Sessão global e cobertura completa da administração
+
+- Adicionado `AuthProvider` compartilhado no layout: o cabeçalho agora identifica a sessão restaurada pelo refresh cookie, mostra o primeiro nome e aponta para conta ou painel conforme o perfil. Login, cadastro, atualização de perfil, troca de senha e logout atualizam toda a interface de forma consistente.
+- Implementados os formulários reais de edição de nome/curso e troca de senha em `/minha-conta` e `/admin/perfil`. A validação de senha aparece antes do envio e os erros de campo retornados pela API são exibidos diretamente.
+- Criadas as telas `/admin/usuarios`, `/admin/modalidades` e `/admin/mural`, cobrindo gestão de contas, modalidades/horários, conquistas e história. Eventos passaram a aceitar modalidade e resultados passaram a aceitar evento vinculado.
+- Corrigida a ordem do tratamento global de erros do Fastify, que fazia validações Zod retornarem `500`; respostas inválidas agora usam `422`. Requisições sem corpo também deixam de declarar JSON indevidamente no cliente.
+- Verificação: frontend `npm run lint`, `npx tsc --noEmit` e `npm run build` com 30 páginas; backend `npm run lint`, `npm run build` e `npm test` com 9 testes. O Docker Compose foi reconstruído, PostgreSQL e API ficaram saudáveis, e login, `/auth/me`, refresh e consultas administrativas foram verificados contra o banco real.
+
+### 23/10/2026 — Backend completo e integração real do frontend
+
+- Criado `backend/` com Fastify, TypeScript, Prisma, Zod, autenticação bcrypt/JWT, autorização `USUARIO`/`ADMIN`, tratamento global de erros, logs com redação de segredos, CORS, Helmet, rate limiting, upload validado, OpenAPI e health check. O Prisma mapeia as 14 tabelas existentes sem alterar `database/01_schema.sql`.
+- Implementados CRUDs e consultas de usuários, notícias, modalidades/horários, integrantes/associações, eventos, resultados, conquistas, história, produtos/variações e pedidos. O checkout cria pedido em transação serializável, valida/desconta estoque e usa o preço do banco; cancelamento devolve o estoque e status seguem transições controladas.
+- Integrados no Next.js: autenticação/recuperação, sessão, conta, pedidos, notícias, agenda, modalidades, mural, loja/estoque/checkout e todas as telas administrativas. O carrinho permanece no navegador, enquanto catálogo e pedido são reais. Ranking, perfil estatístico do atleta, presença/favorito, rascunhos, auditoria, pagamento e notificações continuam explicitamente limitados pelo schema.
+- Adicionados `.env.example`, READMEs, testes, Dockerfiles e `docker-compose.yml` para frontend, API e PostgreSQL.
+- Verificação: backend `npm run lint`, `npm run build`, `npm test` (8 testes incluindo endpoint de login/cookie) e `npm audit --omit=dev` (0 vulnerabilidades); frontend `npm run lint`, `npx tsc --noEmit` e `npm run build`. `git diff --check` também foi conferido. Não foi possível executar o compose nem testes reais contra PostgreSQL nesta máquina porque Docker e serviço PostgreSQL não estão instalados; essa validação de infraestrutura permanece pendente.
 
 ### 22/10/2026 — Esquema do banco de dados PostgreSQL
 

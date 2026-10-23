@@ -1,4 +1,5 @@
 export type Product = {
+  id?: number;
   slug: string;
   name: string;
   priceCents: number;
@@ -7,6 +8,7 @@ export type Product = {
   image?: string;
   alt?: string;
   sizes?: string[];
+  variations?: { id: number; size: string; stock: number }[];
 };
 
 export function formatPrice(cents: number) {

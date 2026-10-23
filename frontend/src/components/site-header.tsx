@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { useAuth } from "./auth-provider";
 import styles from "./site-header.module.css";
 
 const links = [
@@ -17,8 +18,11 @@ const links = [
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const { user, status } = useAuth();
   const mobileMenuRef = useRef<HTMLDetailsElement>(null);
-  const accountLabel = pathname === "/login" || pathname === "/cadastro" ? "Minha conta" : "Entrar / Minha conta";
+  const accountHref = user?.perfil === "ADMIN" ? "/admin" : user ? "/minha-conta" : "/login";
+  const firstName = user?.nome.trim().split(/\s+/)[0];
+  const accountLabel = status === "loading" ? "Minha conta" : firstName ? `Olá, ${firstName}` : "Entrar / Minha conta";
   const closeMobileMenu = () => {
     if (mobileMenuRef.current) mobileMenuRef.current.open = false;
   };
@@ -49,12 +53,12 @@ export function SiteHeader() {
         <nav className={styles.desktopNav} aria-label="Navegação principal">
           {links.map((link) => <Link className={pathname === link.href || (link.href !== "/" && pathname.startsWith(`${link.href}/`)) ? styles.active : ""} href={link.href} key={link.href}>{link.label}</Link>)}
         </nav>
-        <Link className={styles.account} href="/login">{accountLabel}</Link>
+        <Link className={styles.account} href={accountHref}>{accountLabel}</Link>
         <details className={styles.mobileMenu} ref={mobileMenuRef}>
           <summary aria-label="Menu de navegação"><span aria-hidden="true">☰</span></summary>
           <nav aria-label="Navegação móvel">
             {links.map((link) => <Link href={link.href} key={link.href} onClick={closeMobileMenu}>{link.label}</Link>)}
-            <Link href="/login" onClick={closeMobileMenu}>{accountLabel}</Link>
+            <Link href={accountHref} onClick={closeMobileMenu}>{accountLabel}</Link>
           </nav>
         </details>
       </div>

@@ -6,6 +6,8 @@ export type AdminMember = {
   course: string;
   instagram: string;
   image?: string;
+  modalityIds?: number[];
+  boardMember?: boolean;
 };
 
 export const adminMembers: AdminMember[] = [

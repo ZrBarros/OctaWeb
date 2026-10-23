@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { modalities } from "@/data/modalities";
+import { apiServer } from "@/lib/server-api";
+import type { ApiItem, ApiModality } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "Modalidades | Octacore" };
 
-export default function ModalitiesPage() {
+export default async function ModalitiesPage() {
+  const modalities = (await apiServer<ApiItem<ApiModality[]>>("/modalities")).data;
   return (
     <main className={styles.main}>
       <div className={styles.container}>
@@ -18,11 +20,11 @@ export default function ModalitiesPage() {
           {modalities.map((modality) => (
             <article className={`${styles.card} hoverCard`} key={modality.slug}>
               <div className={styles.cardHeading}>
-                <h2>{modality.name}</h2>
-                <span>{modality.code}</span>
+                <h2>{modality.nome}</h2>
+                <span>M{String(modality.id).padStart(2, "0")}</span>
               </div>
-              <div className={styles.placeholder} role="img" aria-label={`Imagem de ${modality.name} pendente`} />
-              <p>{modality.description}</p>
+              <div className={styles.placeholder} role="img" aria-label={`Imagem de ${modality.nome} pendente`} />
+              <p>{modality.descricao}</p>
               <Link href={`/modalidades/${modality.slug}`} className={styles.details}>Ver detalhes</Link>
             </article>
           ))}

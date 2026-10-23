@@ -13,7 +13,8 @@ export function ProductPurchase({ product }: { product: Product }) {
   const { message: feedback, showFeedback, clearFeedback } = useTimedFeedback();
   const cart = useCart();
   const inCart = cart?.find((item) => item.slug === product.slug && item.size === (selectedSize ?? undefined))?.quantity ?? 0;
-  const available = 99 - inCart;
+  const availableStock = product.variations?.find((variation) => variation.size === (selectedSize ?? "UNICO"))?.stock ?? 0;
+  const available = Math.max(0, Math.min(99, availableStock) - inCart);
 
   function handleAdd() {
     if (product.sizes && !selectedSize) return;

@@ -9,6 +9,12 @@ const privateNetworkDevOrigins = [
 const nextConfig: NextConfig = {
   // Let phones and tablets on a private Wi-Fi network load Next dev assets.
   allowedDevOrigins: privateNetworkDevOrigins,
+  images: {
+    remotePatterns: [
+      { protocol: "http", hostname: "localhost", port: "3333", pathname: "/uploads/**" },
+      { protocol: "https", hostname: "**", pathname: "/uploads/**" },
+    ],
+  },
 };
 
 export default nextConfig;

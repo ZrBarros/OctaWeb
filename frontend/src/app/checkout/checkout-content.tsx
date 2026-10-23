@@ -3,14 +3,20 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import Link from "next/link";
-import { formatPrice, products } from "@/data/products";
-import { useCart } from "@/lib/cart";
+import { formatPrice } from "@/data/products";
+import { clearCart, useCart } from "@/lib/cart";
+import { mapProduct } from "@/lib/api-mappers";
+import type { ApiItem, ApiOrder, ApiPage, ApiProduct } from "@/lib/api-types";
+import { apiClient } from "@/lib/api";
+import { useApiData } from "@/lib/use-api";
 import styles from "./page.module.css";
 
-type Confirmation = { name: string; pickup: string; totalCents: number };
+type Confirmation = { orderId: number; name: string; pickup: string; totalCents: number };
 
 export function CheckoutContent() {
   const items = useCart();
+  const { data: response, loading, error: productsError } = useApiData<ApiPage<ApiProduct>>("/products?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
+  const products = response.data.map(mapProduct);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [error, setError] = useState("");
   const lines = items?.flatMap((item) => {
@@ -19,7 +25,7 @@ export function CheckoutContent() {
   }) ?? [];
   const totalCents = lines.reduce((total, item) => total + item.product.priceCents * item.quantity, 0);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (lines.length === 0) return;
 
@@ -32,8 +38,13 @@ export function CheckoutContent() {
       return;
     }
 
-    setError("");
-    setConfirmation({ name, pickup: pickup === "campus" ? "No campus da UFAL" : "A combinar com a atlética", totalCents });
+    const orderItems = lines.map((item) => ({ variationId: item.product.variations?.find((variation) => variation.size === (item.size ?? "UNICO"))?.id, quantity: item.quantity }));
+    if (orderItems.some((item) => !item.variationId)) { setError("Uma variação do carrinho não está mais disponível. Atualize o carrinho."); return; }
+    try {
+      const result = await apiClient<ApiItem<ApiOrder>>("/orders", { method: "POST", auth: true, body: JSON.stringify({ contactName: name, contactPhone: phone, pickupMethod: pickup === "campus" ? "CAMPUS" : "COMBINAR", notes: String(data.get("notes") ?? "").trim() || null, items: orderItems }) });
+      setError(""); clearCart();
+      setConfirmation({ orderId: result.data.id, name, pickup: pickup === "campus" ? "No campus da UFAL" : "A combinar com a atlética", totalCents: Math.round(Number(result.data.valorTotal) * 100) });
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Não foi possível registrar o pedido."); }
   }
 
   return (
@@ -45,24 +56,27 @@ export function CheckoutContent() {
 
         {confirmation ? (
           <section className={styles.confirmation} role="status" aria-labelledby="confirmation-title">
-            <span className={styles.badge}>Demonstração concluída</span>
-            <h1 id="confirmation-title">Simulação finalizada</h1>
-            <p>Obrigado, {confirmation.name}. Este pedido foi apenas uma demonstração: nenhuma informação foi enviada à atlética e não houve cobrança.</p>
+            <span className={styles.badge}>Pedido registrado</span>
+            <h1 id="confirmation-title">Pedido confirmado</h1>
+            <p>Obrigado, {confirmation.name}. O pedido foi enviado à atlética. Nenhuma cobrança automática foi realizada.</p>
             <div className={styles.confirmationDetails}>
+              <div><span>Pedido</span><strong>#{confirmation.orderId}</strong></div>
               <div><span>Retirada escolhida</span><strong>{confirmation.pickup}</strong></div>
-              <div><span>Total simulado</span><strong>{formatPrice(confirmation.totalCents)}</strong></div>
-              <div><span>Status</span><strong>Pendente · demonstração</strong></div>
+              <div><span>Total</span><strong>{formatPrice(confirmation.totalCents)}</strong></div>
+              <div><span>Status</span><strong>Pendente</strong></div>
             </div>
             <Link className="button buttonPrimary" href="/loja">Voltar à loja</Link>
           </section>
         ) : (
           <>
             <div className={styles.kicker}><span>Loja</span><i /></div>
-            <h1>Checkout simulado</h1>
-            <p className={styles.intro}>Confira seus produtos e preencha os dados para testar o fluxo de pedido.</p>
+            <h1>Finalizar pedido</h1>
+            <p className={styles.intro}>Confira seus produtos e informe os dados para retirada.</p>
 
-            {items === null ? (
+            {items === null || loading ? (
               <p className={styles.loading} role="status">Carregando carrinho...</p>
+            ) : productsError ? (
+              <p className={styles.loading} role="alert">{productsError}</p>
             ) : lines.length === 0 ? (
               <section className={styles.empty} aria-label="Carrinho vazio">
                 <h2>Seu carrinho está vazio</h2>
@@ -73,7 +87,7 @@ export function CheckoutContent() {
               <div className={styles.layout}>
                 <form className={styles.form} onSubmit={handleSubmit}>
                   <h2>Dados para retirada</h2>
-                  <p className={styles.formIntro}>Esta simulação não envia seus dados nem registra um pedido real.</p>
+                  <p className={styles.formIntro}>O pedido será registrado para acompanhamento pela diretoria. Não há cobrança online.</p>
                   <div className={styles.fields}>
                     <label>
                       Nome completo
@@ -97,7 +111,7 @@ export function CheckoutContent() {
                     </label>
                   </div>
                   {error && <p className={styles.error} role="alert">{error}</p>}
-                  <button className="button buttonPrimary" type="submit">Simular pedido</button>
+                  <button className="button buttonPrimary" type="submit">Registrar pedido</button>
                 </form>
 
                 <aside className={styles.summary} aria-labelledby="summary-title">
@@ -111,7 +125,7 @@ export function CheckoutContent() {
                     ))}
                   </ul>
                   <div className={styles.total}><span>Total</span><strong>{formatPrice(totalCents)}</strong></div>
-                  <p>Sem pagamento real. A confirmação vale apenas para esta demonstração.</p>
+                  <p>Sem pagamento online. A diretoria confirmará as próximas etapas.</p>
                   <Link href="/carrinho">← Editar carrinho</Link>
                 </aside>
               </div>

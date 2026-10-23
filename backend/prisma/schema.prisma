@@ -1,0 +1,228 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["octacore"]
+}
+
+model Usuario {
+  id            Int       @id @default(autoincrement())
+  nome          String    @db.VarChar(120)
+  email         String    @db.VarChar(160)
+  senhaHash     String    @map("senha_hash") @db.VarChar(255)
+  curso         String    @db.VarChar(100)
+  fotoUrl       String?   @map("foto_url") @db.VarChar(255)
+  perfil        String    @default("USUARIO") @db.VarChar(10)
+  criadoEm      DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm  DateTime  @default(now()) @map("atualizado_em") @db.Timestamptz(6)
+  noticias      Noticia[]
+  pedidos       Pedido[]
+
+  @@map("usuario")
+  @@schema("octacore")
+}
+
+model Noticia {
+  id             Int      @id @default(autoincrement())
+  slug           String   @unique @db.VarChar(200)
+  titulo         String   @db.VarChar(200)
+  resumo         String?  @db.VarChar(300)
+  conteudo       String
+  imagemCapaUrl  String?  @map("imagem_capa_url") @db.VarChar(255)
+  categoria      String   @db.VarChar(20)
+  autorId        Int      @map("autor_id")
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @default(now()) @map("atualizado_em") @db.Timestamptz(6)
+  autor          Usuario  @relation(fields: [autorId], references: [id], onDelete: Restrict)
+
+  @@index([autorId], map: "ix_noticia_autor")
+  @@index([criadoEm(sort: Desc)], map: "ix_noticia_criado_em")
+  @@map("noticia")
+  @@schema("octacore")
+}
+
+model Modalidade {
+  id            Int                    @id @default(autoincrement())
+  nome          String                 @db.VarChar(80)
+  slug          String                 @unique @db.VarChar(80)
+  descricao     String?
+  imagemUrl     String?                @map("imagem_url") @db.VarChar(255)
+  responsavel   String?                @db.VarChar(120)
+  localTreino   String?                @map("local_treino") @db.VarChar(150)
+  horarios      HorarioTreino[]
+  integrantes   IntegranteModalidade[]
+  eventos       Evento[]
+  resultados    Resultado[]
+  conquistas    Conquista[]
+
+  @@map("modalidade")
+  @@schema("octacore")
+}
+
+model HorarioTreino {
+  id            Int        @id @default(autoincrement())
+  modalidadeId  Int        @map("modalidade_id")
+  diaSemana     Int        @map("dia_semana") @db.SmallInt
+  horaInicio    DateTime   @map("hora_inicio") @db.Time(6)
+  horaFim       DateTime?  @map("hora_fim") @db.Time(6)
+  modalidade    Modalidade @relation(fields: [modalidadeId], references: [id], onDelete: Cascade)
+
+  @@unique([modalidadeId, diaSemana, horaInicio], map: "uq_horario")
+  @@map("horario_treino")
+  @@schema("octacore")
+}
+
+model Integrante {
+  id           Int                    @id @default(autoincrement())
+  slug         String                 @unique @db.VarChar(140)
+  nome         String                 @db.VarChar(120)
+  curso        String?                @db.VarChar(100)
+  funcao       String?                @db.VarChar(80)
+  diretoria    Boolean                @default(false)
+  fotoUrl      String?                @map("foto_url") @db.VarChar(255)
+  instagram    String?                @db.VarChar(60)
+  modalidades  IntegranteModalidade[]
+
+  @@map("integrante")
+  @@schema("octacore")
+}
+
+model IntegranteModalidade {
+  integranteId Int        @map("integrante_id")
+  modalidadeId Int        @map("modalidade_id")
+  integrante   Integrante @relation(fields: [integranteId], references: [id], onDelete: Cascade)
+  modalidade   Modalidade @relation(fields: [modalidadeId], references: [id], onDelete: Cascade)
+
+  @@id([integranteId, modalidadeId])
+  @@index([modalidadeId], map: "ix_int_mod_modalidade")
+  @@map("integrante_modalidade")
+  @@schema("octacore")
+}
+
+model Evento {
+  id             Int         @id @default(autoincrement())
+  slug           String      @unique @db.VarChar(160)
+  titulo         String      @db.VarChar(150)
+  descricao      String?
+  tipo           String      @db.VarChar(15)
+  dataHora       DateTime    @map("data_hora") @db.Timestamptz(6)
+  local          String      @db.VarChar(150)
+  imagemUrl      String?     @map("imagem_url") @db.VarChar(255)
+  modalidadeId   Int?        @map("modalidade_id")
+  modalidade     Modalidade? @relation(fields: [modalidadeId], references: [id], onDelete: SetNull)
+  resultado      Resultado?
+
+  @@index([dataHora], map: "ix_evento_data_hora")
+  @@index([modalidadeId], map: "ix_evento_modalidade")
+  @@map("evento")
+  @@schema("octacore")
+}
+
+model Resultado {
+  id               Int        @id @default(autoincrement())
+  modalidadeId     Int        @map("modalidade_id")
+  eventoId         Int?       @unique @map("evento_id")
+  adversario       String     @db.VarChar(120)
+  placarOcta       Int        @map("placar_octa")
+  placarAdversario Int        @map("placar_adversario")
+  campeonato       String?    @db.VarChar(150)
+  data             DateTime   @db.Date
+  modalidade       Modalidade @relation(fields: [modalidadeId], references: [id], onDelete: Restrict)
+  evento           Evento?    @relation(fields: [eventoId], references: [id], onDelete: SetNull)
+
+  @@index([modalidadeId, data(sort: Desc)], map: "ix_resultado_modalidade")
+  @@map("resultado")
+  @@schema("octacore")
+}
+
+model Conquista {
+  id             Int         @id @default(autoincrement())
+  titulo         String      @db.VarChar(150)
+  campeonato     String      @db.VarChar(150)
+  colocacao      String      @db.VarChar(40)
+  ano            Int         @db.SmallInt
+  descricao      String?
+  modalidadeId   Int?        @map("modalidade_id")
+  modalidade     Modalidade? @relation(fields: [modalidadeId], references: [id], onDelete: SetNull)
+
+  @@index([modalidadeId], map: "ix_conquista_modalidade")
+  @@map("conquista")
+  @@schema("octacore")
+}
+
+model MarcoHistorico {
+  id         Int     @id @default(autoincrement())
+  ano        Int     @db.SmallInt
+  titulo     String  @db.VarChar(150)
+  descricao  String?
+  ordem      Int     @default(0)
+
+  @@map("marco_historico")
+  @@schema("octacore")
+}
+
+model Produto {
+  id          Int               @id @default(autoincrement())
+  slug        String            @unique @db.VarChar(140)
+  nome        String            @db.VarChar(120)
+  descricao   String?
+  preco       Decimal           @db.Decimal(10, 2)
+  categoria   String            @db.VarChar(15)
+  imagemUrl   String?           @map("imagem_url") @db.VarChar(255)
+  ativo       Boolean           @default(true)
+  variacoes   ProdutoVariacao[]
+
+  @@map("produto")
+  @@schema("octacore")
+}
+
+model ProdutoVariacao {
+  id          Int          @id @default(autoincrement())
+  produtoId   Int          @map("produto_id")
+  tamanho     String       @default("UNICO") @db.VarChar(10)
+  estoque     Int          @default(0)
+  produto     Produto      @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  itens       ItemPedido[]
+
+  @@unique([produtoId, tamanho], map: "uq_variacao")
+  @@map("produto_variacao")
+  @@schema("octacore")
+}
+
+model Pedido {
+  id               Int          @id @default(autoincrement())
+  usuarioId        Int          @map("usuario_id")
+  status           String       @default("PENDENTE") @db.VarChar(25)
+  valorTotal       Decimal      @default(0) @map("valor_total") @db.Decimal(10, 2)
+  nomeContato      String       @map("nome_contato") @db.VarChar(120)
+  telefoneContato  String       @map("telefone_contato") @db.VarChar(20)
+  formaRetirada    String       @map("forma_retirada") @db.VarChar(20)
+  observacoes      String?
+  criadoEm         DateTime     @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm     DateTime     @default(now()) @map("atualizado_em") @db.Timestamptz(6)
+  usuario          Usuario      @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+  itens            ItemPedido[]
+
+  @@index([usuarioId, criadoEm(sort: Desc)], map: "ix_pedido_usuario")
+  @@index([status], map: "ix_pedido_status")
+  @@map("pedido")
+  @@schema("octacore")
+}
+
+model ItemPedido {
+  id             Int             @id @default(autoincrement())
+  pedidoId       Int             @map("pedido_id")
+  variacaoId     Int             @map("variacao_id")
+  quantidade     Int
+  precoUnitario  Decimal         @map("preco_unitario") @db.Decimal(10, 2)
+  pedido         Pedido          @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  variacao       ProdutoVariacao @relation(fields: [variacaoId], references: [id], onDelete: Restrict)
+
+  @@unique([pedidoId, variacaoId], map: "uq_item_pedido")
+  @@index([variacaoId], map: "ix_item_variacao")
+  @@map("item_pedido")
+  @@schema("octacore")
+}

@@ -1,42 +1,83 @@
 # OctaWeb
 
-Site da **Associação Atlética Acadêmica de Computação da UFAL (Octacore)**, desenvolvido como projeto da disciplina de Programação Web. O objetivo é reunir notícias, modalidades, agenda, mural da atlética e loja em um só lugar.
+Plataforma da Associação Atlética Acadêmica de Computação da UFAL (Octacore), com site público, loja, conta, painel administrativo, API REST e PostgreSQL.
 
-O projeto está na fase de **MVP do front end**. As telas foram construídas com **Next.js, React e TypeScript**, seguindo o [protótipo no Figma](https://www.figma.com/design/BcgJnC6UWsDG5W5B5mO7V6/Projeto-P3---Octacore?node-id=0-1). Uma API em **NestJS** está planejada para uma etapa posterior; ela ainda não faz parte deste repositório. O banco de dados **PostgreSQL** já está modelado em [`database/`](database/).
+## Stack
 
-## Como executar
+- Frontend: Next.js 16, React 19 e TypeScript.
+- Backend: Node.js, TypeScript, Fastify, Prisma e OpenAPI.
+- Banco: PostgreSQL, schema `octacore` com 14 tabelas.
+- Deploy local: Docker Compose com frontend, API e banco.
 
-É necessário ter Node.js e npm instalados. Na raiz do projeto:
+## Executar tudo com Docker
+
+Pré-requisito: Docker com Compose.
+
+```bash
+docker compose up --build
+```
+
+- Site: http://localhost:3000
+- API: http://localhost:3333
+- OpenAPI: http://localhost:3333/docs/openapi.json
+- Health check: http://localhost:3333/health
+- PostgreSQL no host: `localhost:5433`
+
+O compose é uma configuração local. Antes de publicar, troque os três segredos JWT, ative cookies seguros, configure os domínios reais e forneça SMTP.
+
+## Executar sem Docker
+
+Inicie PostgreSQL e aplique `database/01_schema.sql` seguido de `database/02_seed.sql`. Depois:
+
+```bash
+cd backend
+copy .env.example .env
+npm install
+npm run prisma:generate
+npm run dev
+```
+
+Em outro terminal:
 
 ```bash
 cd frontend
+copy .env.example .env.local
 npm install
 npm run dev
 ```
 
-Abra [http://localhost:3000](http://localhost:3000) no navegador. Para acessar a prévia por outro aparelho na mesma rede, inicie o servidor com `npm run dev -- --hostname 0.0.0.0` e abra `http://IP-DO-COMPUTADOR:3000` no aparelho.
+As credenciais locais criadas pelo seed estão em [`database/README.md`](database/README.md). Não use os dados do seed em produção.
 
-Para conferir o código e gerar a versão de produção:
+## Verificação
 
 ```bash
+cd backend
 npm run lint
+npm run build
+npm test
+npm audit --omit=dev
+
+cd ../frontend
+npm run lint
+npx tsc --noEmit
 npm run build
 ```
 
-## O que existe hoje
+## Estado funcional
 
-- **Site público:** home, notícias, modalidades, agenda, mural, ranking e perfis demonstrativos.
-- **Loja:** catálogo, detalhes dos produtos, carrinho salvo no navegador e checkout simulado.
-- **Conta:** telas de login, cadastro, perfil e pedidos demonstrativos.
-- **Painel administrativo:** prévias de dashboard e gestão de notícias, produtos, eventos, integrantes, resultados e pedidos.
+- Cadastro, login, refresh por cookie `httpOnly`, logout, perfil, alteração e recuperação de senha.
+- Autorização `USUARIO`/`ADMIN` aplicada na API.
+- Notícias, modalidades/horários, integrantes, eventos, resultados, conquistas, história e produtos vindos do PostgreSQL.
+- Checkout autenticado cria pedido em transação, congela preços e desconta estoque.
+- O cabeçalho acompanha a sessão; a conta edita perfil, troca senha e consulta pedidos reais.
+- O painel gerencia usuários, modalidades/horários, notícias, eventos, integrantes, conquistas, história, resultados, produtos, estoque e pedidos.
+- Upload administrativo de JPG, PNG e WebP, limitado a 2 MB e validado por assinatura.
 
-Os conteúdos ainda são, em grande parte, dados locais de exemplo. Login e cadastro **não criam uma sessão real**; ações do painel **não publicam alterações no site**; o checkout **não registra pedidos nem realiza pagamentos**. A autenticação, as permissões e a persistência dos dados dependem da futura integração com o backend.
+O carrinho continua no `localStorage`, mas preços, variações e estoque vêm da API. Pagamento não foi implementado porque o schema não possui transação financeira. Presença/favorito em eventos, estatísticas individuais, classificação e log de atividades continuam como interface demonstrativa porque não existem tabelas correspondentes.
 
-## Estrutura e documentação
+## Estrutura
 
-- [`frontend/`](frontend/) — aplicação Next.js. O [README do front end](frontend/README.md) explica onde estão as principais partes do código.
-- [`database/`](database/) — esquema PostgreSQL do MVP, dados de exemplo e instruções de conexão para o backend.
-- [`assets/`](assets/) — materiais de identidade visual e documentos de referência do projeto.
-- [`DOCUMENTACAO.md`](DOCUMENTACAO.md) — estado de cada tela, limites das simulações, decisões, próximos passos e histórico de desenvolvimento. Consulte este arquivo para saber o que já funciona e o que ainda está planejado.
-
-Ao implementar uma mudança relevante, atualize também a documentação para manter o estado do projeto correto.
+- [`frontend/`](frontend/) — aplicação Next.js e integração com a API.
+- [`backend/`](backend/) — API, Prisma, testes, upload e documentação operacional.
+- [`database/`](database/) — schema SQL oficial, seed e MER.
+- [`DOCUMENTACAO.md`](DOCUMENTACAO.md) — estado detalhado, limitações e histórico.

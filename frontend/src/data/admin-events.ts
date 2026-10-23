@@ -7,9 +7,10 @@ export type AdminEvent = {
   description: string;
   place: string;
   image?: string;
+  modalityId?: number | null;
 };
 
-export const adminEventCategories = ["Esportivo", "Seletiva", "Treino", "Festa", "Reunião", "Outro"] as const;
+export const adminEventCategories = ["Jogo", "Campeonato", "Seletiva", "Treino", "Festa", "Reunião", "Outro"] as const;
 
 export const adminEvents: AdminEvent[] = [
   { id: 1, title: "Cerimônia de Abertura InterUFAL 2026", category: "Esportivo", dateTime: "2026-09-22T18:00", description: "Abertura oficial do maior campeonato entre cursos da universidade.", place: "Ginásio Central da UFAL" },

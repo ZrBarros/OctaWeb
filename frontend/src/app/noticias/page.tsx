@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import { NewsCard } from "@/components/news-card";
-import { news, newsCategories } from "@/data/news";
+import { newsCategories } from "@/data/news";
+import { mapNews } from "@/lib/api-mappers";
+import type { ApiNews, ApiPage } from "@/lib/api-types";
+import { useApiData } from "@/lib/use-api";
 import styles from "./page.module.css";
 
 export default function NewsPage() {
   const [category, setCategory] = useState<(typeof newsCategories)[number]>("Todos");
-  const visibleNews = category === "Todos" ? news : news.filter((article) => article.category === category);
+  const { data: response, loading, error } = useApiData<ApiPage<ApiNews>>("/news?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
+  const articles = response.data.map(mapNews);
+  const visibleNews = category === "Todos" ? articles : articles.filter((article) => article.category === category);
 
   return (
     <main className={styles.main}>
@@ -34,7 +39,7 @@ export default function NewsPage() {
           </select>
         </label>
 
-        {visibleNews.length > 0 ? (
+        {loading ? <p className={styles.empty}>Carregando notícias...</p> : error ? <p className={styles.empty}>{error}</p> : visibleNews.length > 0 ? (
           <div className={styles.grid}>{visibleNews.map((article) => <NewsCard key={article.slug} article={article} />)}</div>
         ) : (
           <p className={styles.empty}>Ainda não há notícias nessa categoria.</p>
