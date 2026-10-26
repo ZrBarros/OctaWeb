@@ -1,6 +1,6 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 23/10/2026
+**Última atualização:** 26/10/2026
 
 **Estado:** MVP full stack integrado; backend e banco prontos para execução, com limitações de schema documentadas
 
@@ -46,7 +46,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | Rota | O que existe hoje | Estado |
 | --- | --- | --- |
 | `/` | Página inicial com apresentação, mascote, destaques, produtos e até três compromissos futuros. | **Integração real:** produtos e agenda vêm da API; destaques esportivos permanecem editoriais na tela |
-| Todas as rotas do App Router | O conteúdo da rota entra com fade em 180 ms; cabeçalho/estrutura compartilhada permanecem estáveis. | Animação de interface local; sem dependência de backend |
+| Todas as rotas do App Router | O conteúdo da rota entra com opacidade, leve deslocamento e desfoque em 440 ms; seções, cartões, formulários e tabelas abaixo da dobra são revelados progressivamente durante o scroll. Cabeçalho e estruturas compartilhadas permanecem estáveis. | Animação local no navegador, com `IntersectionObserver` e respeito a `prefers-reduced-motion`; sem dependência de backend |
 | `/motion-octaweb.html` | Peça animada de apresentação do OctaWeb, com identidade visual da Octacore, apresentação da plataforma e seus principais espaços. | Apresentação em HTML/CSS; animação local no navegador, sem exportação de vídeo |
 | `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. | **Integração real:** notícias publicadas no PostgreSQL |
 | `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades, horários, responsáveis, elenco, resultados e próximos eventos disponíveis. | **Integração real:** dados relacionais da API |
@@ -102,7 +102,7 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/app/` | Rotas, estrutura e estilos de cada página. Uma pasta com `page.tsx` representa uma rota. |
 | `frontend/src/app/layout.tsx` | Estrutura compartilhada e fonte Outfit. |
 | `frontend/src/app/globals.css` | Cores, tokens de movimento, transições para controles, entrada de diálogos e estilos globais. |
-| `frontend/src/app/template.tsx` e `template.module.css` | Entrada animada curta do conteúdo de cada rota; respeita movimento reduzido definido globalmente. |
+| `frontend/src/app/template.tsx`, `template.module.css` e `components/page-motion.tsx` | Transição global entre rotas e revelação progressiva de blocos durante o scroll; respeita a preferência por movimento reduzido. |
 | `frontend/src/components/` | Componentes reutilizados, como cabeçalho, rodapé e cards. |
 | `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. |
 | `frontend/src/data/` | Tipos, rótulos e dados que continuam demonstrativos; não é mais a fonte dos módulos integrados. |
@@ -219,6 +219,13 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 26/10/2026 — Transições de rota e revelação no scroll
+
+- Unificada a animação de navegação pública e administrativa: ao trocar de rota, o conteúdo entra em 440 ms com opacidade, leve deslocamento vertical e desfoque, enquanto cabeçalhos e estruturas compartilhadas permanecem estáveis.
+- Adicionada revelação progressiva de seções, cartões, formulários e tabelas quando entram na área visível. O comportamento usa `IntersectionObserver`, aplica pequenos atrasos alternados aos blocos e também cobre conteúdo inserido depois do carregamento.
+- A preferência `prefers-reduced-motion` desativa as animações e mantém todo o conteúdo imediatamente visível. A mudança é somente de interface no navegador e não altera integrações ou dados do backend.
+- Verificação: `npm.cmd run lint`, `npx.cmd tsc --noEmit` e `npm.cmd run build` passaram; o Next.js compilou as 30 páginas. A inspeção visual fina em diferentes navegadores/dispositivos continua recomendada.
 
 ### 23/10/2026 — Sessão global e cobertura completa da administração
 
