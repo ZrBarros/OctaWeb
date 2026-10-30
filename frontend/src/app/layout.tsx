@@ -9,6 +9,9 @@ const outfit = Outfit({ subsets: ["latin"], display: "swap", variable: "--font-o
 export const metadata: Metadata = {
   title: "Octacore | Atlética de Computação da UFAL",
   description: "Esporte, integração e história da Atlética Octacore.",
+  icons: {
+    icon: "/images/logo-octacore.png",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
