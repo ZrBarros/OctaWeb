@@ -1,13 +1,51 @@
-.pageEnter {
-  animation: page-enter 180ms var(--motion-ease-out) both;
+.motionRoot {
+  animation: route-enter 440ms var(--motion-ease-out) both;
 }
 
-@keyframes page-enter {
+@keyframes route-enter {
   from {
     opacity: 0;
+    filter: blur(2px);
+    transform: translateY(12px);
   }
 
   to {
     opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.motionRoot :global([data-scroll-reveal]) {
+  transition:
+    opacity 620ms var(--motion-ease-out),
+    filter 620ms var(--motion-ease-out),
+    transform 620ms var(--motion-ease-out);
+  transition-delay: calc(var(--reveal-order, 0) * 55ms);
+}
+
+.motionRoot :global([data-scroll-reveal="pending"]) {
+  opacity: 0;
+  filter: blur(3px);
+  transform: translateY(26px);
+  will-change: opacity, filter, transform;
+}
+
+.motionRoot :global([data-scroll-reveal="visible"]) {
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motionRoot {
+    animation: none;
+  }
+
+  .motionRoot :global([data-scroll-reveal]) {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
   }
 }

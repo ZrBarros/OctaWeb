@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import styles from "./template.module.css";
+import { PageMotion } from "@/components/page-motion";
 
 export default function Template({ children }: { children: ReactNode }) {
-  return <div className={styles.pageEnter}>{children}</div>;
+  return <PageMotion>{children}</PageMotion>;
 }
