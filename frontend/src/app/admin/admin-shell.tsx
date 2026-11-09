@@ -88,7 +88,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  return <AdminFeedbackContext.Provider value={setFeedback}><AdminToolbarTargetContext.Provider value={{ desktop: toolbarSearchTarget, mobile: mobileToolbarSearchTarget, setMobile: setMobileToolbarSearchTarget }}><div className={styles.shell}>
+  return <AdminFeedbackContext.Provider value={setFeedback}><AdminToolbarTargetContext.Provider value={{ desktop: toolbarSearchTarget, mobile: mobileToolbarSearchTarget, setMobile: setMobileToolbarSearchTarget }}><div className={styles.shell} data-admin-root>
     <aside ref={sidebarRef} className={styles.sidebar} aria-label="Painel administrativo">
       <div className={styles.adminNavbar}>
         <div className={styles.brandHeader}>

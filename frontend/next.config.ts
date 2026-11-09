@@ -7,6 +7,9 @@ const privateNetworkDevOrigins = [
 ];
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [{ source: "/uploads/:path*", destination: `${process.env.API_URL?.replace(/\/api\/v1\/?$/, "") ?? "http://localhost:3333"}/uploads/:path*` }];
+  },
   // Let phones and tablets on a private Wi-Fi network load Next dev assets.
   allowedDevOrigins: privateNetworkDevOrigins,
   images: {

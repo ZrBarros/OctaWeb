@@ -3,8 +3,10 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import Image from "next/image";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
+import { AdminDialogPortal } from "../admin-dialog-portal";
 import { adminEventCategories, type AdminEvent } from "@/data/admin-events";
 import { apiClient, uploadImage } from "@/lib/api";
+import { displayImageUrl } from "@/lib/display-image-url";
 import type { ApiEvent, ApiItem, ApiModality, ApiPage } from "@/lib/api-types";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
@@ -99,7 +101,7 @@ export function AdminEventsPage() {
 
       {view === "list" ? <div className={styles.grid}>
         {filtered.map((item) => <article className={styles.card} key={item.id}>
-          <div className={styles.cardImage}>{item.image ? <Image src={item.image} alt="" width={600} height={180} unoptimized={item.image.startsWith("data:")} /> : <div className={styles.imagePlaceholder}><AdminIcon name="events" /><span>Imagem do evento</span></div>}</div>
+          <div className={styles.cardImage}>{item.image ? <Image src={displayImageUrl(item.image)} alt="" width={600} height={180} unoptimized /> : <div className={styles.imagePlaceholder}><AdminIcon name="events" /><span>Imagem do evento</span></div>}</div>
           <div className={styles.cardBody}>
             <div className={styles.cardMeta}><span className={styles.badge}>{item.category}</span><time dateTime={item.dateTime}>{formatEventDate(item.dateTime)}</time></div>
             <h2>{item.title}</h2><p>{item.description}</p><div className={styles.place}><PinIcon /> {item.place}</div>
@@ -120,7 +122,7 @@ export function AdminEventsPage() {
       </section>}
     </div>
 
-    {draft && <div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="event-dialog-title">
+    {draft && <AdminDialogPortal><div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="event-dialog-title">
       <div className={styles.dialogHeader}><h2 id="event-dialog-title">{editingId === null ? "Criar evento" : "Editar evento"}</h2><button type="button" aria-label="Fechar formulário" onClick={() => setDraft(null)}>×</button></div>
       <p>As alterações serão salvas no banco e refletidas na agenda pública.</p>
       <form className={styles.form} onSubmit={saveEvent}>
@@ -131,11 +133,11 @@ export function AdminEventsPage() {
         <label>Descrição<textarea required maxLength={300} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Apresente o evento em poucas palavras" /></label>
         <label>Imagem do evento (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /><small>JPG, PNG ou WebP, até 2 MB.</small></label>
         {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}
-        {draft.image && <div className={styles.selectedImage}><Image src={draft.image} alt="Prévia da imagem do evento" width={160} height={90} unoptimized={draft.image.startsWith("data:")} /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover imagem</button></div>}
+        {draft.image && <div className={styles.selectedImage}><Image src={displayImageUrl(draft.image)} alt="Prévia da imagem do evento" width={160} height={90} unoptimized /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover imagem</button></div>}
         <div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDraft(null)}>Cancelar</button><button className={styles.saveButton} type="submit">{editingId === null ? "Criar evento" : "Salvar alterações"}</button></div>
       </form>
-    </section></div>}
+    </section></div></AdminDialogPortal>}
 
-    {deletingItem && <div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-event-title"><div className={styles.dialogHeader}><h2 id="delete-event-title">Excluir evento?</h2><button type="button" aria-label="Cancelar exclusão" onClick={() => setDeletingId(null)}>×</button></div><p>Remover “{deletingItem.title}”? A exclusão também afeta a agenda pública.</p><div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDeletingId(null)}>Cancelar</button><button className={styles.deleteConfirm} type="button" onClick={() => void deleteEvent()}>Excluir evento</button></div></section></div>}
+    {deletingItem && <AdminDialogPortal><div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-event-title"><div className={styles.dialogHeader}><h2 id="delete-event-title">Excluir evento?</h2><button type="button" aria-label="Cancelar exclusão" onClick={() => setDeletingId(null)}>×</button></div><p>Remover “{deletingItem.title}”? A exclusão também afeta a agenda pública.</p><div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDeletingId(null)}>Cancelar</button><button className={styles.deleteConfirm} type="button" onClick={() => void deleteEvent()}>Excluir evento</button></div></section></div></AdminDialogPortal>}
   </>;
 }

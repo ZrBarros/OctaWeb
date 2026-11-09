@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
+import { AdminDialogPortal } from "../admin-dialog-portal";
 import { resultStatus, type AdminResult } from "@/data/admin-results";
 import { apiClient } from "@/lib/api";
 import type { ApiEvent, ApiItem, ApiModality, ApiPage, ApiResult } from "@/lib/api-types";
@@ -102,7 +103,7 @@ export function AdminResultsPage() {
       </div></div>
     </div>
 
-    {draft && <div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="result-dialog-title">
+    {draft && <AdminDialogPortal><div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="result-dialog-title">
       <div className={styles.dialogHeader}><h2 id="result-dialog-title">{editingId === null ? "Registrar resultado" : "Editar resultado"}</h2><button type="button" aria-label="Fechar formulário" onClick={() => setDraft(null)}>×</button></div>
       <p>O status é calculado pelo placar e o resultado será publicado.</p>
       <form className={styles.form} onSubmit={saveResult}>
@@ -113,8 +114,8 @@ export function AdminResultsPage() {
         <label>Evento vinculado (opcional)<select value={draft.eventId} onChange={(event) => setDraft({ ...draft, eventId: event.target.value })}><option value="">Sem evento vinculado</option>{events.filter((item) => !item.resultado || item.id === Number(draft.eventId)).map((item) => <option value={item.id} key={item.id}>{item.titulo} · {new Intl.DateTimeFormat("pt-BR").format(new Date(item.dataHora))}</option>)}</select></label>
         <div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDraft(null)}>Cancelar</button><button className={styles.saveButton} type="submit">{editingId === null ? "Registrar resultado" : "Salvar alterações"}</button></div>
       </form>
-    </section></div>}
+    </section></div></AdminDialogPortal>}
 
-    {deletingItem && <div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-result-title"><div className={styles.dialogHeader}><h2 id="delete-result-title">Excluir resultado?</h2><button type="button" aria-label="Cancelar exclusão" onClick={() => setDeletingId(null)}>×</button></div><p>Remover o resultado de {deletingItem.modality} contra {deletingItem.opponent} do banco?</p><div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDeletingId(null)}>Cancelar</button><button className={styles.deleteConfirm} type="button" onClick={() => void deleteResult()}>Excluir resultado</button></div></section></div>}
+    {deletingItem && <AdminDialogPortal><div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-result-title"><div className={styles.dialogHeader}><h2 id="delete-result-title">Excluir resultado?</h2><button type="button" aria-label="Cancelar exclusão" onClick={() => setDeletingId(null)}>×</button></div><p>Remover o resultado de {deletingItem.modality} contra {deletingItem.opponent} do banco?</p><div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDeletingId(null)}>Cancelar</button><button className={styles.deleteConfirm} type="button" onClick={() => void deleteResult()}>Excluir resultado</button></div></section></div></AdminDialogPortal>}
   </>;
 }

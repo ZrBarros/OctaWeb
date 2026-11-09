@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatPrice } from "@/data/products";
 import { mapEvent, mapProduct } from "@/lib/api-mappers";
 import { apiServer } from "@/lib/server-api";
+import { displayImageUrl } from "@/lib/display-image-url";
 import type { ApiEvent, ApiPage, ApiProduct } from "@/lib/api-types";
 import styles from "./page.module.css";
 
@@ -58,7 +59,7 @@ export default async function Home() {
                   <article className={styles.productCard} key={product.slug}>
                     <Link className={styles.productLink} href={`/loja/${product.slug}`} aria-label={`Ver detalhes de ${product.name}`}>
                       {product.image ? (
-                        <Image className={styles.productImage} src={product.image} alt={product.alt ?? ""} width={300} height={220} />
+                        <Image className={styles.productImage} src={displayImageUrl(product.image)} alt={product.alt ?? ""} width={300} height={220} unoptimized />
                       ) : (
                         <div className={styles.productPlaceholder} aria-label={`Imagem de ${product.name} pendente`} role="img" />
                       )}

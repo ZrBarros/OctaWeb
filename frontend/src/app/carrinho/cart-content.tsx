@@ -7,6 +7,7 @@ import { mapProduct } from "@/lib/api-mappers";
 import type { ApiPage, ApiProduct } from "@/lib/api-types";
 import { useApiData } from "@/lib/use-api";
 import { changeCartQuantity, removeFromCart, useCart } from "@/lib/cart";
+import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 export function CartContent() {
@@ -47,7 +48,7 @@ export function CartContent() {
                 <article className={styles.item} key={`${slug}:${size ?? ""}`}>
                   <Link className={styles.visual} href={`/loja/${slug}`} aria-label={`Ver ${product.name}`}>
                     {product.image ? (
-                      <Image src={product.image} alt={product.alt ?? product.name} width={140} height={140} />
+                      <Image src={displayImageUrl(product.image)} alt={product.alt ?? product.name} width={140} height={140} unoptimized />
                     ) : (
                       <span className={styles.placeholder} role="img" aria-label={`Imagem de ${product.name} pendente`} />
                     )}

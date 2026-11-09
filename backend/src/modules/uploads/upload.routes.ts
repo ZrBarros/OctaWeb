@@ -42,7 +42,10 @@ export async function publicUploadRoutes(app: FastifyInstance) {
     const mime = extension === "jpg" ? "image/jpeg" : `image/${extension}`;
     const filepath = path.join(path.resolve(app.env.UPLOAD_DIR), request.params.filename);
     try { await access(filepath); } catch { throw notFound("Imagem"); }
-    reply.header("X-Content-Type-Options", "nosniff").header("Cache-Control", "public, max-age=2592000, immutable").type(mime);
+    reply.header("X-Content-Type-Options", "nosniff")
+      .header("Cross-Origin-Resource-Policy", "cross-origin")
+      .header("Cache-Control", "public, max-age=2592000, immutable")
+      .type(mime);
     return reply.send(createReadStream(filepath));
   });
 }

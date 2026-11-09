@@ -177,7 +177,7 @@ O cabeçalho consulta um estado compartilhado de autenticação: visitantes abre
 
 `/admin/modalidades` gerencia modalidades, imagens, responsáveis, locais e múltiplos horários de treino. `/admin/mural` gerencia conquistas e marcos históricos. As alterações alimentam imediatamente as respectivas páginas públicas.
 
-`/admin/integrantes` consulta e altera integrantes do mural. Nome, função, curso, Instagram, foto, participação na diretoria e múltiplos vínculos com modalidades persistem na edição.
+`/admin/integrantes` consulta e altera integrantes do mural. Nome, função, curso, Instagram, foto, participação na diretoria e múltiplos vínculos com modalidades persistem na edição. As modalidades são selecionadas por caixas de marcação, sem exigir teclas modificadoras.
 
 `/admin/resultados` consulta e persiste partidas ligadas a uma modalidade cadastrada e, opcionalmente, a um evento sem resultado. Busca, filtros, CRUD e cálculo de vitória/empate/derrota continuam na interface; a tabela pode rolar horizontalmente em telas estreitas.
 
@@ -219,6 +219,28 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 09/11/2026 — Edição de imagem em produtos existentes
+
+- O formulário de edição administrativa agora mantém a descrição, o estado ativo e os IDs das variações do produto. Antes, esses dados eram descartados ao abrir o modal e o salvamento tentava substituir as variações por uma nova `UNICO`, o que podia falhar quando havia pedidos vinculados. A troca de imagem usa o upload real da API e atualiza o mesmo produto no PostgreSQL.
+- Erros ao salvar passam a aparecer dentro do formulário, visíveis mesmo com o modal aberto. Verificação: `npm run lint`, `npx tsc --noEmit`, `git diff --check` e reconstrução do frontend no Docker (30 páginas) passaram; a edição com conta administrativa no navegador ainda requer teste manual.
+
+### 09/11/2026 — Exibição de uploads e espaçamento dos controles administrativos
+
+- A API já salvava imagens enviadas e persistia seus URLs em eventos e produtos, mas a rota pública respondia com `Cross-Origin-Resource-Policy: same-origin`; como o site e a API usam portas diferentes, o navegador bloqueava as prévias e imagens após salvar. A rota `/uploads/:filename` agora autoriza o uso da imagem em outra origem, mantendo a validação de nome UUID, tipo de arquivo e os demais cabeçalhos de segurança. O upload e a persistência continuam integrados ao backend e PostgreSQL.
+- Selects das telas e formulários administrativos receberam seta branca com margem interna uniforme; campos de data e hora usam ícone compatível com o tema escuro e afastamento da borda.
+- Verificação: teste da rota pública com Helmet confirmou resposta `200`, tipo de imagem e `Cross-Origin-Resource-Policy: cross-origin`; backend `npm run lint`, `npm test` (10 testes) e `npm run build`, frontend `npm run lint`, `npx tsc --noEmit` e `npm run build` (30 páginas) passaram.
+
+### 09/11/2026 — Correção complementar da exibição de imagens
+
+- A verificação anterior cobria a resposta direta da API, mas o Next tentava otimizar as URLs absolutas de uploads e retornava `400` no endereço `/_next/image`. As imagens já persistidas em produtos, eventos, integrantes e notícias continuam no banco com URL absoluta; a interface agora converte URLs de upload da API para o caminho `/uploads/...` do próprio site. Um rewrite encaminha esse caminho à API, e as imagens dinâmicas usam a URL diretamente, sem o otimizador. Isso atende prévias e páginas públicas em dispositivos que acessam o site pela rede local.
+- O fluxo continua integrado à API e ao PostgreSQL; não é uma simulação. Verificação: a URL antiga de otimização retornou `400`; frontend `npm run lint`, `npx tsc --noEmit` e build do Docker (30 páginas) passaram. Após reconstruir o frontend, uma imagem de produto já salva retornou `200 OK` e `image/jpeg` pelo endereço `http://localhost:3000/uploads/...`. A inspeção visual no navegador ainda depende de conferência manual.
+
+### 09/11/2026 — Formulários administrativos e seleção de modalidades
+
+- Os modais de cadastro, edição e confirmação de integrantes, eventos, produtos, resultados, pedidos, modalidades, mural e usuários são renderizados acima da estrutura animada do painel. O cartão respeita a altura visível da janela e rola internamente, preservando acesso ao título, fechamento e ações em telas baixas.
+- O cadastro de integrantes substituiu a lista múltipla nativa por checkboxes com rótulos clicáveis, estados selecionados visíveis e disposição responsiva. A função foi separada da seleção de modalidades. Os vínculos continuam sendo enviados à API e persistidos no PostgreSQL, sem alteração do contrato.
+- Verificação: `npm run lint`, `npx tsc --noEmit`, `npm run build` (30 páginas) e `git diff --check` passaram. A inspeção visual no navegador ficou pendente porque o site local não estava em execução nesta sessão.
 
 ### 23/10/2026 — Sessão global e cobertura completa da administração
 

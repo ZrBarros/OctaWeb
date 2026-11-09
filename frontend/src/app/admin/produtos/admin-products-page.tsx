@@ -3,9 +3,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
+import { AdminDialogPortal } from "../admin-dialog-portal";
 import { adminProductCategories, type AdminProduct } from "@/data/admin-products";
 import { apiCategory } from "@/lib/api-mappers";
 import { apiClient, uploadImage } from "@/lib/api";
+import { displayImageUrl } from "@/lib/display-image-url";
 import type { ApiItem, ApiPage, ApiProduct } from "@/lib/api-types";
 import { formatPrice } from "@/data/products";
 import shared from "../admin.module.css";
@@ -31,6 +33,7 @@ export function AdminProductsPage() {
   const [message, setMessage] = useState("");
   const [priceInput, setPriceInput] = useState("");
   const [imageError, setImageError] = useState("");
+  const [saveError, setSaveError] = useState("");
   const filteredItems = items.filter((item) => `${item.name} ${item.category}`.toLocaleLowerCase("pt-BR").includes(query.trim().toLocaleLowerCase("pt-BR")));
   const deletingItem = items.find((item) => item.id === deletingId);
 
@@ -48,9 +51,10 @@ export function AdminProductsPage() {
 
   function openEditor(item?: AdminProduct) {
     setEditingId(item?.id ?? null);
-    setDraft(item ? { name: item.name, category: item.category, priceCents: item.priceCents, stock: item.stock, image: item.image } : { ...emptyDraft });
+    setDraft(item ? { name: item.name, category: item.category, priceCents: item.priceCents, stock: item.stock, image: item.image, description: item.description, active: item.active, variations: item.variations?.map((variation) => ({ ...variation })) ?? [] } : { ...emptyDraft });
     setPriceInput(item ? (item.priceCents / 100).toFixed(2).replace(".", ",") : "");
     setImageError("");
+    setSaveError("");
     setMessage("");
   }
 
@@ -79,8 +83,8 @@ export function AdminProductsPage() {
     if (!name || !Number.isFinite(price) || price <= 0 || !Number.isInteger(draft.stock) || draft.stock < 0) return;
     const baseVariations = draft.variations?.length ? draft.variations.map((variation) => ({ ...variation })) : [{ size: "UNICO", stock: 0 }];
     let remainingStock = draft.stock; for (const variation of baseVariations) { variation.stock = Math.min(variation.stock, remainingStock); remainingStock -= variation.stock; } baseVariations[0]!.stock += remainingStock;
-    try { const response = await apiClient<ApiItem<ApiProduct>>(`/admin/products${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ name, description: draft.description ?? null, priceCents: Math.round(price * 100), category: apiCategory(draft.category), imageUrl: draft.image ?? null, active: draft.active ?? true, variations: baseVariations }) }); const mapped = mapProduct(response.data); setItems((current) => editingId === null ? [mapped, ...current] : current.map((item) => item.id === editingId ? mapped : item)); setMessage(editingId === null ? "Produto cadastrado na loja." : "Produto atualizado."); }
-    catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível salvar o produto."); return; }
+    try { const response = await apiClient<ApiItem<ApiProduct>>(`/admin/products${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ name, description: draft.description ?? null, priceCents: Math.round(price * 100), category: apiCategory(draft.category), imageUrl: draft.image ?? null, active: draft.active ?? true, variations: baseVariations }) }); const mapped = mapProduct(response.data); setItems((current) => editingId === null ? [mapped, ...current] : current.map((item) => item.id === editingId ? mapped : item)); setMessage(editingId === null ? "Produto cadastrado na loja." : "Produto atualizado."); setSaveError(""); }
+    catch (reason) { setSaveError(reason instanceof Error ? reason.message : "Não foi possível salvar o produto."); return; }
     setDraft(null);
     setQuery("");
   }
@@ -109,7 +113,7 @@ export function AdminProductsPage() {
             <thead><tr><th>Imagem</th><th>Nome do Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Ações</th></tr></thead>
             <tbody>
               {filteredItems.map((item) => <tr key={item.id}>
-                <td data-label="Imagem"><span className={styles.thumbnail}>{item.image ? <Image src={item.image} alt="" width={48} height={48} unoptimized={item.image.startsWith("data:")} /> : <AdminIcon name="products" />}</span></td>
+                <td data-label="Imagem"><span className={styles.thumbnail}>{item.image ? <Image src={displayImageUrl(item.image)} alt="" width={48} height={48} unoptimized /> : <AdminIcon name="products" />}</span></td>
                 <td data-label="Produto" className={styles.productName}>{item.name}</td>
                 <td data-label="Categoria">{item.category}</td>
                 <td data-label="Preço" className={styles.price}>{formatPrice(item.priceCents)}</td>
@@ -123,7 +127,7 @@ export function AdminProductsPage() {
       </div>
     </div>
 
-    {draft && <div className={styles.overlay}>
+    {draft && <AdminDialogPortal><div className={styles.overlay}>
       <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="product-dialog-title">
         <div className={styles.dialogHeader}><h2 id="product-dialog-title">{editingId === null ? "Cadastrar produto" : "Editar produto"}</h2><button type="button" aria-label="Fechar formulário" onClick={() => setDraft(null)}>×</button></div>
         <p>As alterações serão salvas no banco e refletidas na loja.</p>
@@ -136,18 +140,19 @@ export function AdminProductsPage() {
           <label>Quantidade em estoque<input required type="number" min="0" step="1" value={draft.stock} onChange={(event) => setDraft({ ...draft, stock: Number(event.target.value) })} /></label>
           <label>Imagem do produto (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /><small>JPG, PNG ou WebP, até 2 MB.</small></label>
           {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}
-          {draft.image && <div className={styles.selectedImage}><Image src={draft.image} alt="Prévia da imagem do produto" width={82} height={82} unoptimized={draft.image.startsWith("data:")} /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover imagem</button></div>}
+          {draft.image && <div className={styles.selectedImage}><Image src={displayImageUrl(draft.image)} alt="Prévia da imagem do produto" width={82} height={82} unoptimized /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover imagem</button></div>}
+          {saveError && <span className={styles.imageError} role="alert">{saveError}</span>}
           <div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDraft(null)}>Cancelar</button><button className={styles.saveButton} type="submit">{editingId === null ? "Cadastrar produto" : "Salvar alterações"}</button></div>
         </form>
       </section>
-    </div>}
+    </div></AdminDialogPortal>}
 
-    {deletingItem && <div className={styles.overlay}>
+    {deletingItem && <AdminDialogPortal><div className={styles.overlay}>
       <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="delete-product-title">
         <div className={styles.dialogHeader}><h2 id="delete-product-title">Excluir produto?</h2><button type="button" aria-label="Cancelar exclusão" onClick={() => setDeletingId(null)}>×</button></div>
         <p>Desativar “{deletingItem.name}”? O produto deixará de aparecer na loja pública.</p>
         <div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDeletingId(null)}>Cancelar</button><button className={styles.deleteConfirm} type="button" onClick={() => void deleteProduct()}>Desativar produto</button></div>
       </section>
-    </div>}
+    </div></AdminDialogPortal>}
   </>;
 }

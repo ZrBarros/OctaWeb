@@ -5,8 +5,10 @@ import Image from "next/image";
 import { InstagramIcon } from "@/components/instagram-icon";
 import { type AdminMember } from "@/data/admin-members";
 import { apiClient, uploadImage } from "@/lib/api";
+import { displayImageUrl } from "@/lib/display-image-url";
 import type { ApiItem, ApiMember, ApiModality, ApiPage } from "@/lib/api-types";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
+import { AdminDialogPortal } from "../admin-dialog-portal";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
 
@@ -84,7 +86,7 @@ export function AdminMembersPage() {
       <div className={styles.grid}>
         {filtered.map((item) => <article className={styles.card} key={item.id}>
           <button className={styles.cardMain} type="button" onClick={() => openEditor(item)} aria-label={`Editar ${item.name}`}>
-            <div className={styles.avatar}>{item.image ? <Image src={item.image} alt={`Foto de ${item.name}`} width={76} height={76} unoptimized={item.image.startsWith("data:")} /> : <span aria-label={`Foto de ${item.name} pendente`}>{initials(item.name)}</span>}</div>
+            <div className={styles.avatar}>{item.image ? <Image src={displayImageUrl(item.image)} alt={`Foto de ${item.name}`} width={76} height={76} unoptimized /> : <span aria-label={`Foto de ${item.name} pendente`}>{initials(item.name)}</span>}</div>
             <div className={styles.cardContent}><h2>{item.name}</h2><p className={styles.role}>{item.role}</p><p className={styles.course}>{item.course}</p><p className={styles.instagram}><InstagramIcon /><span>@{item.instagram}</span></p></div>
           </button>
           <div className={styles.cardActions}><button type="button" onClick={() => openEditor(item)} aria-label={`Editar ${item.name}`}>Editar</button><button type="button" onClick={() => setRemovingId(item.id)} aria-label={`Remover ${item.name}`}>Remover</button></div>
@@ -93,23 +95,26 @@ export function AdminMembersPage() {
       </div>
     </div>
 
-    {draft && <div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="member-dialog-title">
+    {draft && <AdminDialogPortal><div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="member-dialog-title">
       <div className={styles.dialogHeader}><h2 id="member-dialog-title">{editingId === null ? "Novo integrante" : "Editar integrante"}</h2><button type="button" aria-label="Fechar formulário" onClick={() => setDraft(null)}>×</button></div>
       <p>As alterações serão salvas no banco.</p>
       <form className={styles.form} onSubmit={saveMember}>
         <label>Nome<input autoFocus required maxLength={100} value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} placeholder="Nome do integrante" /></label>
-        <label>Função e modalidade<input required maxLength={100} value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Ex.: Atleta · Basquete" /></label>
+        <label>Função<input required maxLength={100} value={draft.role} onChange={(event) => setDraft({ ...draft, role: event.target.value })} placeholder="Ex.: Atleta" /></label>
         <label>Curso<input required maxLength={100} value={draft.course} onChange={(event) => setDraft({ ...draft, course: event.target.value })} placeholder="Ex.: Ciência da Computação" /></label>
-        <label>Modalidades<select multiple value={(draft.modalityIds ?? []).map(String)} onChange={(event) => setDraft({ ...draft, modalityIds: Array.from(event.currentTarget.selectedOptions, (option) => Number(option.value)) })}>{modalities.map((item) => <option value={item.id} key={item.id}>{item.nome}</option>)}</select><small>Use Ctrl ou Command para selecionar mais de uma.</small></label>
-        <label><input type="checkbox" checked={draft.boardMember ?? false} onChange={(event) => setDraft({ ...draft, boardMember: event.target.checked })} /> Integrante da diretoria</label>
+        <fieldset className={styles.modalityFieldset}><legend>Modalidades praticadas</legend><div className={styles.modalityOptions}>
+          {modalities.map((item) => <label className={styles.checkOption} key={item.id}><input type="checkbox" checked={(draft.modalityIds ?? []).includes(item.id)} onChange={(event) => setDraft((current) => current ? { ...current, modalityIds: event.target.checked ? [...(current.modalityIds ?? []), item.id] : (current.modalityIds ?? []).filter((id) => id !== item.id) } : null)} /><span>{item.nome}</span></label>)}
+          {modalities.length === 0 && <small>Nenhuma modalidade cadastrada.</small>}
+        </div></fieldset>
+        <label className={styles.boardOption}><input type="checkbox" checked={draft.boardMember ?? false} onChange={(event) => setDraft({ ...draft, boardMember: event.target.checked })} /><span>Integrante da diretoria</span></label>
         <label>Usuário do Instagram<input required pattern="@?[a-zA-Z0-9._]{1,30}" title="Use até 30 letras, números, pontos ou sublinhados, com @ opcional" value={draft.instagram} onChange={(event) => setDraft({ ...draft, instagram: event.target.value })} placeholder="@usuario" /></label>
         <label>Foto (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /><small>JPG, PNG ou WebP, até 2 MB.</small></label>
         {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}
-        {draft.image && <div className={styles.selectedImage}><Image src={draft.image} alt="Prévia da foto do integrante" width={76} height={76} unoptimized={draft.image.startsWith("data:")} /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover foto</button></div>}
+        {draft.image && <div className={styles.selectedImage}><Image src={displayImageUrl(draft.image)} alt="Prévia da foto do integrante" width={76} height={76} unoptimized /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover foto</button></div>}
         <div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setDraft(null)}>Cancelar</button><button className={styles.saveButton} type="submit">{editingId === null ? "Cadastrar integrante" : "Salvar alterações"}</button></div>
       </form>
-    </section></div>}
+    </section></div></AdminDialogPortal>}
 
-    {removingMember && <div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="remove-member-title"><div className={styles.dialogHeader}><h2 id="remove-member-title">Remover integrante?</h2><button type="button" aria-label="Cancelar remoção" onClick={() => setRemovingId(null)}>×</button></div><p>Remover “{removingMember.name}”? A alteração afeta o mural público.</p><div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setRemovingId(null)}>Cancelar</button><button className={styles.removeConfirm} type="button" onClick={() => void removeMember()}>Remover integrante</button></div></section></div>}
+    {removingMember && <AdminDialogPortal><div className={styles.overlay}><section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="remove-member-title"><div className={styles.dialogHeader}><h2 id="remove-member-title">Remover integrante?</h2><button type="button" aria-label="Cancelar remoção" onClick={() => setRemovingId(null)}>×</button></div><p>Remover “{removingMember.name}”? A alteração afeta o mural público.</p><div className={styles.dialogActions}><button className={styles.cancelButton} type="button" onClick={() => setRemovingId(null)}>Cancelar</button><button className={styles.removeConfirm} type="button" onClick={() => void removeMember()}>Remover integrante</button></div></section></div></AdminDialogPortal>}
   </>;
 }

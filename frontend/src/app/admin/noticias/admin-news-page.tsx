@@ -7,6 +7,7 @@ import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell"
 import { adminNewsCategories, type AdminNewsItem, type AdminNewsCategory, type AdminNewsStatus } from "@/data/admin-news";
 import { apiCategory } from "@/lib/api-mappers";
 import { apiClient, uploadImage } from "@/lib/api";
+import { displayImageUrl } from "@/lib/display-image-url";
 import type { ApiItem, ApiNews, ApiPage } from "@/lib/api-types";
 import shared from "../admin.module.css";
 import styles from "./page.module.css";
@@ -165,7 +166,7 @@ export function AdminNewsPage() {
             <button className={styles.sampleImageButton} type="button" onClick={() => { setDraft({ ...draft, imageSrc: "/images/imagem-galeria.png", imageAlt: "Registro da galeria da Octacore" }); setImageError(""); }}>Usar imagem da galeria como exemplo</button>
             {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}
             {draft.imageSrc && <div className={styles.selectedImage}>
-              <Image src={draft.imageSrc} alt={draft.imageAlt || "Imagem selecionada para a notícia"} width={960} height={540} unoptimized />
+              <Image src={displayImageUrl(draft.imageSrc)} alt={draft.imageAlt || "Imagem selecionada para a notícia"} width={960} height={540} unoptimized />
               <button type="button" onClick={() => setDraft({ ...draft, imageSrc: undefined, imageAlt: "" })}>Remover imagem</button>
             </div>}
             {draft.imageSrc && <label>Descrição da imagem<input required value={draft.imageAlt} onChange={(event) => setDraft({ ...draft, imageAlt: event.target.value })} placeholder="Descreva o que aparece na imagem" /></label>}
@@ -176,7 +177,7 @@ export function AdminNewsPage() {
             <div className={styles.previewTop}><span className={styles.previewCategory}>{draft.category}</span><span className={styles.published}>{draft.status}</span></div>
             <h3>{draft.title.trim()}</h3>
             <div className={styles.previewMeta}>Por {draft.author.trim()} <span aria-hidden="true">•</span> {editingId === null ? "Hoje" : items.find((item) => item.id === editingId)?.date}</div>
-            {draft.imageSrc ? <Image className={styles.previewImage} src={draft.imageSrc} alt={draft.imageAlt.trim()} width={960} height={540} unoptimized /> : <div className={styles.previewPlaceholder} role="img" aria-label="Imagem da notícia ainda não adicionada" />}
+            {draft.imageSrc ? <Image className={styles.previewImage} src={displayImageUrl(draft.imageSrc)} alt={draft.imageAlt.trim()} width={960} height={540} unoptimized /> : <div className={styles.previewPlaceholder} role="img" aria-label="Imagem da notícia ainda não adicionada" />}
             <p className={styles.previewLead}>{draft.summary.trim()}</p>
             <div className={styles.previewBody}>{draft.body.trim().split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
           </article>

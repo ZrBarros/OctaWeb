@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
+import { AdminDialogPortal } from "../admin-dialog-portal";
 import { orderStatuses, orderTotalCents, type AdminOrder, type OrderStatus } from "@/data/admin-orders";
 import { apiClient } from "@/lib/api";
 import type { ApiOrder, ApiPage, ApiItem } from "@/lib/api-types";
@@ -127,7 +128,7 @@ export function AdminOrdersPage() {
       </div>
     </div>
 
-    {selectedOrder && <div className={styles.overlay} onClick={(event) => { if (event.target === event.currentTarget) setSelectedNumber(null); }}>
+    {selectedOrder && <AdminDialogPortal><div className={styles.overlay} onClick={(event) => { if (event.target === event.currentTarget) setSelectedNumber(null); }}>
       <section className={styles.orderDialog} role="dialog" aria-modal="true" aria-labelledby="order-dialog-title">
         <div className={styles.dialogHeader}>
           <div><p>Gerenciar pedido</p><h2 id="order-dialog-title">Pedido #{selectedOrder.number}</h2></div>
@@ -160,6 +161,6 @@ export function AdminOrdersPage() {
           <button className={styles.saveButton} type="button" disabled={draftStatus === selectedOrder.status} onClick={() => void saveStatus()}>Salvar novo status</button>
         </div>
       </section>
-    </div>}
+    </div></AdminDialogPortal>}
   </>;
 }
