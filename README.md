@@ -19,9 +19,12 @@ docker compose up --build
 
 - Site: http://localhost:3000
 - API: http://localhost:3333
+- Swagger: http://localhost:3333/docs
 - OpenAPI: http://localhost:3333/docs/openapi.json
 - Health check: http://localhost:3333/health
 - PostgreSQL no host: `localhost:5433`
+
+O serviço `api` já executa o backend Python de `backend-python/`. Para usar o site, basta iniciar `db`, `api` e `frontend`; o serviço opcional `api-python` da configuração paralela, na porta 3334, não é necessário. A pasta antiga `backend/` foi removida.
 
 O compose é uma configuração local. Antes de publicar, troque os três segredos JWT, ative cookies seguros, configure os domínios reais e forneça SMTP.
 
@@ -78,6 +81,5 @@ O carrinho continua no `localStorage`, mas preços, variações e estoque vêm d
 
 - [`frontend/`](frontend/) — aplicação Next.js e integração com a API.
 - [`backend-python/`](backend-python/) — API FastAPI ativa, modelos SQLAlchemy, regras, testes, upload e documentação operacional.
-- [`backend/`](backend/) — implementação Fastify legada, preservada temporariamente apenas como referência e rollback.
 - [`database/`](database/) — schema SQL oficial, seed e MER.
 - [`DOCUMENTACAO.md`](DOCUMENTACAO.md) — estado detalhado, limitações e histórico.

@@ -39,5 +39,5 @@ ruff check app tests
 - Cancelamento devolve estoque e respeita a mesma máquina de estados.
 - Uploads validam tamanho, MIME, assinatura binária e nome UUID.
 
-O Docker Compose principal já constrói `backend-python/`. O diretório `backend/` permanece temporariamente apenas como referência e possibilidade de rollback, enquanto `docker-compose.python.yml` permite subir uma segunda instância Python de teste na porta 3334.
+O Docker Compose principal constrói `backend-python/` como serviço `api`, na porta 3333. O diretório antigo `backend/` foi removido. `docker-compose.python.yml` permite subir uma segunda instância Python de teste na porta 3334, mas ela não é necessária para executar o frontend com a API principal e o banco.
 

@@ -13,7 +13,7 @@ Este é o registro contínuo do site da Associação Atlética Acadêmica de Com
 O site reúne informações da atlética, notícias, modalidades, agenda, mural e produtos. O frontend está conectado a uma API REST que aplica autenticação, autorização, regras de estoque, pedidos e administração de conteúdo sobre o PostgreSQL existente.
 
 - **Front end escolhido:** Next.js, React e TypeScript.
-- **Backend implementado:** Python 3.13, FastAPI, SQLAlchemy 2, Pydantic e psycopg, em `backend-python/`; a versão Fastify em `backend/` permanece temporariamente como referência de rollback.
+- **Backend implementado:** Python 3.13, FastAPI, SQLAlchemy 2, Pydantic e psycopg, em `backend-python/`; a pasta antiga `backend/`, com Fastify, foi removida.
 - **Banco:** PostgreSQL, com as 14 tabelas oficiais do schema `octacore`; o backend apenas mapeia o schema e não o altera.
 - **Integração real:** autenticação, conteúdo público, administração, uploads, estoque e pedidos.
 - **Ainda demonstrativo:** pagamento, presença/favorito em eventos, ranking, estatística individual e atividades administrativas, pois o schema não possui entidades correspondentes.
@@ -79,7 +79,16 @@ A separação é validada pela API em cada rota protegida. A interface também r
 
 ## 3. Como executar e conferir
 
-No terminal, a partir da pasta `frontend`:
+Para executar frontend, API Python e banco juntos, rode na raiz do projeto:
+
+```bash
+docker compose up -d --build
+docker compose ps
+```
+
+O site fica em `http://localhost:3000`, o Swagger em `http://localhost:3333/docs` e a saúde da API em `http://localhost:3333/health`. O serviço `api` usa `backend-python/`; a instância opcional `api-python` na porta 3334 pode permanecer parada. A conexão externa ao PostgreSQL usa `localhost:5433`.
+
+Para desenvolver somente o frontend, com API e banco já disponíveis, execute a partir da pasta `frontend`:
 
 ```bash
 npm install
@@ -110,7 +119,6 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `backend-python/app/routers/`, `services/` e `repositories/` | Rotas FastAPI, regras de negócio e acesso SQLAlchemy de autenticação, conteúdo, loja e administração. |
 | `backend-python/app/models.py` | Mapeamento SQLAlchemy fiel às 14 tabelas; não cria migrações. |
 | `backend-python/tests/` | Testes Pytest de validação, tokens e bcrypt. |
-| `backend/` | Implementação Fastify/Prisma legada, fora do Compose principal e mantida temporariamente para consulta/rollback. |
 | `docker-compose.yml` | Frontend, API e PostgreSQL com health checks. |
 | `frontend/src/components/auth-form.tsx` | Formulário compartilhado pelas telas de login e cadastro. |
 | `frontend/src/data/account.ts` | Legado visual; conta e pedidos integrados não usam mais estes valores. |
@@ -204,7 +212,7 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 
 ## 8. Decisões e limites conhecidos
 
-- O frontend usa **Next.js + TypeScript**; em 10/11/2026 o backend principal foi migrado para **Python + FastAPI + SQLAlchemy + Pydantic + psycopg** para facilitar a manutenção pela equipe. O contrato HTTP e o schema PostgreSQL foram preservados; Fastify/Prisma permanece apenas como rollback temporário.
+- O frontend usa **Next.js + TypeScript**; em 10/11/2026 o backend principal foi migrado para **Python + FastAPI + SQLAlchemy + Pydantic + psycopg** para facilitar a manutenção pela equipe. O contrato HTTP e o schema PostgreSQL foram preservados. A pasta Fastify/Prisma foi removida; uma recuperação da implementação antiga depende de um commit anterior que a contenha.
 - O banco de dados é **PostgreSQL**, com as tabelas no schema `octacore`. A estrutura oficial fica em `database/01_schema.sql`, derivada do MER do projeto; mudanças de estrutura devem ser feitas nesse arquivo e versionadas. Os slugs de notícias, eventos, modalidades, integrantes e produtos seguem as rotas do front end.
 - O protótipo do Figma orienta a interface; a fonte Outfit e os arquivos em `assets/` compõem a identidade visual atual.
 - Fotos ainda indisponíveis permanecem como placeholders, conforme combinado para galeria, mural e integrantes.
@@ -221,12 +229,18 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 
 ## 9. Histórico de desenvolvimento
 
+### 10/11/2026 — Documentação após remoção do backend legado
+
+- Atualizados os READMEs e o estado atual desta documentação após a exclusão de `backend/`. A única implementação de backend presente no projeto é `backend-python/`.
+- Esclarecido que o serviço principal `api` já executa Python na porta 3333 e que a instância paralela `api-python` na porta 3334 é opcional. Mantidos os registros históricos da implementação Fastify e da migração.
+- Verificação: confirmada a ausência de `backend/` e o caminho `build: ./backend-python` no Compose principal; revisão documental e `git diff --check`. Não houve alteração de código, dados ou integração nesta atualização.
+
 ### 10/11/2026 — Migração integral do backend para Python/FastAPI
 
 - Criado `backend-python/` com Python 3.13, FastAPI, SQLAlchemy 2, Pydantic, psycopg, PyJWT e bcrypt. Os 14 modelos apontam para o schema `octacore` existente, sem recriar tabelas ou perder dados.
 - Reimplementadas as 41 rotas de autenticação, conteúdo público, administração, loja, pedidos, usuários, dashboard e uploads. Foram preservados URLs, envelopes JSON, nomes dos campos, JWT HS256, cookie `httpOnly`, hashes bcrypt, permissões `USUARIO`/`ADMIN`, validações e erros padronizados.
 - Pedidos mantêm transação serializável, bloqueio de estoque, preço congelado, trigger de total e devolução de estoque no cancelamento. A conexão psycopg configura `search_path=octacore,public` para compatibilidade com os triggers existentes.
-- `docker-compose.yml` passou a construir `backend-python/` como serviço `api`. `backend/` continua versionado apenas como referência/rollback, e `docker-compose.python.yml` permite uma segunda instância Python de teste na porta 3334.
+- `docker-compose.yml` passou a construir `backend-python/` como serviço `api`. Na etapa inicial da migração, `backend/` foi mantido como referência/rollback e removido posteriormente. `docker-compose.python.yml` permite uma segunda instância Python de teste na porta 3334.
 - Verificação: `compileall`, Pytest com 7 testes, Ruff e o build de produção das 30 páginas passaram. A API paralela foi comparada ao Fastify nas listagens públicas; depois, o Compose principal foi recriado com FastAPI e ficou saudável na porta 3333, com 49 caminhos no OpenAPI e frontend `200` na porta 3000. Login, refresh, `/auth/me`, usuários, dashboard, CRUD completo de conteúdo, pedido real, redução/restauração de estoque, upload e leitura pública foram testados contra PostgreSQL; todos os registros e arquivos temporários foram removidos.
 
 ### 26/10/2026 — Transições de rota e revelação no scroll
