@@ -1,0 +1,33 @@
+services:
+  api-python:
+    build: ./backend-python
+    environment:
+      ENVIRONMENT: production
+      HOST: 0.0.0.0
+      PORT: 3333
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/octacore?schema=octacore
+      FRONTEND_ORIGIN: http://localhost:3000
+      PUBLIC_API_URL: http://localhost:3334
+      JWT_ACCESS_SECRET: altere-este-segredo-access-com-32-caracteres
+      JWT_REFRESH_SECRET: altere-este-segredo-refresh-com-32-caracteres
+      JWT_RESET_SECRET: altere-este-segredo-reset-com-32-caracteres
+      ACCESS_TOKEN_TTL: 15m
+      REFRESH_TOKEN_TTL: 30d
+      RESET_TOKEN_TTL: 15m
+      COOKIE_SECURE: "false"
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_BYTES: 2097152
+      PASSWORD_RESET_URL: http://localhost:3000/redefinir-senha
+    ports:
+      - "3334:3333"
+    volumes:
+      - octaweb-uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3333/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+

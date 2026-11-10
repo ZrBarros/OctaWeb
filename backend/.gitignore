@@ -1,6 +1,0 @@
-node_modules/
-.npm-cache/
-dist/
-.env
-uploads/*
-!uploads/.gitkeep

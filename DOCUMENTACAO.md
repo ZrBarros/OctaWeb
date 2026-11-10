@@ -1,8 +1,8 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 26/10/2026
+**Última atualização:** 10/11/2026
 
-**Estado:** MVP full stack integrado; backend e banco prontos para execução, com limitações de schema documentadas
+**Estado:** MVP full stack integrado; backend Python/FastAPI ativo no Docker Compose e banco preservado, com limitações de schema documentadas
 
 **Referência visual:** protótipo [Projeto P3 — Octacore no Figma](https://www.figma.com/design/BcgJnC6UWsDG5W5B5mO7V6/Projeto-P3---Octacore?node-id=0-1)
 
@@ -13,7 +13,7 @@ Este é o registro contínuo do site da Associação Atlética Acadêmica de Com
 O site reúne informações da atlética, notícias, modalidades, agenda, mural e produtos. O frontend está conectado a uma API REST que aplica autenticação, autorização, regras de estoque, pedidos e administração de conteúdo sobre o PostgreSQL existente.
 
 - **Front end escolhido:** Next.js, React e TypeScript.
-- **Backend implementado:** Node.js, TypeScript, Fastify e Prisma, em `backend/`.
+- **Backend implementado:** Python 3.13, FastAPI, SQLAlchemy 2, Pydantic e psycopg, em `backend-python/`; a versão Fastify em `backend/` permanece temporariamente como referência de rollback.
 - **Banco:** PostgreSQL, com as 14 tabelas oficiais do schema `octacore`; o backend apenas mapeia o schema e não o altera.
 - **Integração real:** autenticação, conteúdo público, administração, uploads, estoque e pedidos.
 - **Ainda demonstrativo:** pagamento, presença/favorito em eventos, ranking, estatística individual e atividades administrativas, pois o schema não possui entidades correspondentes.
@@ -35,7 +35,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 ## 1.2 Arquitetura integrada
 
 - O frontend usa `API_URL` em Server Components e `NEXT_PUBLIC_API_URL` nas telas interativas.
-- A API usa camadas de rotas/controladores, serviços e repositórios, validação Zod, Prisma, erros padronizados, logs com redação de segredos, CORS, Helmet e rate limiting.
+- A API usa rotas FastAPI, serviços e repositórios, validação Pydantic, SQLAlchemy/psycopg, erros padronizados, CORS, cabeçalhos de segurança e rate limiting. Os modelos mapeiam o schema existente sem gerar migrações.
 - O access token fica em memória no navegador; o refresh token usa cookie `httpOnly` e é renovado automaticamente. Sem tabela de tokens, logout remove o cookie do cliente, mas não mantém lista de revogação no servidor.
 - O checkout exige usuário autenticado. A criação do pedido usa transação serializável, valida estoque, desconta quantidades e congela o preço nos itens; o trigger do banco recalcula o total.
 - Uploads administrativos aceitam JPG, PNG ou WebP de até 2 MB, conferem assinatura binária e são servidos apenas por nome UUID validado.
@@ -107,9 +107,10 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. |
 | `frontend/src/data/` | Tipos, rótulos e dados que continuam demonstrativos; não é mais a fonte dos módulos integrados. |
 | `frontend/src/lib/cart.ts` | Seleção do carrinho no navegador; a API revalida produto, variação, preço e estoque no checkout. |
-| `backend/src/modules/` | Rotas/controladores, serviços, repositórios e validações de autenticação, conteúdo, loja e administração. |
-| `backend/prisma/schema.prisma` | Mapeamento ORM fiel às 14 tabelas; não cria migrações. |
-| `backend/tests/` | Testes de validação, tokens e endpoints de autenticação. |
+| `backend-python/app/routers/`, `services/` e `repositories/` | Rotas FastAPI, regras de negócio e acesso SQLAlchemy de autenticação, conteúdo, loja e administração. |
+| `backend-python/app/models.py` | Mapeamento SQLAlchemy fiel às 14 tabelas; não cria migrações. |
+| `backend-python/tests/` | Testes Pytest de validação, tokens e bcrypt. |
+| `backend/` | Implementação Fastify/Prisma legada, fora do Compose principal e mantida temporariamente para consulta/rollback. |
 | `docker-compose.yml` | Frontend, API e PostgreSQL com health checks. |
 | `frontend/src/components/auth-form.tsx` | Formulário compartilhado pelas telas de login e cadastro. |
 | `frontend/src/data/account.ts` | Legado visual; conta e pedidos integrados não usam mais estes valores. |
@@ -132,9 +133,9 @@ Notícias, produtos, estoque, modalidades, horários, agenda, integrantes, resul
 | Conteúdo | Arquivo |
 | --- | --- |
 | Conteúdo, catálogo, esporte e pedidos integrados | Painel `/admin`, API `/api/v1` e PostgreSQL |
-| Contratos e regras do banco | `database/01_schema.sql` e `backend/prisma/schema.prisma` |
+| Contratos e regras do banco | `database/01_schema.sql` e `backend-python/app/models.py` |
 | Configuração de API no frontend | `frontend/.env.local` |
-| Configuração da API | `backend/.env` |
+| Configuração da API | `backend-python/.env` |
 | Detalhe visual de presença em evento | `frontend/src/data/event-details.ts` (somente tipos/limitação visual) |
 | Perfil e estatísticas do atleta | `frontend/src/data/athletes.ts` |
 | Ranking e estatísticas esportivas gerais | `frontend/src/data/ranking.ts` |
@@ -195,7 +196,7 @@ A navegação administrativa mantém o comportamento responsivo anterior. A navb
 
 ## 7. Próximos passos
 
-1. Validar o compose e os fluxos de ponta a ponta em uma máquina com Docker/PostgreSQL, incluindo concorrência de estoque, uploads e SMTP.
+1. Configurar e validar SMTP real; os demais fluxos do Compose, banco, autenticação, conteúdo, pedido/estoque e uploads já foram exercitados contra PostgreSQL.
 2. Decidir e versionar uma evolução de schema para refresh/reset tokens revogáveis, presença/favoritos, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
 3. Revisar acessibilidade/responsividade em dispositivos físicos e substituir placeholders pelas imagens aprovadas.
 
@@ -203,7 +204,7 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 
 ## 8. Decisões e limites conhecidos
 
-- O frontend usa **Next.js + TypeScript**; o backend implementado usa **Fastify + TypeScript + Prisma**, escolha feita para compartilhar linguagem, reduzir boilerplate e manter o schema PostgreSQL existente.
+- O frontend usa **Next.js + TypeScript**; em 10/11/2026 o backend principal foi migrado para **Python + FastAPI + SQLAlchemy + Pydantic + psycopg** para facilitar a manutenção pela equipe. O contrato HTTP e o schema PostgreSQL foram preservados; Fastify/Prisma permanece apenas como rollback temporário.
 - O banco de dados é **PostgreSQL**, com as tabelas no schema `octacore`. A estrutura oficial fica em `database/01_schema.sql`, derivada do MER do projeto; mudanças de estrutura devem ser feitas nesse arquivo e versionadas. Os slugs de notícias, eventos, modalidades, integrantes e produtos seguem as rotas do front end.
 - O protótipo do Figma orienta a interface; a fonte Outfit e os arquivos em `assets/` compõem a identidade visual atual.
 - Fotos ainda indisponíveis permanecem como placeholders, conforme combinado para galeria, mural e integrantes.
@@ -219,6 +220,14 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 10/11/2026 — Migração integral do backend para Python/FastAPI
+
+- Criado `backend-python/` com Python 3.13, FastAPI, SQLAlchemy 2, Pydantic, psycopg, PyJWT e bcrypt. Os 14 modelos apontam para o schema `octacore` existente, sem recriar tabelas ou perder dados.
+- Reimplementadas as 41 rotas de autenticação, conteúdo público, administração, loja, pedidos, usuários, dashboard e uploads. Foram preservados URLs, envelopes JSON, nomes dos campos, JWT HS256, cookie `httpOnly`, hashes bcrypt, permissões `USUARIO`/`ADMIN`, validações e erros padronizados.
+- Pedidos mantêm transação serializável, bloqueio de estoque, preço congelado, trigger de total e devolução de estoque no cancelamento. A conexão psycopg configura `search_path=octacore,public` para compatibilidade com os triggers existentes.
+- `docker-compose.yml` passou a construir `backend-python/` como serviço `api`. `backend/` continua versionado apenas como referência/rollback, e `docker-compose.python.yml` permite uma segunda instância Python de teste na porta 3334.
+- Verificação: `compileall`, Pytest com 7 testes, Ruff e o build de produção das 30 páginas passaram. A API paralela foi comparada ao Fastify nas listagens públicas; depois, o Compose principal foi recriado com FastAPI e ficou saudável na porta 3333, com 49 caminhos no OpenAPI e frontend `200` na porta 3000. Login, refresh, `/auth/me`, usuários, dashboard, CRUD completo de conteúdo, pedido real, redução/restauração de estoque, upload e leitura pública foram testados contra PostgreSQL; todos os registros e arquivos temporários foram removidos.
 
 ### 26/10/2026 — Transições de rota e revelação no scroll
 

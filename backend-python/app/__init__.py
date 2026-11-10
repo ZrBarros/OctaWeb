@@ -1,0 +1,2 @@
+"""API Octacore em FastAPI."""
+
