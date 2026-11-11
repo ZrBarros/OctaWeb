@@ -1,6 +1,6 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 10/11/2026
+**Última atualização:** 11/11/2026
 
 **Estado:** MVP full stack integrado; backend Python/FastAPI ativo no Docker Compose e banco preservado, com limitações de schema documentadas
 
@@ -62,7 +62,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/checkout` | Dados de retirada e criação de pedido autenticado. | **Integração real:** pedido transacional e estoque; sem cobrança/pagamento |
 | `/login`, `/cadastro` e `/redefinir-senha` | Cadastro, login, recuperação e redefinição. | **Integração real:** bcrypt, JWT e cookie `httpOnly` |
 | `/minha-conta` | Painel do usuário conectado, edição de nome/curso, troca de senha e logout. | **Integração real:** sessão compartilhada, perfil e credenciais da API |
-| `/meus-pedidos` | Pedidos ativos, progresso e histórico. | **Integração real:** pedidos do usuário autenticado |
+| `/meus-pedidos` e `/meus-pedidos#historico` | Abas separadas de pedidos ativos e histórico; apenas a lista selecionada aparece. Ativos incluem Pendente, Confirmado, Em separação e Disponível para retirada; histórico inclui Entregue e Cancelado. | **Integração real:** pedidos do usuário autenticado, classificados pelo status retornado pela API |
 | `/admin` | Indicadores e vendas derivados do banco; atividades recentes ficam vazias por falta de tabela de auditoria. | **Integração real:** rota protegida por ADMIN |
 | `/admin/perfil` | Perfil da conta administrativa, edição de dados, troca de senha e atalhos. | **Integração real:** usa a mesma sessão e operações da conta |
 | `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
@@ -172,7 +172,7 @@ O carrinho persiste no mesmo navegador; ele não acompanha o usuário em outros 
 
 O cabeçalho consulta um estado compartilhado de autenticação: visitantes abrem `/login`, usuários conectados veem o primeiro nome e abrem `/minha-conta`, e administradores abrem `/admin`. Login e cadastro validam localmente e enviam dados à API; após autenticação, usuários vão para `/minha-conta` e administradores para `/admin`. O access token fica em memória e é reemitido pelo refresh cookie após recarregar ou reabrir o site. “Esqueci minha senha” solicita e-mail por SMTP quando configurado e `/redefinir-senha` aplica o token recebido.
 
-`/minha-conta` exibe o usuário autenticado, atualiza nome e curso, troca a senha e encerra a sessão. A troca de senha invalida o refresh cookie e exige novo login. `/meus-pedidos` separa pedidos ativos e históricos vindos da API.
+`/minha-conta` exibe o usuário autenticado, atualiza nome e curso, troca a senha e encerra a sessão. A troca de senha invalida o refresh cookie e exige novo login. `/meus-pedidos` abre a aba de pedidos ativos, com status de Pendente até Disponível para retirada. O atalho `/meus-pedidos#historico` abre diretamente o histórico, que exibe somente Entregue e Cancelado. As abas mostram uma lista por vez e acompanham a navegação voltar/avançar do navegador. A classificação usa o status real da API ao carregar a página; não há atualização em tempo real entre sessões administrativas e do cliente. A consulta atual mantém o limite de 100 pedidos.
 
 ### Painel administrativo
 
@@ -228,6 +228,13 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 11/11/2026 — Abas de pedidos ativos e histórico
+
+- Substituída a exibição simultânea das duas listas por navegação entre Pedidos ativos e Histórico de pedidos, com estados de carregamento, erro e lista vazia para a visualização selecionada.
+- Ativos exibem apenas `PENDENTE`, `CONFIRMADO`, `EM_SEPARACAO` e `DISPONIVEL_RETIRADA`. `ENTREGUE` e `CANCELADO` aparecem exclusivamente no histórico quando os dados atualizados são carregados da API.
+- Preservados os atalhos da Minha Conta e o acesso direto por `#historico`, com seleção sincronizada ao endereço do navegador. A alteração é de interface sobre a integração real existente, sem mudanças no banco ou nas regras administrativas.
+- Verificação: revisão dos filtros e atalhos, `npm run lint`, `npx tsc --noEmit`, `npm run build` (30 páginas) e `git diff --check` passaram. Inspeção interativa no navegador pendente.
 
 ### 10/11/2026 — Documentação após remoção do backend legado
 

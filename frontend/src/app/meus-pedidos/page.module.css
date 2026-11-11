@@ -26,10 +26,17 @@
 .progress .currentStep span { background: var(--orange); color: #210b19; }
 .orderFooter { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding-top: 26px; color: #c0b7c4; font-size: 13px; }
 .orderFooter strong { margin-left: 6px; color: var(--orange); font-size: 22px; }
-.history { margin-top: 50px; padding: 25px 30px; border: 1px solid #381342; border-radius: 8px; background: #180820; }
-.history h2 { margin: 0 0 8px; font-size: 18px; text-transform: uppercase; }
-.history p { margin: 0 0 15px; color: #beb3c3; font-size: 14px; }
-.history a { color: var(--orange); font-size: 13px; font-weight: 800; }
-.history a:hover { text-decoration: underline; }
+.tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; }
+.tabs a { flex: 1 1 180px; padding: 16px 20px; border: 1px solid #7b3680; border-radius: 8px; color: #d2aed9; font-size: 14px; font-weight: 800; text-align: center; }
+.tabs a:hover { background: #32123c; color: #fff; }
+.tabs a[aria-current="page"] { border-color: var(--orange); background: var(--orange); color: #210b19; }
+.tabs a:focus-visible, .backLink:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.orders { scroll-margin-top: 110px; }
+.sectionHeading { margin: 0 0 8px; font-size: 22px; text-transform: uppercase; }
+.sectionDescription { margin: 0 0 24px; color: #beb3c3; font-size: 14px; }
+.orderList { display: grid; gap: 24px; }
+.empty { padding: 28px; border: 1px solid #381342; border-radius: 8px; background: #180820; color: #beb3c3; }
+.backLink { display: inline-block; margin-top: 30px; color: var(--orange); font-size: 13px; font-weight: 800; }
+.backLink:hover { text-decoration: underline; }
 @media (max-width: 700px) { .orderHeader, .orderHeader > div, .orderFooter { align-items: flex-start; flex-direction: column; } .orderHeader { gap: 12px; } .orderFooter strong { display: block; margin: 5px 0 0; } }
 @media (max-width: 600px) { .main { padding: 48px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 28px; } .orderCard { padding: 22px; } .items li { gap: 10px; } .imagePlaceholder { width: 38px; height: 38px; flex-basis: 38px; } .itemText strong, .itemPrice { font-size: 12px; } .itemText small { font-size: 10px; } .progress ol { gap: 4px; } .progress li strong { font-size: 9px; } .history { padding: 22px; } }
