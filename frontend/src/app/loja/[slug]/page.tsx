@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { formatPrice } from "@/data/products";
 import { mapProduct } from "@/lib/api-mappers";
 import { apiServer } from "@/lib/server-api";
+import { displayImageUrl } from "@/lib/display-image-url";
 import { ApiError, type ApiItem, type ApiProduct } from "@/lib/api-types";
 import { ProductPurchase } from "./product-purchase";
 import styles from "./page.module.css";
@@ -33,7 +34,7 @@ export default async function ProductDetailPage({ params }: Props) {
         <div className={styles.productLayout}>
           <div className={styles.visual}>
             {product.image ? (
-              <Image className={styles.image} src={product.image} alt={product.alt ?? product.name} width={900} height={800} priority />
+              <Image className={styles.image} src={displayImageUrl(product.image)} alt={product.alt ?? product.name} width={900} height={800} priority unoptimized />
             ) : (
               <div className={styles.placeholder} role="img" aria-label={`Imagem de ${product.name} pendente`} />
             )}

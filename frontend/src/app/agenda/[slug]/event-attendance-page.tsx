@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { EventDetail } from "@/data/event-details";
+import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 export function EventAttendancePage({ event }: { event: EventDetail }) {
@@ -16,7 +17,7 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
     <main className={styles.main}>
       <div className={styles.hero}>
         {event.heroImage
-          ? <Image src={event.heroImage} alt={`Imagem de ${event.title}`} width={1440} height={320} priority />
+          ? <Image src={displayImageUrl(event.heroImage)} alt={`Imagem de ${event.title}`} width={1440} height={320} priority unoptimized />
           : <div className={styles.heroPlaceholder} role="img" aria-label={`Imagem de ${event.title} pendente`} />}
       </div>
 

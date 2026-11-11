@@ -7,6 +7,7 @@ import type { Product } from "@/data/products";
 import { formatPrice } from "@/data/products";
 import { addToCart, useCart } from "@/lib/cart";
 import { useTimedFeedback } from "@/lib/use-timed-feedback";
+import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -35,7 +36,7 @@ export function ProductCard({ product }: { product: Product }) {
     <article className={styles.card}>
       <Link className={styles.imageLink} href={`/loja/${product.slug}`} aria-label={`Ver ${product.name} em detalhes`}>
         {product.image ? (
-          <Image className={styles.image} src={product.image} alt={product.alt ?? ""} width={400} height={300} />
+          <Image className={styles.image} src={displayImageUrl(product.image)} alt={product.alt ?? ""} width={400} height={300} unoptimized />
         ) : (
           <span className={styles.placeholder} role="img" aria-label={`Imagem de ${product.name} pendente`} />
         )}
