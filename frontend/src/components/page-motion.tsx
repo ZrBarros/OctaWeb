@@ -49,7 +49,7 @@ export function PageMotion({ children }: Readonly<{ children: ReactNode }>) {
             if (entry.isIntersecting) show(entry.target as HTMLElement);
           });
         },
-        { rootMargin: "0px 0px -9%", threshold: 0.08 },
+        { rootMargin: "0px 0px -3%", threshold: 0.04 },
       );
     }
 

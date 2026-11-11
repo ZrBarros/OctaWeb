@@ -1,8 +1,8 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 26/10/2026
+**Última atualização:** 11/11/2026
 
-**Estado:** MVP full stack integrado; backend e banco prontos para execução, com limitações de schema documentadas
+**Estado:** MVP full stack integrado; backend Python/FastAPI ativo no Docker Compose e banco preservado, com limitações de schema documentadas
 
 **Referência visual:** protótipo [Projeto P3 — Octacore no Figma](https://www.figma.com/design/BcgJnC6UWsDG5W5B5mO7V6/Projeto-P3---Octacore?node-id=0-1)
 
@@ -13,7 +13,7 @@ Este é o registro contínuo do site da Associação Atlética Acadêmica de Com
 O site reúne informações da atlética, notícias, modalidades, agenda, mural e produtos. O frontend está conectado a uma API REST que aplica autenticação, autorização, regras de estoque, pedidos e administração de conteúdo sobre o PostgreSQL existente.
 
 - **Front end escolhido:** Next.js, React e TypeScript.
-- **Backend implementado:** Node.js, TypeScript, Fastify e Prisma, em `backend/`.
+- **Backend implementado:** Python 3.13, FastAPI, SQLAlchemy 2, Pydantic e psycopg, em `backend-python/`; a pasta antiga `backend/`, com Fastify, foi removida.
 - **Banco:** PostgreSQL, com as 14 tabelas oficiais do schema `octacore`; o backend apenas mapeia o schema e não o altera.
 - **Integração real:** autenticação, conteúdo público, administração, uploads, estoque e pedidos.
 - **Ainda demonstrativo:** pagamento, presença/favorito em eventos, ranking, estatística individual e atividades administrativas, pois o schema não possui entidades correspondentes.
@@ -35,7 +35,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 ## 1.2 Arquitetura integrada
 
 - O frontend usa `API_URL` em Server Components e `NEXT_PUBLIC_API_URL` nas telas interativas.
-- A API usa camadas de rotas/controladores, serviços e repositórios, validação Zod, Prisma, erros padronizados, logs com redação de segredos, CORS, Helmet e rate limiting.
+- A API usa rotas FastAPI, serviços e repositórios, validação Pydantic, SQLAlchemy/psycopg, erros padronizados, CORS, cabeçalhos de segurança e rate limiting. Os modelos mapeiam o schema existente sem gerar migrações.
 - O access token fica em memória no navegador; o refresh token usa cookie `httpOnly` e é renovado automaticamente. Sem tabela de tokens, logout remove o cookie do cliente, mas não mantém lista de revogação no servidor.
 - O checkout exige usuário autenticado. A criação do pedido usa transação serializável, valida estoque, desconta quantidades e congela o preço nos itens; o trigger do banco recalcula o total.
 - Uploads administrativos aceitam JPG, PNG ou WebP de até 2 MB, conferem assinatura binária e são servidos apenas por nome UUID validado.
@@ -62,7 +62,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/checkout` | Dados de retirada e criação de pedido autenticado. | **Integração real:** pedido transacional e estoque; sem cobrança/pagamento |
 | `/login`, `/cadastro` e `/redefinir-senha` | Cadastro, login, recuperação e redefinição. | **Integração real:** bcrypt, JWT e cookie `httpOnly` |
 | `/minha-conta` | Painel do usuário conectado, edição de nome/curso, troca de senha e logout. | **Integração real:** sessão compartilhada, perfil e credenciais da API |
-| `/meus-pedidos` | Pedidos ativos, progresso e histórico. | **Integração real:** pedidos do usuário autenticado |
+| `/meus-pedidos` e `/meus-pedidos#historico` | Abas separadas de pedidos ativos e histórico; apenas a lista selecionada aparece. Ativos incluem Pendente, Confirmado, Em separação e Disponível para retirada; histórico inclui Entregue e Cancelado. | **Integração real:** pedidos do usuário autenticado, classificados pelo status retornado pela API |
 | `/admin` | Indicadores e vendas derivados do banco; atividades recentes ficam vazias por falta de tabela de auditoria. | **Integração real:** rota protegida por ADMIN |
 | `/admin/perfil` | Perfil da conta administrativa, edição de dados, troca de senha e atalhos. | **Integração real:** usa a mesma sessão e operações da conta |
 | `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
@@ -79,7 +79,16 @@ A separação é validada pela API em cada rota protegida. A interface também r
 
 ## 3. Como executar e conferir
 
-No terminal, a partir da pasta `frontend`:
+Para executar frontend, API Python e banco juntos, rode na raiz do projeto:
+
+```bash
+docker compose up -d --build
+docker compose ps
+```
+
+O site fica em `http://localhost:3000`, o Swagger em `http://localhost:3333/docs` e a saúde da API em `http://localhost:3333/health`. O serviço `api` usa `backend-python/`; a instância opcional `api-python` na porta 3334 pode permanecer parada. A conexão externa ao PostgreSQL usa `localhost:5433`.
+
+Para desenvolver somente o frontend, com API e banco já disponíveis, execute a partir da pasta `frontend`:
 
 ```bash
 npm install
@@ -107,9 +116,9 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. |
 | `frontend/src/data/` | Tipos, rótulos e dados que continuam demonstrativos; não é mais a fonte dos módulos integrados. |
 | `frontend/src/lib/cart.ts` | Seleção do carrinho no navegador; a API revalida produto, variação, preço e estoque no checkout. |
-| `backend/src/modules/` | Rotas/controladores, serviços, repositórios e validações de autenticação, conteúdo, loja e administração. |
-| `backend/prisma/schema.prisma` | Mapeamento ORM fiel às 14 tabelas; não cria migrações. |
-| `backend/tests/` | Testes de validação, tokens e endpoints de autenticação. |
+| `backend-python/app/routers/`, `services/` e `repositories/` | Rotas FastAPI, regras de negócio e acesso SQLAlchemy de autenticação, conteúdo, loja e administração. |
+| `backend-python/app/models.py` | Mapeamento SQLAlchemy fiel às 14 tabelas; não cria migrações. |
+| `backend-python/tests/` | Testes Pytest de validação, tokens e bcrypt. |
 | `docker-compose.yml` | Frontend, API e PostgreSQL com health checks. |
 | `frontend/src/components/auth-form.tsx` | Formulário compartilhado pelas telas de login e cadastro. |
 | `frontend/src/data/account.ts` | Legado visual; conta e pedidos integrados não usam mais estes valores. |
@@ -132,9 +141,9 @@ Notícias, produtos, estoque, modalidades, horários, agenda, integrantes, resul
 | Conteúdo | Arquivo |
 | --- | --- |
 | Conteúdo, catálogo, esporte e pedidos integrados | Painel `/admin`, API `/api/v1` e PostgreSQL |
-| Contratos e regras do banco | `database/01_schema.sql` e `backend/prisma/schema.prisma` |
+| Contratos e regras do banco | `database/01_schema.sql` e `backend-python/app/models.py` |
 | Configuração de API no frontend | `frontend/.env.local` |
-| Configuração da API | `backend/.env` |
+| Configuração da API | `backend-python/.env` |
 | Detalhe visual de presença em evento | `frontend/src/data/event-details.ts` (somente tipos/limitação visual) |
 | Perfil e estatísticas do atleta | `frontend/src/data/athletes.ts` |
 | Ranking e estatísticas esportivas gerais | `frontend/src/data/ranking.ts` |
@@ -163,7 +172,7 @@ O carrinho persiste no mesmo navegador; ele não acompanha o usuário em outros 
 
 O cabeçalho consulta um estado compartilhado de autenticação: visitantes abrem `/login`, usuários conectados veem o primeiro nome e abrem `/minha-conta`, e administradores abrem `/admin`. Login e cadastro validam localmente e enviam dados à API; após autenticação, usuários vão para `/minha-conta` e administradores para `/admin`. O access token fica em memória e é reemitido pelo refresh cookie após recarregar ou reabrir o site. “Esqueci minha senha” solicita e-mail por SMTP quando configurado e `/redefinir-senha` aplica o token recebido.
 
-`/minha-conta` exibe o usuário autenticado, atualiza nome e curso, troca a senha e encerra a sessão. A troca de senha invalida o refresh cookie e exige novo login. `/meus-pedidos` separa pedidos ativos e históricos vindos da API.
+`/minha-conta` exibe o usuário autenticado, atualiza nome e curso, troca a senha e encerra a sessão. A troca de senha invalida o refresh cookie e exige novo login. `/meus-pedidos` abre a aba de pedidos ativos, com status de Pendente até Disponível para retirada. O atalho `/meus-pedidos#historico` abre diretamente o histórico, que exibe somente Entregue e Cancelado. As abas mostram uma lista por vez e acompanham a navegação voltar/avançar do navegador. A classificação usa o status real da API ao carregar a página; não há atualização em tempo real entre sessões administrativas e do cliente. A consulta atual mantém o limite de 100 pedidos.
 
 ### Painel administrativo
 
@@ -195,7 +204,7 @@ A navegação administrativa mantém o comportamento responsivo anterior. A navb
 
 ## 7. Próximos passos
 
-1. Validar o compose e os fluxos de ponta a ponta em uma máquina com Docker/PostgreSQL, incluindo concorrência de estoque, uploads e SMTP.
+1. Configurar e validar SMTP real; os demais fluxos do Compose, banco, autenticação, conteúdo, pedido/estoque e uploads já foram exercitados contra PostgreSQL.
 2. Decidir e versionar uma evolução de schema para refresh/reset tokens revogáveis, presença/favoritos, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
 3. Revisar acessibilidade/responsividade em dispositivos físicos e substituir placeholders pelas imagens aprovadas.
 
@@ -203,7 +212,7 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 
 ## 8. Decisões e limites conhecidos
 
-- O frontend usa **Next.js + TypeScript**; o backend implementado usa **Fastify + TypeScript + Prisma**, escolha feita para compartilhar linguagem, reduzir boilerplate e manter o schema PostgreSQL existente.
+- O frontend usa **Next.js + TypeScript**; em 10/11/2026 o backend principal foi migrado para **Python + FastAPI + SQLAlchemy + Pydantic + psycopg** para facilitar a manutenção pela equipe. O contrato HTTP e o schema PostgreSQL foram preservados. A pasta Fastify/Prisma foi removida; uma recuperação da implementação antiga depende de um commit anterior que a contenha.
 - O banco de dados é **PostgreSQL**, com as tabelas no schema `octacore`. A estrutura oficial fica em `database/01_schema.sql`, derivada do MER do projeto; mudanças de estrutura devem ser feitas nesse arquivo e versionadas. Os slugs de notícias, eventos, modalidades, integrantes e produtos seguem as rotas do front end.
 - O protótipo do Figma orienta a interface; a fonte Outfit e os arquivos em `assets/` compõem a identidade visual atual.
 - Fotos ainda indisponíveis permanecem como placeholders, conforme combinado para galeria, mural e integrantes.
@@ -220,14 +229,40 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 
 ## 9. Histórico de desenvolvimento
 
+### 11/11/2026 — Integração das correções da branch Zeca com a API Python
+
+- Resolvido o merge preservando a API FastAPI atual e as correções de formulários e imagens no frontend. A rota de upload Fastify do backend removido não foi restaurada; a API Python mantém o upload e a leitura pública, e o frontend continua exibindo as imagens pelo caminho `/uploads/...` do próprio site.
+- O histórico anterior do backend Fastify foi mantido como registro da evolução do projeto. Verificação: lint e build do frontend (30 páginas), compilação dos módulos Python e `git diff --check` passaram. O fluxo de upload e edição no navegador após o merge permanece para conferência manual.
+
+### 11/11/2026 — Abas de pedidos ativos e histórico
+
+- Substituída a exibição simultânea das duas listas por navegação entre Pedidos ativos e Histórico de pedidos, com estados de carregamento, erro e lista vazia para a visualização selecionada.
+- Ativos exibem apenas `PENDENTE`, `CONFIRMADO`, `EM_SEPARACAO` e `DISPONIVEL_RETIRADA`. `ENTREGUE` e `CANCELADO` aparecem exclusivamente no histórico quando os dados atualizados são carregados da API.
+- Preservados os atalhos da Minha Conta e o acesso direto por `#historico`, com seleção sincronizada ao endereço do navegador. A alteração é de interface sobre a integração real existente, sem mudanças no banco ou nas regras administrativas.
+- Verificação: revisão dos filtros e atalhos, `npm run lint`, `npx tsc --noEmit`, `npm run build` (30 páginas) e `git diff --check` passaram. Inspeção interativa no navegador pendente.
+
+### 10/11/2026 — Documentação após remoção do backend legado
+
+- Atualizados os READMEs e o estado atual desta documentação após a exclusão de `backend/`. A única implementação de backend presente no projeto é `backend-python/`.
+- Esclarecido que o serviço principal `api` já executa Python na porta 3333 e que a instância paralela `api-python` na porta 3334 é opcional. Mantidos os registros históricos da implementação Fastify e da migração.
+- Verificação: confirmada a ausência de `backend/` e o caminho `build: ./backend-python` no Compose principal; revisão documental e `git diff --check`. Não houve alteração de código, dados ou integração nesta atualização.
+
+### 10/11/2026 — Migração integral do backend para Python/FastAPI
+
+- Criado `backend-python/` com Python 3.13, FastAPI, SQLAlchemy 2, Pydantic, psycopg, PyJWT e bcrypt. Os 14 modelos apontam para o schema `octacore` existente, sem recriar tabelas ou perder dados.
+- Reimplementadas as 41 rotas de autenticação, conteúdo público, administração, loja, pedidos, usuários, dashboard e uploads. Foram preservados URLs, envelopes JSON, nomes dos campos, JWT HS256, cookie `httpOnly`, hashes bcrypt, permissões `USUARIO`/`ADMIN`, validações e erros padronizados.
+- Pedidos mantêm transação serializável, bloqueio de estoque, preço congelado, trigger de total e devolução de estoque no cancelamento. A conexão psycopg configura `search_path=octacore,public` para compatibilidade com os triggers existentes.
+- `docker-compose.yml` passou a construir `backend-python/` como serviço `api`. Na etapa inicial da migração, `backend/` foi mantido como referência/rollback e removido posteriormente. `docker-compose.python.yml` permite uma segunda instância Python de teste na porta 3334.
+- Verificação: `compileall`, Pytest com 7 testes, Ruff e o build de produção das 30 páginas passaram. A API paralela foi comparada ao Fastify nas listagens públicas; depois, o Compose principal foi recriado com FastAPI e ficou saudável na porta 3333, com 49 caminhos no OpenAPI e frontend `200` na porta 3000. Login, refresh, `/auth/me`, usuários, dashboard, CRUD completo de conteúdo, pedido real, redução/restauração de estoque, upload e leitura pública foram testados contra PostgreSQL; todos os registros e arquivos temporários foram removidos.
+
 ### 09/11/2026 — Edição de imagem em produtos existentes
 
 - O formulário de edição administrativa agora mantém a descrição, o estado ativo e os IDs das variações do produto. Antes, esses dados eram descartados ao abrir o modal e o salvamento tentava substituir as variações por uma nova `UNICO`, o que podia falhar quando havia pedidos vinculados. A troca de imagem usa o upload real da API e atualiza o mesmo produto no PostgreSQL.
 - Erros ao salvar passam a aparecer dentro do formulário, visíveis mesmo com o modal aberto. Verificação: `npm run lint`, `npx tsc --noEmit`, `git diff --check` e reconstrução do frontend no Docker (30 páginas) passaram; a edição com conta administrativa no navegador ainda requer teste manual.
 
-### 09/11/2026 — Exibição de uploads e espaçamento dos controles administrativos
+### 09/11/2026 — Exibição de uploads no backend Fastify e espaçamento dos controles administrativos
 
-- A API já salvava imagens enviadas e persistia seus URLs em eventos e produtos, mas a rota pública respondia com `Cross-Origin-Resource-Policy: same-origin`; como o site e a API usam portas diferentes, o navegador bloqueava as prévias e imagens após salvar. A rota `/uploads/:filename` agora autoriza o uso da imagem em outra origem, mantendo a validação de nome UUID, tipo de arquivo e os demais cabeçalhos de segurança. O upload e a persistência continuam integrados ao backend e PostgreSQL.
+- Na implementação Fastify de então, a API já salvava imagens enviadas e persistia seus URLs em eventos e produtos, mas a rota pública respondia com `Cross-Origin-Resource-Policy: same-origin`; como o site e a API usavam portas diferentes, o navegador bloqueava as prévias e imagens após salvar. A rota `/uploads/:filename` passou a autorizar o uso da imagem em outra origem, mantendo a validação de nome UUID, tipo de arquivo e os demais cabeçalhos de segurança. O upload e a persistência continuavam integrados ao backend e PostgreSQL.
 - Selects das telas e formulários administrativos receberam seta branca com margem interna uniforme; campos de data e hora usam ícone compatível com o tema escuro e afastamento da borda.
 - Verificação: teste da rota pública com Helmet confirmou resposta `200`, tipo de imagem e `Cross-Origin-Resource-Policy: cross-origin`; backend `npm run lint`, `npm test` (10 testes) e `npm run build`, frontend `npm run lint`, `npx tsc --noEmit` e `npm run build` (30 páginas) passaram.
 
