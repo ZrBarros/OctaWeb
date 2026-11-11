@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { apiServer } from "@/lib/server-api";
 import type { ApiItem, ApiModality } from "@/lib/api-types";
+import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "Modalidades | Octacore" };
@@ -23,7 +25,9 @@ export default async function ModalitiesPage() {
                 <h2>{modality.nome}</h2>
                 <span>M{String(modality.id).padStart(2, "0")}</span>
               </div>
-              <div className={styles.placeholder} role="img" aria-label={`Imagem de ${modality.nome} pendente`} />
+              {modality.imagemUrl ? (
+                <Image className={styles.image} src={displayImageUrl(modality.imagemUrl)} alt="" width={720} height={380} unoptimized />
+              ) : null}
               <p>{modality.descricao}</p>
               <Link href={`/modalidades/${modality.slug}`} className={styles.details}>Ver detalhes</Link>
             </article>

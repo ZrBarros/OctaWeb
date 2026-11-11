@@ -50,11 +50,12 @@ export default function AgendaPage() {
                   <strong>{event.day}</strong><span>{event.month}</span>
                 </time>
                 <div className={styles.eventDetails}>
-                  <h2>{event.detailSlug ? <Link href={`/agenda/${event.detailSlug}`}>{event.title}</Link> : event.title}</h2>
+                  <h2>{event.title}</h2>
                   <p><time dateTime={event.dateTime}>◷ {event.time}</time><span>·</span><span>▣ {event.place}</span></p>
-                  {event.detailSlug && <Link className={styles.detailLink} href={`/agenda/${event.detailSlug}`}>Ver detalhes e presença <span aria-hidden="true">→</span></Link>}
+                  {event.detailSlug && <span className={styles.detailLink}>Ver detalhes e presença <span aria-hidden="true">→</span></span>}
                 </div>
                 <span className={styles.badge}>{event.category}</span>
+                {event.detailSlug && <Link className={styles.cardLink} href={`/agenda/${event.detailSlug}`} aria-label={`Ver detalhes de ${event.title}`} />}
               </article>
             )) : (
               <p className={styles.empty}>Ainda não há compromissos nessa categoria.</p>

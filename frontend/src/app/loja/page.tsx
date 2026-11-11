@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { mapProduct } from "@/lib/api-mappers";
 import type { ApiPage, ApiProduct } from "@/lib/api-types";
 import { useApiData } from "@/lib/use-api";
@@ -14,6 +14,8 @@ const categories = ["Todos", "Camisas", "Tirantes", "Copos", "Acessórios", "Kit
 export default function StorePage() {
   const [category, setCategory] = useState("Todos");
   const [search, setSearch] = useState("");
+  const [controlsStuck, setControlsStuck] = useState(false);
+  const controlsSentinel = useRef<HTMLDivElement>(null);
   const cart = useCart();
   const { data: response, loading, error } = useApiData<ApiPage<ApiProduct>>("/products?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
   const products = response.data.map(mapProduct);
@@ -22,6 +24,16 @@ export default function StorePage() {
     (category === "Todos" || product.category === category) &&
     product.name.toLocaleLowerCase("pt-BR").includes(search.toLocaleLowerCase("pt-BR")),
   );
+
+  useEffect(() => {
+    const sentinel = controlsSentinel.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setControlsStuck(!entry.isIntersecting && entry.boundingClientRect.top < 0);
+    });
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <main className={styles.main}>
@@ -32,7 +44,8 @@ export default function StorePage() {
         </div>
         <p className={styles.intro}>Vista as cores da maior associação acadêmica do estado.</p>
 
-        <div className={styles.controls}>
+        <div className={styles.controlsSentinel} ref={controlsSentinel} aria-hidden="true" />
+        <div className={`${styles.controls} ${controlsStuck ? styles.controlsStuck : ""}`}>
           <div className={styles.categories} aria-label="Categorias de produtos">
             {categories.map((item) => (
               <button

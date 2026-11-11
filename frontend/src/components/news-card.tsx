@@ -1,12 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { NewsArticle } from "@/data/news";
+import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./news-card.module.css";
 
 export function NewsCard({ article }: { article: NewsArticle }) {
   return (
     <article className={`${styles.card} hoverCard`}>
       <Link className={styles.link} href={`/noticias/${article.slug}`}>
-        <div className={styles.placeholder} role="img" aria-label={`Imagem da notícia ${article.title} pendente`} />
+        {article.image ? (
+          <Image className={styles.image} src={displayImageUrl(article.image)} alt="" width={720} height={420} unoptimized />
+        ) : (
+          <div className={styles.placeholder} role="img" aria-label={`Imagem da notícia ${article.title} pendente`} />
+        )}
         <div className={styles.content}>
           <div className={styles.meta}>
             <span>{article.category}</span>

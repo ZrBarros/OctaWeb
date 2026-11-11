@@ -17,7 +17,7 @@ export function mapProduct(item: ApiProduct): Product {
 
 export function mapNews(item: ApiNews): NewsArticle {
   const date = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Maceio" }).format(new Date(item.criadoEm)).replace(" de ", " ").replace(" de ", " ").replace(".", "");
-  return { slug: item.slug, category: (titleCase[item.categoria] ?? item.categoria) as NewsCategory, date, dateTime: item.criadoEm, title: item.titulo, summary: item.resumo ?? "", author: item.autor.nome, paragraphs: item.conteudo.split(/\n\s*\n/).filter(Boolean) };
+  return { slug: item.slug, category: (titleCase[item.categoria] ?? item.categoria) as NewsCategory, date, dateTime: item.criadoEm, title: item.titulo, summary: item.resumo ?? "", image: item.imagemCapaUrl ?? undefined, author: item.autor.nome, paragraphs: item.conteudo.split(/\n\s*\n/).filter(Boolean) };
 }
 
 export function mapEvent(item: ApiEvent): AgendaEvent {
