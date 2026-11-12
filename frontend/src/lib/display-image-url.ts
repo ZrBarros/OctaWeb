@@ -2,8 +2,7 @@
 export function displayImageUrl(url: string): string {
   try {
     const parsed = new URL(url);
-    const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333/api/v1").origin;
-    if (parsed.origin === apiOrigin && /^\/uploads\/[^/]+$/.test(parsed.pathname)) {
+    if (["http:", "https:"].includes(parsed.protocol) && /^\/uploads\/[^/]+$/.test(parsed.pathname)) {
       return `${parsed.pathname}${parsed.search}`;
     }
   } catch {

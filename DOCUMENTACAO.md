@@ -113,7 +113,7 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/app/globals.css` | Cores, tokens de movimento, transições para controles, entrada de diálogos e estilos globais. |
 | `frontend/src/app/template.tsx`, `template.module.css` e `components/page-motion.tsx` | Transição global entre rotas e revelação progressiva de blocos durante o scroll; respeita a preferência por movimento reduzido. |
 | `frontend/src/components/` | Componentes reutilizados, como cabeçalho, rodapé e cards. |
-| `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. |
+| `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. O navegador usa `/api/v1` no mesmo endereço do site; o Next.js encaminha a chamada à API configurada em `API_URL`. |
 | `frontend/src/data/` | Tipos, rótulos e dados que continuam demonstrativos; não é mais a fonte dos módulos integrados. |
 | `frontend/src/lib/cart.ts` | Seleção do carrinho no navegador; a API revalida produto, variação, preço e estoque no checkout. |
 | `backend-python/app/routers/`, `services/` e `repositories/` | Rotas FastAPI, regras de negócio e acesso SQLAlchemy de autenticação, conteúdo, loja e administração. |
@@ -228,6 +228,11 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 12/11/2026 — Acesso à API em outro computador
+
+- As chamadas feitas pelo navegador passaram a usar `/api/v1` no endereço do próprio site. O Next.js encaminha essas requisições à API pelo endereço interno, evitando que `localhost:3333` aponte para o computador do visitante. Imagens enviadas à API continuam servidas por `/uploads` no mesmo endereço do site.
+- Mudança de integração real entre frontend e backend, sem alteração no banco. Verificação: build do frontend e requisições ao proxy em ambiente Docker. Para desenvolvimento sem Docker, `NEXT_PUBLIC_API_URL` deve permanecer `/api/v1` no `.env.local`; o acesso por outro dispositivo ainda depende de ambos estarem na mesma rede e da porta 3000 estar acessível.
 
 ### 11/11/2026 — Materiais de origem fora do Git
 
