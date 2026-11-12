@@ -17,7 +17,7 @@ const sections = [
     symbol: "♧",
     title: "Diretoria & Integrantes",
     description: "Conheça as pessoas que fazem parte da Octacore dentro e fora das quadras.",
-    action: "Ver diretoria",
+    action: "Ver integrantes",
     href: "/mural/integrantes",
   },
   {
@@ -47,12 +47,12 @@ export default function MuralPage() {
           <h2 id="pillars-title">Pilares da nossa história</h2>
           <div className={styles.grid}>
             {sections.map((section, index) => (
-              <article className={`${styles.card} hoverCard`} key={section.href}>
+              <Link className={`${styles.card} hoverCard`} href={section.href} key={section.href}>
                 <span className={`${styles.icon} ${index === 1 ? styles.orangeIcon : ""}`} aria-hidden="true">{section.symbol}</span>
                 <h3>{section.title}</h3>
                 <p>{section.description}</p>
-                <Link href={section.href}>{section.action} <span aria-hidden="true">→</span></Link>
-              </article>
+                <span className={styles.cardAction}>{section.action} <span aria-hidden="true">→</span></span>
+              </Link>
             ))}
           </div>
         </section>

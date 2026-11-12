@@ -19,6 +19,7 @@ export type NewsArticle = {
   dateTime: string;
   title: string;
   summary: string;
+  image?: string;
   author: string;
   paragraphs: string[];
 };

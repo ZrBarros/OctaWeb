@@ -2,7 +2,7 @@ from datetime import UTC, datetime, time
 
 from sqlalchemy.orm import Session
 
-from app.errors import not_found
+from app.errors import bad_request, not_found
 from app.models import Conquista, Evento, HorarioTreino, Integrante, IntegranteModalidade, MarcoHistorico, Modalidade, Noticia, Resultado
 from app.repositories.content import ContentRepository
 from app.schemas import AchievementInput, EventInput, MemberInput, MilestoneInput, ModalityInput, NewsInput, ResultInput
@@ -48,7 +48,24 @@ class ContentService:
         item.nome, item.slug, item.descricao = data.name, data.slug or make_slug(data.name), data.description
         item.imagem_url, item.responsavel, item.local_treino = data.imageUrl, data.responsible, data.trainingPlace
         if data.schedules is not None:
-            item.horarios = [HorarioTreino(dia_semana=row.dayOfWeek, hora_inicio=time.fromisoformat(row.startTime), hora_fim=time.fromisoformat(row.endTime) if row.endTime else None) for row in data.schedules]
+            requested = {(row.dayOfWeek, time.fromisoformat(row.startTime)) for row in data.schedules}
+            if len(requested) != len(data.schedules):
+                raise bad_request("Há horários de treino repetidos para o mesmo dia e início.")
+            existing = {(row.dia_semana, row.hora_inicio): row for row in item.horarios}
+            removed = False
+            for row in list(item.horarios):
+                if (row.dia_semana, row.hora_inicio) not in requested:
+                    item.horarios.remove(row)
+                    removed = True
+            if removed:
+                self.db.flush()
+            for row in data.schedules:
+                key = (row.dayOfWeek, time.fromisoformat(row.startTime))
+                end_time = time.fromisoformat(row.endTime) if row.endTime else None
+                if key in existing:
+                    existing[key].hora_fim = end_time
+                else:
+                    item.horarios.append(HorarioTreino(dia_semana=key[0], hora_inicio=key[1], hora_fim=end_time))
         self.repository.save(item)
         return self.repository.modality_by_id(item.id)  # type: ignore[return-value]
 

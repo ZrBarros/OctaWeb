@@ -18,7 +18,7 @@ O site reúne informações da atlética, notícias, modalidades, agenda, mural 
 - **Integração real:** autenticação, conteúdo público, administração, uploads, estoque e pedidos.
 - **Ainda demonstrativo:** pagamento, presença/favorito em eventos, ranking, estatística individual e atividades administrativas, pois o schema não possui entidades correspondentes.
 
-Os documentos de planejamento originais estão em `assets/`. Esta página registra o estado **implementado**; ideias desses documentos só passam para “pronto” depois de aparecerem no código e serem verificadas.
+Os documentos de planejamento originais ficam em `assets/` apenas no ambiente local; a pasta é ignorada pelo Git. Esta página registra o estado **implementado**; ideias desses documentos só passam para “pronto” depois de aparecerem no código e serem verificadas.
 
 ## 1.1 Perfis de acesso planejados
 
@@ -48,15 +48,15 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/` | Página inicial com apresentação, mascote, destaques, produtos e até três compromissos futuros. | **Integração real:** produtos e agenda vêm da API; destaques esportivos permanecem editoriais na tela |
 | Todas as rotas do App Router | O conteúdo da rota entra com opacidade, leve deslocamento e desfoque em 440 ms; seções, cartões, formulários e tabelas abaixo da dobra são revelados progressivamente durante o scroll. Cabeçalho e estruturas compartilhadas permanecem estáveis. | Animação local no navegador, com `IntersectionObserver` e respeito a `prefers-reduced-motion`; sem dependência de backend |
 | `/motion-octaweb.html` | Peça animada de apresentação do OctaWeb, com identidade visual da Octacore, apresentação da plataforma e seus principais espaços. | Apresentação em HTML/CSS; animação local no navegador, sem exportação de vídeo |
-| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. | **Integração real:** notícias publicadas no PostgreSQL |
-| `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades, horários, responsáveis, elenco, resultados e próximos eventos disponíveis. | **Integração real:** dados relacionais da API |
+| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. Todos os cards usam o mesmo visual de vidro discreto e mostram a capa cadastrada, quando existe. Na lista, navbar e conteúdo compartilham um gradiente contínuo. | **Integração real:** notícias e capas vêm do PostgreSQL/API; o efeito de vidro e o gradiente são somente de interface |
+| `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades, horários, responsáveis, elenco, resultados e próximos eventos disponíveis. Na lista, os cards têm superfície roxa translúcida discreta e fundo contínuo com a navbar; imagens cadastradas aparecem, e modalidades sem imagem não reservam uma área vazia. | **Integração real:** dados e imagens da API; o tratamento visual dos cards e do fundo é somente de interface na lista |
 | `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
 | `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. | **Prévia visual:** números de exemplo, sem cálculo automático |
-| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e links para páginas de detalhe; filtro compacto em celular. | **Integração real:** eventos da API |
+| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e cards inteiros clicáveis para suas páginas de detalhe; filtro compacto em celular. O fundo segue a navbar sem faixa abrupta, e os cards usam uma superfície roxa translúcida discreta. | **Integração real:** eventos da API; fundo e cards são tratamento de interface |
 | `/agenda/[slug]` | Detalhe do evento persistido, com imagem, modalidade, data, local e descrição. | **Integração parcial:** conteúdo real; presença e favorito continuam simulações no navegador porque não há tabelas correspondentes |
-| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. | **Integração real:** história, integrantes e conquistas vêm da API; parte das imagens é placeholder |
+| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. A abertura do Mural tem fundo contínuo com a navbar, superfícies roxas discretas e três cards inteiros clicáveis. | **Integração real:** história, integrantes e conquistas vêm da API; parte das imagens é placeholder; o novo tratamento visual vale para a abertura do Mural |
 | `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidades. | **Integração real:** dados do PostgreSQL; foto pode estar pendente |
-| `/loja` | Catálogo com busca, filtro, variações disponíveis, estoque e carrinho. | **Integração real:** catálogo/estoque da API; seleção do carrinho no navegador |
+| `/loja` | Catálogo com busca, filtro, variações disponíveis, estoque e carrinho. A abertura usa fundo contínuo com a navbar; os cards têm superfícies roxas discretas e a barra recebe sua camada escura somente quando fica fixa durante a rolagem. | **Integração real:** catálogo/estoque da API; seleção do carrinho no navegador; novo tratamento visual somente de interface |
 | `/loja/[slug]` | Detalhe de produto com variação, quantidade e estoque disponível. | **Integração real:** produto da API |
 | `/carrinho` | Alteração de quantidade, remoção e cálculo com preços atuais. | **Integração parcial:** seleção local, catálogo/preços reais |
 | `/checkout` | Dados de retirada e criação de pedido autenticado. | **Integração real:** pedido transacional e estoque; sem cobrança/pagamento |
@@ -68,7 +68,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
 | `/admin/produtos` | Busca, estoque, cadastro, edição, desativação e upload. | **Integração real:** altera loja e estoque |
 | `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload. | **Integração real:** altera agenda pública |
-| `/admin/modalidades` | Cadastro, edição, exclusão, imagem, responsável, local e horários de treino. | **Integração real:** altera páginas de modalidades e seus vínculos |
+| `/admin/modalidades` | Cadastro, edição, exclusão, imagem com prévia e remoção, responsável, local e horários de treino. A edição preserva horários que não mudaram. | **Integração real:** persiste dados e imagens na API e altera as páginas de modalidades |
 | `/admin/integrantes` | Busca, cadastro, edição, remoção e foto. | **Integração real:** altera mural público |
 | `/admin/mural` | Gestão de conquistas e marcos históricos. | **Integração real:** altera as duas páginas públicas do mural |
 | `/admin/resultados` | Busca, filtros, cadastro, edição e remoção. | **Integração real:** persiste resultados |
@@ -129,10 +129,10 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/data/admin.ts` | Referência visual legada; dashboard integrado usa métricas da API. |
 | `frontend/src/app/admin/layout.tsx` e `admin-shell.tsx` | Estrutura e barra superior compartilhadas entre as telas administrativas; em celular a busca contextual fica abaixo do título. |
 | `frontend/src/data/admin-*.ts` | Tipos/rótulos e referências visuais legadas; as telas administrativas carregam a API. |
-| `frontend/public/images/` | Imagens servidas pelo site; originais e referências ficam em `assets/`. |
+| `frontend/public/images/` | Imagens versionadas e servidas pelo site; originais e referências ficam na pasta local `assets/`, fora do Git. |
 | `frontend/README.md` | Guia rápido de execução e mapa resumido do front end. |
 
-As páginas usam CSS Modules (`*.module.css`) para estilos próprios. A identidade visual segue o Figma: fonte Outfit, paleta da Octacore e imagens fornecidas em `assets/`. Os retângulos brancos de galeria, mural e integrantes são espaços reservados intencionais.
+As páginas usam CSS Modules (`*.module.css`) para estilos próprios. A identidade visual segue o Figma: fonte Outfit, paleta da Octacore e cópias versionadas das imagens em `frontend/public/images/`. Os originais fornecidos ficam em `assets/` somente no ambiente local. Os retângulos brancos de galeria, mural e integrantes são espaços reservados intencionais.
 
 ## 5. Onde alterar o conteúdo
 
@@ -184,7 +184,7 @@ O cabeçalho consulta um estado compartilhado de autenticação: visitantes abre
 
 `/admin/eventos` consulta e altera a mesma tabela usada por Agenda e Home. Lista, calendário, busca, CRUD, upload e vínculo opcional com modalidade persistem na API.
 
-`/admin/modalidades` gerencia modalidades, imagens, responsáveis, locais e múltiplos horários de treino. `/admin/mural` gerencia conquistas e marcos históricos. As alterações alimentam imediatamente as respectivas páginas públicas.
+`/admin/modalidades` gerencia modalidades, imagens, responsáveis, locais e múltiplos horários de treino. O formulário mostra a prévia da imagem enviada e permite removê-la antes de salvar. Na edição, horários existentes são mantidos quando seus dias e horas iniciais não mudam, evitando conflito com a chave única do banco; horários repetidos no mesmo dia e início são recusados com mensagem específica. `/admin/mural` gerencia conquistas e marcos históricos. As alterações alimentam imediatamente as respectivas páginas públicas.
 
 `/admin/integrantes` consulta e altera integrantes do mural. Nome, função, curso, Instagram, foto, participação na diretoria e múltiplos vínculos com modalidades persistem na edição. As modalidades são selecionadas por caixas de marcação, sem exigir teclas modificadoras.
 
@@ -206,7 +206,7 @@ A navegação administrativa mantém o comportamento responsivo anterior. A navb
 
 1. Configurar e validar SMTP real; os demais fluxos do Compose, banco, autenticação, conteúdo, pedido/estoque e uploads já foram exercitados contra PostgreSQL.
 2. Decidir e versionar uma evolução de schema para refresh/reset tokens revogáveis, presença/favoritos, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
-3. Revisar acessibilidade/responsividade em dispositivos físicos e substituir placeholders pelas imagens aprovadas.
+3. Revisar acessibilidade/responsividade em dispositivos físicos e substituir placeholders pelas imagens aprovadas. Avaliar os cards de vidro em Notícias antes de levar o estilo a outras telas.
 
 Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando acontecer.
 
@@ -228,6 +228,86 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 11/11/2026 — Materiais de origem fora do Git
+
+- A pasta `assets/`, usada para originais, documentos e renders de trabalho, foi incluída no `.gitignore` e retirada do índice sem apagar os arquivos locais. As imagens necessárias ao site permanecem versionadas em `frontend/public/images/`.
+- Verificação: conferidos os arquivos rastreados, as referências da aplicação e o comportamento de `git check-ignore`. A remoção vale para a versão atual do repositório após o merge; arquivos já publicados continuam no histórico antigo.
+
+### 11/11/2026 — Transição da barra fixa da Loja
+
+- Removida a camada escura da faixa de filtros enquanto ela está na posição inicial, eliminando a divisão de cor com a apresentação da Loja. Ao ficar fixa no topo, a faixa recebe uma camada roxa com desfoque para manter os controles legíveis sobre os produtos.
+- Mudança somente de interface, sem alteração no catálogo ou no carrinho. Verificação: build do frontend no Docker e inspeção visual no navegador antes e depois da rolagem, com filtros, busca e carrinho visíveis.
+
+### 11/11/2026 — Tratamento visual do catálogo da Loja
+
+- Integrado o fundo da rota `/loja` à navbar por gradiente contínuo. A barra fixa de categorias, busca e carrinho ganhou superfície roxa escura com desfoque discreto e opacidade suficiente para separar os produtos durante a rolagem. Os cards de produtos receberam tons roxos naturais, bordas finas e hover menos intenso.
+- A mudança é visual no catálogo; produtos e estoque continuam vindo da API, e o carrinho permanece no navegador. Verificação: build do frontend no Docker e inspeção visual da abertura e da barra fixa durante a rolagem em desktop. O detalhe do produto e a estrutura móvel não foram alterados.
+
+### 11/11/2026 — Navegação pelos cards do Mural
+
+- Os três cards de história, integrantes e conquistas passaram a ser links completos, com foco de teclado visível. A chamada do card de integrantes foi alterada de “Ver diretoria” para “Ver integrantes”. Os destinos e os dados das páginas continuam os mesmos.
+- Verificação: build do frontend no Docker, inspeção visual e clique no centro do card de integrantes no navegador, abrindo `/mural/integrantes`.
+
+### 11/11/2026 — Tratamento visual da abertura do Mural
+
+- Integrado o fundo da rota `/mural` à navbar por um gradiente contínuo. O destaque inicial e os três cards de navegação receberam tons roxos mais naturais, bordas finas e reflexos discretos, mantendo texto e ilustração legíveis.
+- A mudança é apenas de interface na abertura do Mural; as páginas de história, integrantes e conquistas e suas integrações com a API permanecem como antes. Verificação: build do frontend no Docker e inspeção visual do destaque e dos cards em desktop no navegador.
+
+### 11/11/2026 — Transição superior e navegação pelos cards da Agenda
+
+- Removido o fundo próprio do cabeçalho na rota `/agenda`, permitindo que o gradiente da página atravesse a parte superior sem faixa de cor. Cada compromisso com página de detalhe passou a ter toda a área do card clicável, com foco visível para navegação por teclado.
+- A navegação continua usando o slug real recebido da API; a alteração não muda dados ou presença. Verificação: build no Docker, inspeção visual em desktop e clique na área da data de um card, abrindo a página correta do evento.
+
+### 11/11/2026 — Tratamento visual da Agenda
+
+- Integrado o fundo da Agenda à navbar com gradiente contínuo. Cards de compromissos, filtros e painel de informações receberam superfícies roxas discretas, bordas suaves e reflexos contidos, preservando a leitura das datas e categorias.
+- A alteração é somente de interface: listagem e filtros continuam usando os eventos da API. Verificação: build do frontend no Docker e inspeção visual da Agenda carregada em desktop no navegador. O layout móvel conserva a estrutura responsiva anterior.
+
+### 11/11/2026 — Ajuste de contraste dos cards de Modalidades
+
+- Reduzidos o brilho cinza, a borda clara e a sombra dos cards da lista pública. A nova superfície usa tons roxos escuros com transparência e reflexo discreto para acompanhar o fundo da página. Os dados e imagens continuam vindo da API.
+- Verificação: build do frontend no Docker e inspeção visual da lista em desktop no navegador. A versão móvel mantém a mesma grade responsiva anterior; não houve mudança nas páginas individuais.
+
+### 11/11/2026 — Edição e imagem no cadastro de Modalidades
+
+- Corrigida a edição de modalidades que falhava com conflito de dados únicos ao reenviar horários existentes. A API agora preserva esses registros e altera somente horários adicionados, modificados ou removidos.
+- O campo de imagem do modal administrativo ganhou apresentação alinhada ao cadastro de Notícias, com validação de tipo e tamanho, prévia, remoção e erros visíveis no próprio formulário. O upload e o salvamento continuam integrados à API; a prévia é comportamento da interface.
+- Verificação: lint e build do frontend, compilação Python e edição de uma modalidade real em transação revertida no PostgreSQL, confirmando a alteração da descrição e a preservação dos IDs de dois horários. O formulário visual ainda precisa ser conferido em uma sessão administrativa no navegador.
+
+### 11/11/2026 — Vidro discreto na lista de Modalidades
+
+- A lista de Modalidades recebeu cards com superfície neutra translúcida, reflexo e borda suaves, seguindo a direção aprovada em Notícias. Navbar e conteúdo compartilham um gradiente contínuo. Imagens cadastradas na API aparecem nos cards; sem imagem, o card fica compacto e não exibe um placeholder vazio.
+- A mudança é de interface sobre modalidades reais da API. As páginas individuais não receberam esse novo tratamento nesta etapa. Verificação: lint e build do frontend passaram; frontend reconstruído no Docker. Conferidos desktop em 1440 px e celular em 390 px, com quatro cards da API, sem rolagem horizontal. As quatro modalidades atuais não têm imagem cadastrada, portanto a exibição de imagem real nesta tela depende de conteúdo com foto.
+
+### 11/11/2026 — Gradiente contínuo entre navbar e Notícias
+
+- O cabeçalho e a lista de Notícias passaram a compartilhar o mesmo fundo, com o gradiente aplicado ao contêiner das duas áreas. A separação brusca entre as cores da navbar e do topo da página foi removida. A mudança é apenas visual; dados e filtros continuam integrados à API.
+- Verificação: lint e build do frontend passaram; frontend reconstruído no Docker. Conferida a continuidade visual em 1440 px e 390 px, sem rolagem horizontal no celular.
+
+### 11/11/2026 — Cards padronizados com vidro em Notícias
+
+- Todos os cards da lista de Notícias agora têm o mesmo tamanho e a linguagem visual discreta do card de compromissos da Home: superfície roxa translúcida, reflexos sutis e fundo opaco para navegadores sem desfoque ou com transparência reduzida. A versão inicial com um card de destaque maior foi removida após avaliação visual.
+- Após avaliar a versão roxa mais opaca, os cards receberam uma superfície neutra e mais translúcida, com reflexos suaves, borda e sombra discretas. O roxo agora vem principalmente do fundo da página.
+- Os cards passaram a mostrar a imagem de capa quando ela está cadastrada na API; notícias sem capa conservam um espaço provisório. É uma alteração de interface sobre dados reais, sem alteração na API ou no banco.
+- Verificação: `npm run lint` e `npm run build` passaram nas etapas anteriores, e o build passou após o ajuste final de transparência; frontend reconstruído no Docker. Conferidos visualmente desktop de 1440 px e celular de 390 px, sem rolagem horizontal. As imagens cadastradas na API apareceram com proporção uniforme; os três primeiros cards mediram 411 × 414 px no desktop.
+
+### 11/11/2026 — Alinhamento dos blocos da Home
+
+- Os cards de Destaques de Arena e Próximos Compromissos agora começam na mesma linha. O card Faça parte começa na linha dos produtos da loja; Nossas Modalidades acompanha a apresentação da loja. A grade compartilha as linhas entre as duas colunas, preservando o alinhamento mesmo quando a lista de eventos mudar de altura.
+- No celular, as seções seguem a ordem de leitura do documento em uma coluna. A alteração é somente de interface; os dados de produtos e eventos continuam vindo da API, e os destaques fixos da Arena permanecem como antes. Verificação: lint e build de produção passaram, além da conferência visual em desktop (inícios dos cards alinhados) e celular sem rolagem horizontal.
+
+### 11/11/2026 — Protótipo de vidro no cabeçalho público e na Home
+
+- Cabeçalho público com formato arredondado, transparência roxa discreta, reflexos suaves, indicação da página ativa em cápsula e botão de conta no mesmo estilo. O menu móvel passa a aparecer até 960 px para acomodar a navegação. O card de próximos compromissos da Home recebeu a mesma linguagem visual, com intensidade menor para preservar a leitura.
+- Na Home, o cabeçalho e o conteúdo compartilham o mesmo gradiente de fundo, suavizando a transição entre eles. As outras páginas mantêm seus próprios fundos. Verificação deste ajuste: lint e build passaram, o frontend foi reconstruído no Docker e a Home foi conferida no navegador.
+- Os efeitos têm fundo opaco quando o navegador não suporta desfoque ou solicita transparência reduzida. O cabeçalho continua no fluxo normal da página; a barra da loja mantém o visual anterior. Alteração de interface sobre os dados reais existentes, sem mudanças na API ou no banco.
+- Verificação: lint e build de produção passaram; frontend reconstruído no Docker. Conferidos visualmente o cabeçalho e card em 1440 px e o cabeçalho/menu aberto em 390 px, sem rolagem horizontal. O card mostrou corretamente o estado vazio, pois não há eventos futuros cadastrados no momento da conferência.
+
+### 11/11/2026 — Permissões dos volumes de imagens no Docker
+
+- Corrigida a inicialização da API Python para ajustar o proprietário do volume persistente de uploads antes de executar o servidor com o usuário sem privilégios. Sem isso, o envio de imagens recebia `500` por `PermissionError` ao gravar em `/app/uploads`, e o navegador mostrava “Failed to fetch”. O upload continua integrado à API e ao PostgreSQL; não é uma simulação.
+- O contêiner do frontend agora prepara o cache de imagens do Next com permissão de escrita para o usuário de execução, evitando falhas `EACCES` ao exibir imagens otimizadas. Verificação: os logs identificaram ambos os erros; `docker compose up -d --build` concluiu, banco e API ficaram saudáveis, o usuário `octacore` conseguiu escrever no volume e o usuário `node` no cache de imagens; `git diff --check` passou. O envio autenticado pelo navegador após a correção ainda precisa de conferência manual.
 
 ### 11/11/2026 — Integração das correções da branch Zeca com a API Python
 

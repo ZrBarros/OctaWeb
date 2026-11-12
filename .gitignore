@@ -4,5 +4,6 @@
 !**/.env.example
 *.pem
 CONTEXTO_PARA_IA.md
+/assets/
 backend/dist/
 backend/node_modules/

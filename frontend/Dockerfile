@@ -17,6 +17,7 @@ RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=build /app/.next ./.next
 COPY --from=build /app/public ./public
 COPY --from=build /app/next.config.ts ./next.config.ts
+RUN mkdir -p /app/.next/cache/images && chown -R node:node /app/.next/cache
 USER node
 EXPOSE 3000
 CMD ["npm", "start"]
