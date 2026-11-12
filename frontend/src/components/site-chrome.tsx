@@ -24,16 +24,24 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
     return <><div className={styles.modalityShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/agenda") {
+  if (pathname === "/agenda" || pathname.startsWith("/agenda/")) {
     return <><div className={styles.agendaShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/mural") {
+  if (pathname === "/mural" || pathname.startsWith("/mural/integrantes")) {
     return <><div className={styles.muralShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/loja") {
+  if (pathname === "/loja" || pathname.startsWith("/loja/")) {
     return <><div className={styles.storeShell}><SiteHeader />{children}</div><SiteFooter /></>;
+  }
+
+  if (pathname === "/minha-conta") {
+    return <><div className={styles.accountShell}><SiteHeader />{children}</div><SiteFooter /></>;
+  }
+
+  if (pathname === "/carrinho") {
+    return <><div className={styles.cartShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
   return <><SiteHeader />{children}<SiteFooter /></>;

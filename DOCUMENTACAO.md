@@ -113,7 +113,7 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/app/globals.css` | Cores, tokens de movimento, transições para controles, entrada de diálogos e estilos globais. |
 | `frontend/src/app/template.tsx`, `template.module.css` e `components/page-motion.tsx` | Transição global entre rotas e revelação progressiva de blocos durante o scroll; respeita a preferência por movimento reduzido. |
 | `frontend/src/components/` | Componentes reutilizados, como cabeçalho, rodapé e cards. |
-| `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. |
+| `frontend/src/lib/api.ts`, `server-api.ts`, `api-types.ts`, `api-mappers.ts` | Clientes HTTP, autenticação, contratos e adaptação dos dados da API. O navegador usa `/api/v1` no mesmo endereço do site; o Next.js encaminha a chamada à API configurada em `API_URL`. |
 | `frontend/src/data/` | Tipos, rótulos e dados que continuam demonstrativos; não é mais a fonte dos módulos integrados. |
 | `frontend/src/lib/cart.ts` | Seleção do carrinho no navegador; a API revalida produto, variação, preço e estoque no checkout. |
 | `backend-python/app/routers/`, `services/` e `repositories/` | Rotas FastAPI, regras de negócio e acesso SQLAlchemy de autenticação, conteúdo, loja e administração. |
@@ -228,6 +228,36 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 12/11/2026 — Atualização visual do detalhe de evento
+
+- As rotas `/agenda/[slug]` passaram a usar o gradiente contínuo da Agenda. A imagem de capa foi alinhada à largura do conteúdo e os cartões de informações, confirmação visual e participantes receberam superfícies roxas translúcidas.
+- Alteração somente de interface. Eventos e imagens continuam consultados na API; favoritar e confirmar presença seguem como simulações no navegador, sem persistência. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual dos Integrantes no Mural
+
+- A lista e os perfis em `/mural/integrantes` passaram a compartilhar o gradiente contínuo do Mural e cartões roxos translúcidos. Os filtros acompanham o estilo das outras páginas públicas.
+- Fotos cadastradas pela diretoria agora aparecem na lista e no perfil público; quando não há foto, as iniciais substituem o antigo bloco branco. Dados e fotos vêm da API. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual do detalhe de produto
+
+- As rotas `/loja/[slug]` passaram a compartilhar o gradiente contínuo da Loja desde a navbar. Imagem e informações do produto receberam cartões roxos translúcidos e os seletores de tamanho e quantidade foram alinhados ao tratamento visual do carrinho.
+- Alteração somente de interface. Consulta de produto e estoque pela API e adição ao carrinho no navegador permanecem como antes. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual do Carrinho
+
+- A rota `/carrinho` passou a usar gradiente contínuo desde a navbar, superfícies roxas translúcidas nos produtos e no resumo, controles de quantidade mais legíveis e resumo fixo durante a rolagem em telas largas.
+- Alteração somente de interface. O carrinho continua no navegador, os produtos e preços são consultados na API e o checkout mantém o registro real de pedidos sem cobrança online. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual de Minha Conta
+
+- A tela `/minha-conta` recebeu cabeçalho alinhado às páginas públicas recentes, cartão de perfil mais compacto e ações em lista dentro de um painel. O gradiente contínuo entre navbar e conteúdo evita a divisão brusca de cor; as superfícies usam roxo translúcido discreto, bordas suaves e alternativa sem transparência.
+- Alteração somente de interface. Os dados do perfil, a troca de senha, os links para pedidos e o logout continuam conectados à API como antes. Verificação: lint e build de produção do frontend concluídos.
+
+### 12/11/2026 — Acesso à API em outro computador
+
+- As chamadas feitas pelo navegador passaram a usar `/api/v1` no endereço do próprio site. O Next.js encaminha essas requisições à API pelo endereço interno, evitando que `localhost:3333` aponte para o computador do visitante. Imagens enviadas à API continuam servidas por `/uploads` no mesmo endereço do site.
+- Mudança de integração real entre frontend e backend, sem alteração no banco. Verificação: build do frontend e requisições ao proxy em ambiente Docker. Para desenvolvimento sem Docker, `NEXT_PUBLIC_API_URL` deve permanecer `/api/v1` no `.env.local`; o acesso por outro dispositivo ainda depende de ambos estarem na mesma rede e da porta 3000 estar acessível.
 
 ### 11/11/2026 — Materiais de origem fora do Git
 

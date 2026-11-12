@@ -44,13 +44,22 @@ export function AccountDashboard() {
   return (
     <main className={styles.main}>
       <div className={styles.container}>
-        <p className={styles.demoLabel}>Conta conectada</p>
-        <h1>Meu Painel Acadêmico</h1>
+        <div className={styles.heading}>
+          <span className={styles.kicker} aria-hidden="true" />
+          <p className={styles.demoLabel}>Área do membro</p>
+          <h1>Minha conta</h1>
+          <p className={styles.intro}>Seus dados, segurança e pedidos em um só lugar.</p>
+        </div>
         <div className={styles.layout}>
           <section className={styles.profileCard} aria-labelledby="profile-name">
-            <div className={styles.avatar} aria-hidden="true">{initials}</div>
-            <h2 id="profile-name">{profile.nome}</h2>
-            <p className={styles.role}>{profile.perfil === "ADMIN" ? "Administrador" : "Membro Octacore"}</p>
+            <div className={styles.profileHeader}>
+              <div className={styles.avatar} aria-hidden="true">{initials}</div>
+              <div className={styles.profileIdentity}>
+                <p className={styles.profileEyebrow}>Perfil Octacore</p>
+                <h2 id="profile-name">{profile.nome}</h2>
+                <p className={styles.role}>{profile.perfil === "ADMIN" ? "Administrador" : "Membro Octacore"}</p>
+              </div>
+            </div>
             <dl className={styles.profileDetails}>
               <div><dt>Curso</dt><dd>{profile.curso}</dd></div>
               <div><dt>E-mail</dt><dd>{profile.email}</dd></div>
@@ -60,13 +69,16 @@ export function AccountDashboard() {
           </section>
 
           <section className={styles.actions} aria-labelledby="actions-heading">
-            <h2 id="actions-heading">Gerenciar Conta</h2>
+            <div className={styles.actionsHeading}>
+              <h2 id="actions-heading">Gerenciar conta</h2>
+              <p>Escolha o que deseja atualizar ou consultar.</p>
+            </div>
             <div className={styles.actionList}>
               {actions.map((action) => {
                 const content = <><span className={styles.actionIcon}><ActionIcon name={action.icon} /></span><span className={styles.actionText}><strong>{action.title}</strong><small>{action.description}</small></span><span className={styles.arrow} aria-hidden="true">→</span></>;
                 return action.href
-                  ? <Link className={`${styles.actionCard} hoverCard`} href={action.href} key={action.title}>{content}</Link>
-                  : <button className={`${styles.actionCard} hoverCard`} type="button" onClick={() => { setMessage(""); setEditor(action.editor ?? null); }} key={action.title}>{content}</button>;
+                  ? <Link className={styles.actionCard} href={action.href} key={action.title}>{content}</Link>
+                  : <button className={styles.actionCard} type="button" onClick={() => { setMessage(""); setEditor(action.editor ?? null); }} key={action.title}>{content}</button>;
               })}
             </div>
             {message && <p className={styles.feedback} role="status">{message}</p>}

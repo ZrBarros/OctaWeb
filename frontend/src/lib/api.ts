@@ -2,7 +2,7 @@
 
 import { ApiError } from "./api-types";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333/api/v1";
+const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api/v1";
 let accessToken: string | null = null;
 let refreshPromise: Promise<boolean> | null = null;
 

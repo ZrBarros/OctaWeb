@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { InstagramIcon } from "@/components/instagram-icon";
 import { memberFilters } from "@/data/mural";
 import type { ApiMember, ApiPage } from "@/lib/api-types";
 import { useApiData } from "@/lib/use-api";
+import { displayImageUrl } from "@/lib/display-image-url";
 import { useState } from "react";
 import styles from "./page.module.css";
 
 export default function MembersPage() {
   const [filter, setFilter] = useState<(typeof memberFilters)[number]>("Todos");
   const { data: response, loading, error } = useApiData<ApiPage<ApiMember>>("/members?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
-  const muralMembers = response.data.map((member) => ({ slug: member.slug, name: member.nome, role: member.funcao ?? "Integrante", course: member.curso ?? "Curso não informado", modality: member.modalidades[0]?.modalidade.nome ?? "Sem modalidade", groups: [...(member.diretoria ? ["Diretoria"] : []), ...member.modalidades.map((item) => item.modalidade.nome)] }));
+  const muralMembers = response.data.map((member) => ({ slug: member.slug, name: member.nome, role: member.funcao ?? "Integrante", course: member.curso ?? "Curso não informado", modality: member.modalidades[0]?.modalidade.nome ?? "Sem modalidade", image: member.fotoUrl, instagram: member.instagram, groups: [...(member.diretoria ? ["Diretoria"] : []), ...member.modalidades.map((item) => item.modalidade.nome)] }));
   const visibleMembers = filter === "Todos" ? muralMembers : muralMembers.filter((member) => member.groups.includes(filter));
 
   return (
@@ -44,15 +46,17 @@ export default function MembersPage() {
           <div className={styles.grid}>
             {visibleMembers.map((member) => (
               <Link className={`${styles.card} hoverCard`} key={member.slug} href={`/mural/integrantes/${member.slug}`} aria-label={`Ver perfil de ${member.name}`}>
-                <div className={styles.photo} role="img" aria-label={`Foto de ${member.name} pendente`} />
+                <div className={styles.photo}>
+                  {member.image ? <Image src={displayImageUrl(member.image)} alt={`Foto de ${member.name}`} width={360} height={360} unoptimized /> : <span aria-label={`Sem foto de ${member.name}`}>{member.name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("pt-BR")}</span>}
+                </div>
                 <div className={styles.cardContent}>
                   <h2>{member.name}</h2>
                   <p className={styles.role}>{member.role}</p>
                   <p>{member.course}</p>
                   <p>Modalidade: {member.modality}</p>
-                  <span className={styles.instagram}>
+                  {member.instagram && <span className={styles.instagram} aria-label="Instagram informado no perfil">
                     <InstagramIcon />
-                  </span>
+                  </span>}
                 </div>
               </Link>
             ))}

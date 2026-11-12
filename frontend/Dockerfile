@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-ARG NEXT_PUBLIC_API_URL=http://localhost:3333/api/v1
+ARG NEXT_PUBLIC_API_URL=/api/v1
 ARG API_URL=http://localhost:3333/api/v1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV API_URL=$API_URL

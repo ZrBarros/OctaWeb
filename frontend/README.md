@@ -1,6 +1,6 @@
 # Frontend Octacore
 
-Aplicação Next.js 16 integrada à API Fastify da Octacore.
+Aplicação Next.js 16 integrada à API FastAPI da Octacore.
 
 ## Configuração
 
@@ -8,10 +8,10 @@ Copie `.env.example` para `.env.local`:
 
 ```dotenv
 API_URL=http://localhost:3333/api/v1
-NEXT_PUBLIC_API_URL=http://localhost:3333/api/v1
+NEXT_PUBLIC_API_URL=/api/v1
 ```
 
-`API_URL` é usada pelos Server Components. `NEXT_PUBLIC_API_URL` é usada nas telas interativas no navegador.
+`API_URL` é usada pelos Server Components e pelo proxy do Next.js. `NEXT_PUBLIC_API_URL` é usada nas telas interativas no navegador e deve permanecer relativa (`/api/v1`) para funcionar também ao acessar o site de outro computador na rede.
 
 ```bash
 npm install

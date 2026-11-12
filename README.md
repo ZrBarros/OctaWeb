@@ -24,6 +24,8 @@ docker compose up --build
 - Health check: http://localhost:3333/health
 - PostgreSQL no host: `localhost:5433`
 
+Para abrir o site em outro computador na mesma rede, use `http://IP_DO_COMPUTADOR_QUE_RODA_O_DOCKER:3000`. O navegador acessa a API pelo próprio endereço do site (`/api/v1`); a porta 3333 não precisa ser informada na URL do frontend. Se usar `npm run dev` fora do Docker, mantenha `NEXT_PUBLIC_API_URL=/api/v1` em `frontend/.env.local`.
+
 O serviço `api` já executa o backend Python de `backend-python/`. Para usar o site, basta iniciar `db`, `api` e `frontend`; o serviço opcional `api-python` da configuração paralela, na porta 3334, não é necessário. A pasta antiga `backend/` foi removida.
 
 O compose é uma configuração local. Antes de publicar, troque os três segredos JWT, ative cookies seguros, configure os domínios reais e forneça SMTP.

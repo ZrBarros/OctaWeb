@@ -15,13 +15,12 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
 
   return (
     <main className={styles.main}>
-      <div className={styles.hero}>
-        {event.heroImage
-          ? <Image src={displayImageUrl(event.heroImage)} alt={`Imagem de ${event.title}`} width={1440} height={320} priority unoptimized />
-          : <div className={styles.heroPlaceholder} role="img" aria-label={`Imagem de ${event.title} pendente`} />}
-      </div>
-
       <div className={styles.container}>
+        <div className={styles.hero}>
+          {event.heroImage
+            ? <Image src={displayImageUrl(event.heroImage)} alt={`Imagem de ${event.title}`} width={1440} height={320} priority unoptimized />
+            : <div className={styles.heroPlaceholder} role="img" aria-label={`Imagem de ${event.title} pendente`} />}
+        </div>
         <p className={styles.demoNotice}>Prévia demonstrativa · presença não é registrada</p>
         <div className={styles.layout}>
           <div className={styles.eventContent}>
