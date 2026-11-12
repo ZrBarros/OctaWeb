@@ -44,7 +44,7 @@ export function SiteHeader() {
   }, []);
 
   return (
-    <header className={`${styles.header} ${pathname === "/" || pathname === "/noticias" || pathname === "/modalidades" || pathname === "/agenda" || pathname === "/mural" || pathname === "/loja" ? styles.homeHeader : ""}`}>
+    <header className={`${styles.header} ${pathname === "/" || pathname === "/noticias" || pathname === "/modalidades" || pathname.startsWith("/agenda") || pathname === "/mural" || pathname.startsWith("/mural/integrantes") || pathname.startsWith("/loja") || pathname === "/minha-conta" || pathname === "/carrinho" ? styles.homeHeader : ""}`}>
       <div className={styles.inner}>
         <Link className={styles.brand} href="/" aria-label="Octacore, página inicial">
           <span className={styles.brandMark}><Image src="/images/logo-octacore.png" alt="" width={76} height={76} priority /></span>

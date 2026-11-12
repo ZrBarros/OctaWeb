@@ -229,6 +229,31 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 
 ## 9. Histórico de desenvolvimento
 
+### 12/11/2026 — Atualização visual do detalhe de evento
+
+- As rotas `/agenda/[slug]` passaram a usar o gradiente contínuo da Agenda. A imagem de capa foi alinhada à largura do conteúdo e os cartões de informações, confirmação visual e participantes receberam superfícies roxas translúcidas.
+- Alteração somente de interface. Eventos e imagens continuam consultados na API; favoritar e confirmar presença seguem como simulações no navegador, sem persistência. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual dos Integrantes no Mural
+
+- A lista e os perfis em `/mural/integrantes` passaram a compartilhar o gradiente contínuo do Mural e cartões roxos translúcidos. Os filtros acompanham o estilo das outras páginas públicas.
+- Fotos cadastradas pela diretoria agora aparecem na lista e no perfil público; quando não há foto, as iniciais substituem o antigo bloco branco. Dados e fotos vêm da API. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual do detalhe de produto
+
+- As rotas `/loja/[slug]` passaram a compartilhar o gradiente contínuo da Loja desde a navbar. Imagem e informações do produto receberam cartões roxos translúcidos e os seletores de tamanho e quantidade foram alinhados ao tratamento visual do carrinho.
+- Alteração somente de interface. Consulta de produto e estoque pela API e adição ao carrinho no navegador permanecem como antes. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual do Carrinho
+
+- A rota `/carrinho` passou a usar gradiente contínuo desde a navbar, superfícies roxas translúcidas nos produtos e no resumo, controles de quantidade mais legíveis e resumo fixo durante a rolagem em telas largas.
+- Alteração somente de interface. O carrinho continua no navegador, os produtos e preços são consultados na API e o checkout mantém o registro real de pedidos sem cobrança online. Verificação: lint e build do frontend no Docker.
+
+### 12/11/2026 — Atualização visual de Minha Conta
+
+- A tela `/minha-conta` recebeu cabeçalho alinhado às páginas públicas recentes, cartão de perfil mais compacto e ações em lista dentro de um painel. O gradiente contínuo entre navbar e conteúdo evita a divisão brusca de cor; as superfícies usam roxo translúcido discreto, bordas suaves e alternativa sem transparência.
+- Alteração somente de interface. Os dados do perfil, a troca de senha, os links para pedidos e o logout continuam conectados à API como antes. Verificação: lint e build de produção do frontend concluídos.
+
 ### 12/11/2026 — Acesso à API em outro computador
 
 - As chamadas feitas pelo navegador passaram a usar `/api/v1` no endereço do próprio site. O Next.js encaminha essas requisições à API pelo endereço interno, evitando que `localhost:3333` aponte para o computador do visitante. Imagens enviadas à API continuam servidas por `/uploads` no mesmo endereço do site.

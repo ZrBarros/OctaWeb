@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { apiServer } from "@/lib/server-api";
 import { ApiError, type ApiItem, type ApiMember } from "@/lib/api-types";
+import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -18,14 +20,16 @@ export default async function MemberPage({ params }: Props) {
   let data: ApiMember;
   try { data = (await apiServer<ApiItem<ApiMember>>(`/members/${encodeURIComponent(slug)}`)).data; }
   catch (error) { if (error instanceof ApiError && error.status === 404) notFound(); throw error; }
-  const member = { name: data.nome, role: data.funcao ?? "Integrante", course: data.curso ?? "Curso não informado", modality: data.modalidades.map((item) => item.modalidade.nome).join(", ") || "Sem modalidade" };
+  const member = { name: data.nome, role: data.funcao ?? "Integrante", course: data.curso ?? "Curso não informado", modality: data.modalidades.map((item) => item.modalidade.nome).join(", ") || "Sem modalidade", image: data.fotoUrl };
 
   return (
     <main className={styles.main}>
       <div className={styles.container}>
         <nav className={styles.breadcrumb} aria-label="Caminho da página"><Link href="/mural">Mural</Link><span aria-hidden="true">/</span><Link href="/mural/integrantes">Integrantes</Link><span aria-hidden="true">/</span><span>{member.name}</span></nav>
         <article className={styles.profile}>
-          <div className={styles.photo} role="img" aria-label={`Foto de ${member.name} pendente`} />
+          <div className={styles.photo}>
+            {member.image ? <Image src={displayImageUrl(member.image)} alt={`Foto de ${member.name}`} width={480} height={520} unoptimized /> : <span aria-label={`Sem foto de ${member.name}`}>{member.name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("pt-BR")}</span>}
+          </div>
           <div className={styles.content}>
             <p className={styles.kicker}>Integrante Octacore</p>
             <h1>{member.name}</h1>
