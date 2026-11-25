@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Product } from "@/data/products";
 import { formatPrice } from "@/data/products";
 import { addToCart, useCart } from "@/lib/cart";
+import { openCartConfirmation } from "@/lib/cart-confirmation";
 import { useTimedFeedback } from "@/lib/use-timed-feedback";
 import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
@@ -18,6 +19,7 @@ export function ProductCard({ product }: { product: Product }) {
   const inCart = cart?.find((item) => item.slug === product.slug && item.size === (size ?? undefined))?.quantity ?? 0;
   const availableStock = product.variations?.find((variation) => variation.size === (size ?? "UNICO"))?.stock ?? 0;
   const available = Math.max(0, Math.min(99, availableStock) - inCart);
+  const wasAdded = feedback.startsWith("Adicionado:");
 
   function handleAdd() {
     if (product.sizes && !size) {
@@ -26,10 +28,11 @@ export function ProductCard({ product }: { product: Product }) {
     }
     const added = Math.min(quantity, available);
     if (added < 1 || !addToCart(product.slug, size ?? undefined, added)) {
-      showFeedback("Limite de 99 unidades deste item no carrinho.");
+      showFeedback("Estoque disponível atingido para esta opção.");
       return;
     }
-    showFeedback(`${added} ${added === 1 ? "unidade adicionada" : "unidades adicionadas"} ao carrinho${size ? ` · tamanho ${size}` : ""}.`);
+    showFeedback(`Adicionado: ${added} ${added === 1 ? "unidade" : "unidades"} de ${product.name}${size ? ` · tamanho ${size}` : ""}.`);
+    openCartConfirmation({ product, size: size ?? undefined, quantity: added });
   }
 
   return (
@@ -66,15 +69,15 @@ export function ProductCard({ product }: { product: Product }) {
       <div className={styles.quantityRow}>
         <span>Quantidade</span>
         <div className={styles.quantityControl}>
-          <button type="button" aria-label={`Diminuir quantidade de ${product.name}`} disabled={quantity === 1} onClick={() => setQuantity((current) => current - 1)}>−</button>
+          <button type="button" aria-label={`Diminuir quantidade de ${product.name}`} disabled={quantity === 1} onClick={() => { setQuantity((current) => current - 1); clearFeedback(); }}>−</button>
           <output aria-label={`Quantidade selecionada: ${quantity}`}>{quantity}</output>
-          <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity === 99} onClick={() => setQuantity((current) => current + 1)}>+</button>
+          <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity === 99} onClick={() => { setQuantity((current) => current + 1); clearFeedback(); }}>+</button>
         </div>
       </div>
 
-      <button className={styles.addButton} type="button" onClick={handleAdd} disabled={Boolean(size || !product.sizes) && available === 0}>Adicionar ao carrinho</button>
+      <button className={`${styles.addButton} ${wasAdded ? styles.addButtonSuccess : ""}`} type="button" onClick={handleAdd} disabled={Boolean(size || !product.sizes) && available === 0}>{wasAdded ? "Adicionado ✓" : "Adicionar ao carrinho"}</button>
+      {feedback && !wasAdded && <p className={styles.feedbackError} role="alert">{feedback}</p>}
       <Link className={styles.detailsLink} href={`/loja/${product.slug}`}>Ver detalhes <span aria-hidden="true">↗</span></Link>
-      <p className={styles.feedback} role="status" aria-live="polite">{feedback || "\u00a0"}</p>
     </article>
   );
 }

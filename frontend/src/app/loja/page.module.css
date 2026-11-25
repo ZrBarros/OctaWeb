@@ -46,10 +46,12 @@
 .quantityControl output { min-width: 28px; text-align: center; font-size: 13px; font-weight: 800; }
 .addButton { min-height: 44px; width: 100%; padding: 8px; border: 0; border-radius: 6px; background: var(--orange); color: #210b19; cursor: pointer; font: inherit; font-size: 12px; font-weight: 900; }
 .addButton:hover:not(:disabled) { filter: brightness(1.1); }
+.addButtonSuccess { background: #a9e4c2; }
 .addButton:disabled { opacity: .5; cursor: not-allowed; }
+.addButtonSuccess:disabled { opacity: 1; }
 .detailsLink { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; margin-top: 7px; border: 1px solid #60436a; border-radius: 6px; font-size: 12px; font-weight: 800; }
 .detailsLink:hover { border-color: var(--orange); color: var(--orange); }
-.feedback { min-height: 29px; margin: 8px 0 0; color: #dbc5e2; font-size: 11px; line-height: 1.3; }
+.feedbackError { margin: 8px 0 0; padding: 9px 11px; border: 1px solid #ff8a6191; border-radius: 6px; background: #3d1a25c9; color: #ffe5da; font-size: 12px; line-height: 1.4; }
 .card :is(button, a):focus-visible, .cartLink:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
 .empty { padding: 35px; border: 1px solid #a66bb42b; border-radius: 10px; background: #21112bd9; color: #ccc; }
