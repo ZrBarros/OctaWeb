@@ -18,14 +18,15 @@ export default async function AchievementsPage() {
           <h1 id="achievements-title">Conquistas recentes</h1>
           <p className={styles.intro}>O orgulho do polvo estampado em medalhas e troféus.</p>
           <div className={styles.achievementGrid}>
-            {achievements.map((achievement) => (
-              <article className={`${styles.achievement} hoverCard`} key={achievement.title}>
+            {achievements.map((achievement, index) => (
+              <article className={`${styles.achievement} hoverCard`} key={`${achievement.year}-${achievement.title}-${index}`}>
                 <div className={styles.achievementMeta}><strong><span aria-hidden="true">🏆</span> {achievement.year}</strong><span>{achievement.result}</span></div>
                 <h2>{achievement.title}</h2>
                 <p>{achievement.description}</p>
               </article>
             ))}
           </div>
+          {achievements.length === 0 && <p className={styles.empty}>Ainda não há conquistas cadastradas.</p>}
         </section>
 
         <section id="galeria" aria-labelledby="gallery-title" className={styles.gallerySection}>

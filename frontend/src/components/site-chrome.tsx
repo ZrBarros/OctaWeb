@@ -28,7 +28,7 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
     return <><div className={styles.agendaShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/mural" || pathname.startsWith("/mural/integrantes")) {
+  if (pathname === "/mural" || pathname.startsWith("/mural/integrantes") || pathname === "/mural/historia" || pathname === "/mural/conquistas") {
     return <><div className={styles.muralShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
@@ -40,7 +40,7 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
     return <><div className={styles.accountShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/carrinho") {
+  if (pathname === "/carrinho" || pathname === "/checkout") {
     return <><div className={styles.cartShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 

@@ -77,3 +77,20 @@
 .deleteConfirm { border: 0; background: #a1323d; color: white; }
 @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
 @media (max-width: 650px) { .toolbar { align-items: stretch; flex-direction: column; } .newButton { align-self: flex-start; } .cardImage { height: 150px; } .cardMeta { align-items: flex-start; flex-direction: column; gap: 8px; } .formRow { grid-template-columns: 1fr; } .dialog { padding: 18px; } }
+
+/* Eventos: cartões, calendário e formulários com o mesmo tratamento visual. */
+.viewButton { border-color: #b77fc647; border-radius: 10px; background: #281331ad; }
+.selectedView, .newButton, .saveButton { border-radius: 10px; }
+.newButton, .saveButton { background: #9e16b1; }
+.card, .calendar, .empty { border-color: #a66bb43d; border-radius: 16px; background: linear-gradient(155deg, #281331dd, #1a0d26eb 70%, #160a22f2); box-shadow: inset 0 1px 0 #ffffff12, 0 18px 34px -27px #000b; }
+.card:hover { border-color: #c187d17d; }
+.badge { border: 1px solid #b77fc65c; border-radius: 999px; background: #71318861; }
+.calendarGrid, .weekday, .calendarDay, .outsideDay, .calendarEmpty { border-color: #b77fc62e; }
+.outsideDay { background: #130a1b7a; }
+.calendarHeader button, .calendarDay button, .cardActions button { border-radius: 9px; }
+.message { border-color: #b77fc65c; border-radius: 12px; background: #71318838; }
+.dialog { border-color: #b77fc66b; border-radius: 18px; background: linear-gradient(155deg, #281331, #1b0e26 70%); }
+.form input, .form select, .form textarea { border-color: #b77fc65c; border-radius: 10px; background-color: #13091d; }
+.form input[type="file"]::file-selector-button, .dialogActions button { border-radius: 10px; }
+@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .card, .calendar, .empty { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
+@media (prefers-reduced-transparency: reduce) { .card, .calendar, .empty { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }

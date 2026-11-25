@@ -62,3 +62,20 @@
 @media (max-width: 1150px) { .table { min-width: 930px; } .scrollHint { display: block; } }
 @media (max-width: 650px) { .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; } .filters { display: none; } .mobileFilter { display: grid; min-width: 0; gap: 5px; color: #d9c9de; font-size: 9px; font-weight: 800; text-transform: uppercase; } .mobileFilter select { width: 100%; min-width: 0; min-height: 38px; padding: 0 32px 0 9px; appearance: none; border: 1px solid #56305e; border-radius: 6px; background: #1c1c1c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff7f3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center / 13px; color: white; font: inherit; font-size: 11px; text-transform: none; } .mobileFilter select:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; } .newButton { align-self: end; padding-inline: 11px; font-size: 10px; } .formRow { grid-template-columns: 1fr; } .dialog { padding: 18px; } .dialogActions { flex-wrap: wrap; } }
 @media (max-width: 650px) { .mobileFilter select:focus-visible, .mobileCategory select:focus-visible { outline: none; outline-offset: 0; border-color: #56305e; box-shadow: none; } }
+
+/* Resultados: filtros, placares e formulário. */
+.filter { border-color: #b77fc647; border-radius: 10px; background: #281331ad; }
+.selectedFilter, .newButton, .saveButton { border-radius: 10px; }
+.newButton, .saveButton { background: #9e16b1; }
+.tablePanel, .empty { border-color: #a66bb43d; border-radius: 16px; background: linear-gradient(155deg, #281331dd, #1a0d26eb 70%, #160a22f2); box-shadow: inset 0 1px 0 #ffffff12, 0 18px 34px -27px #000b; }
+.table th, .table td { border-color: #b77fc62e; }
+.table th { background: #1d1028b8; }
+.table tbody tr:hover { background: #ffffff08; }
+.score strong { border-radius: 7px; background: #71318861; }
+.win, .loss, .draw { border-radius: 999px; }
+.message { border-color: #b77fc65c; border-radius: 12px; background: #71318838; }
+.dialog { border-color: #b77fc66b; border-radius: 18px; background: linear-gradient(155deg, #281331, #1b0e26 70%); }
+.form input, .form select { border-color: #b77fc65c; border-radius: 10px; background-color: #13091d; }
+.dialogActions button, .mobileFilter select { border-radius: 10px; }
+@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .tablePanel { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
+@media (prefers-reduced-transparency: reduce) { .tablePanel, .empty { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }

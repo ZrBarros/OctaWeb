@@ -57,11 +57,10 @@ INSERT INTO conquista (titulo, campeonato, colocacao, ano, modalidade_id) VALUES
  ('Campeão Interatléticas',     'Interatléticas',           'Campeão',      2026, 1),
  ('Vice-campeão Universitário', 'Campeonato Universitário', 'Vice-campeão', 2026, 2);
 
-INSERT INTO marco_historico (ano, titulo, ordem) VALUES
- (2022, 'Fundação da Octacore', 1),
- (2023, 'Primeiro campeonato', 2),
- (2024, 'Primeiro título', 3),
- (2025, 'Expansão das modalidades', 4);
+INSERT INTO marco_historico (ano, titulo, descricao, ordem) VALUES
+ (2018, 'Fundação da Octacore', 'A Atlética Octacore foi fundada em 2018.', 1),
+ (2026, 'Oito anos de Octacore', 'A atlética completou oito anos em 2026.', 2),
+ (2026, 'Primeiro título do INTERENG', 'A Octacore foi campeã do INTERENG pela primeira vez em 2026.', 3);
 
 -- Notícias (autor = admin)
 INSERT INTO noticia (slug, titulo, resumo, conteudo, categoria, autor_id) VALUES

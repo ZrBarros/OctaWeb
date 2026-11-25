@@ -91,3 +91,19 @@
 @media (max-width: 900px) { .editGrid { grid-template-columns: 1fr; } }
 @media (max-width: 650px) { .toolbar { align-items: stretch; flex-direction: column; } .filters { display: none; } .mobileFilter { display: grid; width: 100%; gap: 5px; color: #d9c9de; font-size: 10px; font-weight: 800; text-transform: uppercase; } .mobileFilter select { width: 100%; min-height: 42px; padding: 0 38px 0 11px; appearance: none; border: 1px solid #56305e; border-radius: 6px; background: #1c1c1c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff7f3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 13px center / 14px; color: white; font: inherit; font-size: 12px; text-transform: none; } .mobileFilter select:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; } .search { width: 100%; } .tablePanel { display: none; } .mobileOrders { display: grid; gap: 12px; } .orderDialog { padding: 18px; } .statusPanel, .orderDetails { padding: 17px; } .dialogActions button { flex: 1; } }
 @media (max-width: 650px) { .mobileFilter select:focus-visible, .mobileCategory select:focus-visible { outline: none; outline-offset: 0; border-color: #56305e; box-shadow: none; } }
+
+/* Pedidos: tabela, cartões móveis e detalhes de gestão. */
+.filter { border-color: #b77fc647; border-radius: 10px; background: #281331ad; }
+.activeFilter, .manage, .orderCard > button { border-radius: 10px; }
+.search { border-color: #b77fc647; border-radius: 10px; background: #13091d; }
+.tablePanel, .orderCard, .orderDetails, .statusPanel, .mobileEmpty { border-color: #a66bb43d; border-radius: 16px; background: linear-gradient(155deg, #281331dd, #1a0d26eb 70%, #160a22f2); box-shadow: inset 0 1px 0 #ffffff12, 0 18px 34px -27px #000b; }
+.table th, .table td, .cardFacts { border-color: #b77fc62e; }
+.table th { background: #1d1028b8; }
+.table tbody tr:hover { background: #ffffff08; }
+.status { border-radius: 999px; }
+.manage, .orderCard > button { border-color: #b77fc673; background: #71318861; }
+.message { border-color: #b77fc65c; border-radius: 12px; background: #71318838; }
+.orderDialog { border-color: #b77fc66b; border-radius: 18px; background: linear-gradient(155deg, #281331, #1b0e26 70%); }
+.dialogActions button, .option, .selectedOption { border-radius: 10px; }
+@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .tablePanel, .orderCard, .orderDetails, .statusPanel { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
+@media (prefers-reduced-transparency: reduce) { .tablePanel, .orderCard, .orderDetails, .statusPanel, .mobileEmpty { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }

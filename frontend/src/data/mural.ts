@@ -1,28 +1,22 @@
-// Textos iniciais baseados no protótipo. A diretoria pode revisar os dados antes da publicação.
+// Referências visuais legadas; a História pública consulta os marcos pela API.
 export const historyMilestones = [
   {
-    year: "2022",
+    year: "2018",
     label: "Fundação",
     title: "A Fundação da Octacore",
-    description: "Estudantes da Ciência da Computação da UFAL se reuniram para criar a atlética e fortalecer a integração dentro e fora das quadras.",
+    description: "A Atlética Octacore foi fundada em 2018.",
   },
   {
-    year: "2023",
-    label: "Primeiro desafio",
-    title: "O Primeiro Campeonato",
-    description: "A Octacore começou a participar de competições universitárias e a formar suas primeiras equipes esportivas.",
+    year: "2026",
+    label: "Aniversário",
+    title: "Oito anos de Octacore",
+    description: "A atlética completou oito anos em 2026.",
   },
   {
-    year: "2024",
-    label: "Glória do polvo",
-    title: "Primeiro Grande Título",
-    description: "Uma conquista marcante deu ainda mais força à nossa comunidade e abriu caminho para novos desafios.",
-  },
-  {
-    year: "2025",
-    label: "Expansão",
-    title: "Multiplicação de Modalidades",
-    description: "Novas modalidades e atividades ampliaram o espaço da Octacore para estudantes com diferentes interesses.",
+    year: "2026",
+    label: "Conquista",
+    title: "Primeiro título do INTERENG",
+    description: "A Octacore foi campeã do INTERENG pela primeira vez em 2026.",
   },
 ];
 

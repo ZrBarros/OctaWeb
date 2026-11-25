@@ -63,3 +63,17 @@
 .removeConfirm { border: 0; background: #a1323d; color: white; }
 @media (max-width: 1050px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 650px) { .toolbar { align-items: stretch; flex-direction: column; } .newButton { align-self: flex-start; } .grid { grid-template-columns: 1fr; } .card { padding: 12px; } .cardMain { gap: 11px; } .avatar { width: 64px; height: 64px; flex-basis: 64px; } .dialog { padding: 18px; } .modalityOptions { grid-template-columns: 1fr; } .dialogActions { flex-wrap: wrap; } }
+
+/* Integrantes: cartões, seleção de modalidades e foto. */
+.newButton, .saveButton { border-radius: 10px; background: #9e16b1; }
+.card, .empty { border-color: #a66bb43d; border-radius: 16px; background: linear-gradient(155deg, #281331dd, #1a0d26eb 70%, #160a22f2); box-shadow: inset 0 1px 0 #ffffff12, 0 18px 34px -27px #000b; }
+.card:hover { border-color: #c187d17d; }
+.avatar { border-color: #b77fc6a8; background: linear-gradient(145deg, #54246a8c, #180b25); }
+.message { border-color: #b77fc65c; border-radius: 12px; background: #71318838; }
+.dialog { border-color: #b77fc66b; border-radius: 18px; background: linear-gradient(155deg, #281331, #1b0e26 70%); }
+.form input:not([type="checkbox"]), .form .checkOption, .form .boardOption { border-color: #b77fc65c; border-radius: 10px; background-color: #13091d; }
+.form .checkOption:has(input:checked), .form .boardOption:has(input:checked) { border-color: #b77fc6a1; background: #71318861; }
+.form input[type="file"]::file-selector-button { border-radius: 8px; background: #7131888c; }
+.dialogActions button { border-radius: 10px; }
+@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .card, .empty { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
+@media (prefers-reduced-transparency: reduce) { .card, .empty { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }

@@ -6,6 +6,7 @@ Esquema PostgreSQL da versão 1 (MVP) da plataforma da Octacore, derivado do MER
 |---|---|
 | `01_schema.sql` | Cria o schema `octacore` com 14 tabelas, chaves, índices, restrições e triggers. **Apaga e recria tudo** a cada execução. |
 | `02_seed.sql` | Dados de exemplo para desenvolvimento e demonstração. |
+| `03_update_history_2026.sql` | Corrige os marcos históricos em bancos já criados, preservando outros registros. Execute uma vez; não reinicializa o banco. |
 | `docker-compose.yml` | Alternativa opcional: sobe o banco em Docker já com os dois scripts aplicados. |
 
 ## Como criar o banco localmente
@@ -35,6 +36,14 @@ docker compose up -d
 ```
 
 O banco fica disponível na porta **5433**, com usuário `postgres` e senha `postgres` (apenas para uso local). Para voltar ao estado inicial: `docker compose down -v && docker compose up -d`.
+
+Se o banco já existia antes da correção dos marcos históricos de 2026, execute na raiz do projeto, com o Compose principal em funcionamento:
+
+```bash
+docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d octacore < database/03_update_history_2026.sql
+```
+
+O script corrige a fundação para 2018, substitui os marcos demonstrativos antigos e registra os oito anos da Octacore e seu primeiro título do INTERENG em 2026. Bancos novos recebem esses dados diretamente de `02_seed.sql`.
 
 ### Conferência
 

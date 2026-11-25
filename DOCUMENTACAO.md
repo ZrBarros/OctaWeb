@@ -54,26 +54,26 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. | **Prévia visual:** números de exemplo, sem cálculo automático |
 | `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e cards inteiros clicáveis para suas páginas de detalhe; filtro compacto em celular. O fundo segue a navbar sem faixa abrupta, e os cards usam uma superfície roxa translúcida discreta. | **Integração real:** eventos da API; fundo e cards são tratamento de interface |
 | `/agenda/[slug]` | Detalhe do evento e lista atualizada de confirmações. Usuários autenticados podem confirmar ou cancelar presença; após login retornam ao evento solicitado. | **Integração real:** conteúdo e presença por conta/evento no PostgreSQL; favorito ainda é apenas local |
-| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. A abertura do Mural tem fundo contínuo com a navbar, superfícies roxas discretas e três cards inteiros clicáveis. | **Integração real:** história, integrantes e conquistas vêm da API; parte das imagens é placeholder; o novo tratamento visual vale para a abertura do Mural |
+| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. As telas do Mural compartilham um fundo contínuo com a navbar e superfícies roxas discretas. A História usa uma linha do tempo com os marcos confirmados de fundação em 2018, oito anos em 2026 e primeiro título do INTERENG em 2026. Conquistas mostra estado vazio quando não há títulos e a galeria distingue fotos reais de espaços ainda pendentes. | **Integração real:** história, integrantes e conquistas vêm da API/PostgreSQL; parte das imagens é placeholder; gradiente e cartões são apenas interface |
 | `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidades. | **Integração real:** dados do PostgreSQL; foto pode estar pendente |
 | `/loja` | Catálogo com busca, filtro, variações disponíveis, estoque e carrinho. A abertura usa fundo contínuo com a navbar; os cards têm superfícies roxas discretas e a barra recebe sua camada escura somente quando fica fixa durante a rolagem. | **Integração real:** catálogo/estoque da API; seleção do carrinho no navegador; novo tratamento visual somente de interface |
 | `/loja/[slug]` | Detalhe de produto com variação, quantidade e estoque disponível. | **Integração real:** produto da API |
 | `/carrinho` | Alteração de quantidade, remoção e cálculo com preços atuais. | **Integração parcial:** seleção local, catálogo/preços reais |
-| `/checkout` | Dados de retirada e criação de pedido autenticado. | **Integração real:** pedido transacional e estoque; sem cobrança/pagamento |
+| `/checkout` | Dados de retirada, resumo, estados vazio/erro e confirmação do pedido com gradiente contínuo desde a navbar e superfícies roxas discretas como no Carrinho. | **Integração real:** pedido transacional e estoque; tratamento visual somente de interface, sem cobrança/pagamento |
 | `/login`, `/cadastro` e `/redefinir-senha` | Cadastro, login, recuperação e redefinição. | **Integração real:** bcrypt, JWT e cookie `httpOnly` |
 | `/minha-conta` | Painel do usuário conectado, edição de nome/curso, troca de senha e logout. | **Integração real:** sessão compartilhada, perfil e credenciais da API |
 | `/meus-pedidos` e `/meus-pedidos#historico` | Abas separadas de pedidos ativos e histórico; apenas a lista selecionada aparece. Ativos incluem Pendente, Confirmado, Em separação e Disponível para retirada; histórico inclui Entregue e Cancelado. | **Integração real:** pedidos do usuário autenticado, classificados pelo status retornado pela API |
-| `/admin` | Indicadores e vendas derivados do banco; atividades recentes ficam vazias por falta de tabela de auditoria. | **Integração real:** rota protegida por ADMIN |
-| `/admin/perfil` | Perfil da conta administrativa, edição de dados, troca de senha e atalhos. | **Integração real:** usa a mesma sessão e operações da conta |
-| `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
-| `/admin/produtos` | Busca, estoque, cadastro, edição, desativação e upload. | **Integração real:** altera loja e estoque |
-| `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload. | **Integração real:** altera agenda pública |
-| `/admin/modalidades` | Cadastro, edição, exclusão, imagem com prévia e remoção, responsável, local e horários de treino. A edição preserva horários que não mudaram. | **Integração real:** persiste dados e imagens na API e altera as páginas de modalidades |
-| `/admin/integrantes` | Busca, cadastro, edição, remoção e foto. | **Integração real:** altera mural público |
-| `/admin/mural` | Gestão de conquistas e marcos históricos. | **Integração real:** altera as duas páginas públicas do mural |
-| `/admin/resultados` | Busca, filtros, cadastro, edição e remoção. | **Integração real:** persiste resultados |
-| `/admin/pedidos` | Busca, filtros, itens e transições válidas de status. | **Integração real:** gerencia pedidos; notificações ao cliente não existem |
-| `/admin/usuarios` | Busca, filtro, edição de dados/perfil e exclusão controlada. | **Integração real:** gerencia contas; impede autoexclusão e autorrebaixamento administrativo |
+| `/admin` | Visão geral com cartões de indicadores, gráfico de vendas e atalhos; usa superfícies roxas translúcidas e estados vazios claros. Indicadores e vendas vêm do banco; atividades recentes ficam vazias por falta de tabela de auditoria. | **Integração real:** rota protegida por ADMIN; tratamento visual somente de interface |
+| `/admin/perfil` | Perfil da conta administrativa, edição de dados, troca de senha e atalhos; cartões acompanham o visual do painel. | **Integração real:** usa a mesma sessão e operações da conta |
+| `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão; tabela e editor seguem as superfícies do painel. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
+| `/admin/produtos` | Busca, estoque, cadastro, edição, desativação e upload; tabela e formulário seguem as superfícies do painel. | **Integração real:** altera loja e estoque |
+| `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload; cartões, calendário e formulário seguem as superfícies do painel. | **Integração real:** altera agenda pública |
+| `/admin/modalidades` | Cadastro, edição, exclusão, imagem com prévia e remoção, responsável, local e horários de treino. A edição preserva horários que não mudaram; cartões e formulários seguem as superfícies do painel. | **Integração real:** persiste dados e imagens na API e altera as páginas de modalidades |
+| `/admin/integrantes` | Busca, cadastro, edição, remoção e foto; cartões e formulário seguem as superfícies do painel. | **Integração real:** altera mural público |
+| `/admin/mural` | Gestão de conquistas e marcos históricos; usa os cartões e formulários compartilhados do painel. | **Integração real:** altera as duas páginas públicas do mural |
+| `/admin/resultados` | Busca, filtros, cadastro, edição e remoção; tabela e formulário seguem as superfícies do painel. | **Integração real:** persiste resultados |
+| `/admin/pedidos` | Busca, filtros, itens e transições válidas de status; tabela, cartões móveis e detalhes seguem as superfícies do painel. | **Integração real:** gerencia pedidos; notificações ao cliente não existem |
+| `/admin/usuarios` | Busca, filtro, edição de dados/perfil e exclusão controlada; usa os cartões e formulários compartilhados do painel. | **Integração real:** gerencia contas; impede autoexclusão e autorrebaixamento administrativo |
 
 “Interface pronta” indica que a página foi construída no front end, não que seu conteúdo esteja aprovado para publicação ou conectado à API.
 
@@ -124,7 +124,7 @@ Se a prévia não abrir, confira se o servidor iniciado por `npm run dev` contin
 | `frontend/src/data/account.ts` | Legado visual; conta e pedidos integrados não usam mais estes valores. |
 | `frontend/src/data/athletes.ts` | Perfil esportivo demonstrativo e resultados recentes do atleta no Figma. |
 | `frontend/src/data/ranking.ts` | Indicadores, classificação e aproveitamento demonstrativos do quadro de ranking. |
-| `frontend/src/data/event-details.ts` | Tipo visual do detalhe; presença/confirmados continuam sem persistência. |
+| `frontend/src/data/event-details.ts` | Referência visual legada do detalhe; as confirmações reais de presença vêm da API. |
 | `frontend/src/components/site-chrome.tsx` | Exibe cabeçalho e rodapé públicos nas rotas do site; omite ambos na área `/admin`, que usa estrutura própria. |
 | `frontend/src/data/admin.ts` | Referência visual legada; dashboard integrado usa métricas da API. |
 | `frontend/src/app/admin/layout.tsx` e `admin-shell.tsx` | Estrutura e barra superior compartilhadas entre as telas administrativas; em celular a busca contextual fica abaixo do título. |
@@ -144,7 +144,7 @@ Notícias, produtos, estoque, modalidades, horários, agenda, integrantes, resul
 | Contratos e regras do banco | `database/01_schema.sql` e `backend-python/app/models.py` |
 | Configuração de API no frontend | `frontend/.env.local` |
 | Configuração da API | `backend-python/.env` |
-| Detalhe visual de presença em evento | `frontend/src/data/event-details.ts` (somente tipos/limitação visual) |
+| Confirmações de presença em evento | API `/api/v1/events/<slug>/attendance` e PostgreSQL; `frontend/src/data/event-details.ts` permanece como referência visual legada |
 | Perfil e estatísticas do atleta | `frontend/src/data/athletes.ts` |
 | Ranking e estatísticas esportivas gerais | `frontend/src/data/ranking.ts` |
 | Indicadores, gráfico e atividades do painel | `frontend/src/data/admin.ts` |
@@ -216,7 +216,7 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - O banco de dados é **PostgreSQL**, com as tabelas no schema `octacore`. A estrutura oficial fica em `database/01_schema.sql`, derivada do MER do projeto; mudanças de estrutura devem ser feitas nesse arquivo e versionadas. Os slugs de notícias, eventos, modalidades, integrantes e produtos seguem as rotas do front end.
 - O protótipo do Figma orienta a interface; a fonte Outfit e os arquivos em `assets/` compõem a identidade visual atual.
 - Fotos ainda indisponíveis permanecem como placeholders, conforme combinado para galeria, mural e integrantes.
-- Conteúdo, preços e detalhes de produtos são dados de exemplo e precisam de confirmação da atlética.
+- A fundação em 2018, os oito anos e o primeiro título do INTERENG em 2026 foram informados pela equipe. Os demais conteúdos, preços e detalhes de produtos são dados de exemplo e precisam de confirmação da atlética.
 - A Home mantém alguns destaques diretamente na página; ao integrar a API, vale reunir dados compartilhados para evitar divergências.
 - O checkout registra pedido real e desconta estoque, mas não cobra: não existe integração de pagamento no schema ou na interface.
 - Login, cadastro, refresh, logout e recuperação de senha são reais. A recuperação só envia e-mail quando SMTP é configurado; sem tabela de token, reset e refresh não têm revogação individual no servidor.
@@ -228,6 +228,11 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 25/11/2026 — Integração das alterações visuais e históricas pendentes
+
+- Reunidas na `main` as superfícies visuais do painel administrativo, Checkout, História e Conquistas do Mural. Incluídos o seed e o script para os marcos de 2018 e 2026, preservando a confirmação de presença real em eventos já existente na API/PostgreSQL.
+- As mudanças de aparência são apenas de interface; história e conquistas continuam consultando a API. O script para bancos existentes foi versionado, mas não foi executado novamente nesta integração. Verificação: lint, TypeScript e build do frontend (30 páginas), compilação dos módulos Python e `git diff --check` passaram. A inspeção visual autenticada do painel continua pendente.
 
 ### 25/11/2026 — Tamanhos no cadastro de camisas
 

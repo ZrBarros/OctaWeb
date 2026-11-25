@@ -16,31 +16,32 @@ export function AdminDashboard() {
     { label: "Eventos próximos", value: String(dashboard.data.metrics.upcomingEvents), detail: "Dentro dos próximos 15 dias", tone: "mint", icon: "events", href: "/admin/eventos", action: "Ver eventos" },
     { label: "Notícias publicadas", value: String(dashboard.data.metrics.news), detail: "Registros publicados", tone: "white", icon: "news", href: "/admin/noticias", action: "Ver notícias" },
   ] as const;
-  const demoSales = dashboard.data.sales.map((sale) => ({ month: new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(new Date(sale.month)).replace(".", ""), amount: sale.amountCents / 100 }));
+  const salesData = dashboard.data.sales.map((sale) => ({ month: new Intl.DateTimeFormat("pt-BR", { month: "short" }).format(new Date(sale.month)).replace(".", ""), amount: sale.amountCents / 100 }));
   const adminActivities = dashboard.data.activities;
   const [query, setQuery] = useState("");
   const [activityCategory, setActivityCategory] = useState("Todas");
   const [showAllActivities, setShowAllActivities] = useState(false);
   const [salesPeriod, setSalesPeriod] = useState<6 | 12>(6);
-  const [selectedSale, setSelectedSale] = useState<(typeof demoSales)[number] | null>(null);
+  const [selectedSale, setSelectedSale] = useState<(typeof salesData)[number] | null>(null);
   const activityCategories = ["Todas", ...Array.from(new Set(adminActivities.map((activity) => activity.category)))];
   const filteredActivities = adminActivities.filter((activity) =>
     (activityCategory === "Todas" || activity.category === activityCategory) &&
     `${activity.description} ${activity.person}`.toLocaleLowerCase("pt-BR").includes(query.trim().toLocaleLowerCase("pt-BR")),
   );
   const activities = showAllActivities ? filteredActivities : filteredActivities.slice(0, 3);
-  const sales = demoSales.slice(-salesPeriod);
+  const sales = salesData.slice(-salesPeriod);
   const maxSales = Math.max(1, ...sales.map((sale) => sale.amount));
   const formatSales = (amount: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(amount);
 
   return <>
     <AdminToolbarSearch><label className={styles.search}><AdminIcon name="search" /><span className={styles.srOnly}>Buscar nas atividades recentes</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar atividades..." /></label></AdminToolbarSearch>
 
-    <div className={styles.content}>
+    <div className={`${styles.content} ${styles.dashboardContent}`}>
       <AdminPageHeading title="Visão Geral do Reino" />
-      <p className={styles.demoNotice}>{loading ? "Carregando indicadores..." : error || "Indicadores calculados a partir do banco"}</p>
+      <p className={styles.dashboardIntro}>Acompanhe os números da Octacore e acesse rapidamente cada área do painel.</p>
+      <p className={styles.demoNotice} role="status">{loading ? "Carregando indicadores..." : error || "Indicadores atualizados pelo banco de dados"}</p>
 
-      <section className={styles.metricGrid} aria-label="Indicadores de exemplo">
+      <section className={styles.metricGrid} aria-label="Indicadores da Octacore">
         {adminMetrics.map((metric) => <Link className={styles.metricCard} href={metric.href} aria-label={`${metric.label}: ${metric.value}. ${metric.action}.`} key={metric.label}>
           <div className={styles.metricTop}><h2>{metric.label}</h2><span className={styles[metric.tone]}><AdminIcon name={metric.icon} /></span></div>
           <strong className={styles.metricValue}>{metric.value}</strong>
@@ -54,14 +55,14 @@ export function AdminDashboard() {
           <div className={styles.panelHeader}><h2 id="sales-title">Desempenho de Vendas (Octa Store)</h2>
             <label className={styles.chartPeriod}><span className={styles.srOnly}>Período do gráfico</span><select value={salesPeriod} onChange={(event) => { setSalesPeriod(Number(event.target.value) as 6 | 12); setSelectedSale(null); }}><option value={6}>6 meses</option><option value={12}>12 meses</option></select></label>
           </div>
-          <div className={`${styles.chart} ${salesPeriod === 12 ? styles.chartTwelve : ""}`} aria-label={`Pedidos nos últimos ${salesPeriod} meses`}>
+          {sales.length > 0 ? <div className={`${styles.chart} ${salesPeriod === 12 ? styles.chartTwelve : ""}`} aria-label={`Vendas nos últimos ${salesPeriod} meses`}>
             {sales.map((sale) => <button className={`${styles.barGroup} ${selectedSale?.month === sale.month ? styles.selectedBar : ""}`} type="button" aria-label={`${sale.month}: ${formatSales(sale.amount)} em pedidos`} aria-pressed={selectedSale?.month === sale.month} onClick={() => setSelectedSale((current) => current?.month === sale.month ? null : sale)} key={sale.month}>
               <span className={styles.barValue}>{formatSales(sale.amount)}</span>
               <span className={styles.bar} style={{ height: `${Math.max(8, Math.round(sale.amount / maxSales * 100))}%` }} />
               <span className={styles.barMonth}>{sale.month}</span>
             </button>)}
-          </div>
-          <p className={styles.chartSelection} aria-live="polite">{selectedSale ? <><strong>{selectedSale.month}</strong> · {formatSales(selectedSale.amount)} em pedidos</> : "Selecione uma barra para ver o valor do mês."}</p>
+          </div> : <p className={styles.chartEmpty}>Ainda não há vendas registradas neste período.</p>}
+          {sales.length > 0 && <p className={styles.chartSelection} aria-live="polite">{selectedSale ? <><strong>{selectedSale.month}</strong> · {formatSales(selectedSale.amount)} em pedidos</> : "Selecione uma barra para ver o valor do mês."}</p>}
         </section>
 
         <section className={styles.panel} aria-labelledby="activity-title">
@@ -75,7 +76,7 @@ export function AdminDashboard() {
               <small><span>{activity.person}</span><span>{activity.time}</span><span className={styles.activityCategory}>{activity.category}</span></small>
             </li>)}
           </ul>
-          {filteredActivities.length === 0 && <p className={styles.emptyState}>Nenhuma atividade encontrada. Confira a busca ou o filtro.</p>}
+          {filteredActivities.length === 0 && <p className={styles.emptyState}>{adminActivities.length === 0 ? "As atividades aparecerão aqui quando o registro de ações estiver disponível." : "Nenhuma atividade encontrada. Confira a busca ou o filtro."}</p>}
           {filteredActivities.length > 3 && <button className={styles.showActivities} type="button" onClick={() => setShowAllActivities((visible) => !visible)}>{showAllActivities ? "Ver menos" : "Ver mais atividades"} <span aria-hidden="true">{showAllActivities ? "↑" : "↓"}</span></button>}
         </section>
       </div>

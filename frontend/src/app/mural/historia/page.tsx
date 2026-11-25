@@ -16,15 +16,15 @@ export default async function HistoryPage() {
         <h1>Nossa trajetória</h1>
         <p className={styles.intro}>A evolução do polvo nas quadras acadêmicas de Maceió.</p>
 
-        <ol className={styles.timeline}>
-          {historyMilestones.map((milestone) => (
-            <li className={styles.milestone} key={milestone.year}>
+        {historyMilestones.length > 0 ? <ol className={styles.timeline}>
+          {historyMilestones.map((milestone, index) => (
+            <li className={styles.milestone} key={`${milestone.year}-${index}`}>
               <div className={styles.year}><strong>{milestone.year}</strong><span>{milestone.label}</span></div>
               <span className={styles.dot} aria-hidden="true" />
-              <div className={`${styles.event} hoverCard`}><h2>{milestone.title}</h2><p>{milestone.description}</p></div>
+              <div className={styles.event}><h2>{milestone.title}</h2><p>{milestone.description}</p></div>
             </li>
           ))}
-        </ol>
+        </ol> : <p className={styles.empty}>Ainda não há marcos históricos cadastrados.</p>}
       </div>
     </main>
   );

@@ -61,3 +61,25 @@
 .danger { border: 0; background: #a1323d; color: white; }
 @media (max-width: 900px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 650px) { .toolbar { align-items: stretch; flex-direction: column; } .toolbarGroup { flex-wrap: wrap; } .cards { grid-template-columns: 1fr; } .dialog { padding: 18px; } .formRow { grid-template-columns: 1fr; } .scheduleRow { grid-template-columns: 1fr 1fr 34px; } .scheduleRow select { grid-column: 1 / -1; } .dialogActions { align-items: stretch; flex-direction: column-reverse; } .dialogActions button { width: 100%; } }
+
+/* Superfícies de gestão: Modalidades, Mural e Usuários. */
+.tableWrap, .card, .empty { border-color: #a66bb43d; border-radius: 16px; background: linear-gradient(155deg, #281331dd, #1a0d26eb 70%, #160a22f2); box-shadow: inset 0 1px 0 #ffffff12, 0 18px 34px -27px #000b; }
+.table th, .table td { border-color: #b77fc62e; }
+.table th { color: var(--orange); }
+.table tbody tr:hover { background: #ffffff08; }
+.card { padding: 23px; }
+.card p { color: #cbbfd0; line-height: 1.55; }
+.badge { border: 1px solid #b77fc647; background: #71318840; color: #ead9ef; }
+.tabs button, .toolbar select { border-color: #b77fc647; border-radius: 10px; background-color: #281331ad; }
+.tabs .activeTab { border-color: #b77fc6a1; background: #7131888c; }
+.newButton, .primary { border-radius: 10px; background: #9e16b1; }
+.message { border-color: #b77fc65c; border-radius: 12px; background: #71318838; }
+.dialog { border-color: #b77fc66b; border-radius: 18px; background: linear-gradient(155deg, #281331, #1b0e26 70%); }
+.form input, .form textarea, .form select { border-color: #b77fc65c; border-radius: 10px; background-color: #13091d; }
+.form select { padding-right: 38px; }
+.imageInput { border-color: #b77fc66b; border-radius: 12px; background: #ffffff05; }
+.imageInput input[type="file"]::file-selector-button { border-radius: 8px; background: #7131888c; }
+.selectedImage img { border-radius: 10px; }
+.secondary, .cancel, .danger, .scheduleRow button, .dialogActions button { border-radius: 10px; }
+@supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .tableWrap, .card, .empty { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
+@media (prefers-reduced-transparency: reduce) { .tableWrap, .card, .empty { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }
