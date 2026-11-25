@@ -20,6 +20,7 @@
 .sizeOptions { display: flex; flex-wrap: wrap; gap: 10px; }
 .sizeOptions button { width: 48px; height: 44px; border: 1px solid #7952849c; border-radius: 7px; background: #1c0b28b0; color: #fff; cursor: pointer; font-size: 14px; font-weight: 800; }
 .sizeOptions button:hover, .sizeOptions .selectedSize { border-color: var(--orange); background: var(--orange); color: #210b19; }
+.sizeOptions button:disabled { opacity: .45; cursor: not-allowed; }
 .sizeOptions button:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 .sizeNote { margin: 11px 0 0; color: #bfb4c4; font-size: 12px; }
 .quantitySelector { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 26px; }

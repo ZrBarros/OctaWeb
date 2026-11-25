@@ -180,7 +180,7 @@ O cabeçalho consulta um estado compartilhado de autenticação: visitantes abre
 
 `/admin/noticias` publica, edita e exclui notícias reais. Imagens passam pelo upload validado; o autor é a conta administrativa autenticada. O formulário oferece apenas “Publicado”, porque `noticia` não possui coluna de rascunho.
 
-`/admin/produtos` consulta produtos/variações reais. Cadastro, edição, desativação, preço, estoque e upload persistem e alimentam Home, Loja e checkout. A interface resume o estoque das variações; ao editar, preserva as variações existentes.
+`/admin/produtos` consulta produtos/variações reais. Cadastro, edição, desativação, preço, estoque e upload persistem e alimentam Home, Loja e checkout. Camisas têm estoque individual para P, M, G e GG; as demais categorias usam estoque único. Ao editar uma camisa antiga cadastrada com estoque `UNICO`, o administrador deve distribuir as unidades pelos tamanhos antes de salvar. A variação antiga fica com estoque zero e preservada para não alterar pedidos já vinculados a ela.
 
 `/admin/eventos` consulta e altera a mesma tabela usada por Agenda e Home. Lista, calendário, busca, CRUD, upload e vínculo opcional com modalidade persistem na API.
 
@@ -228,6 +228,11 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 25/11/2026 — Tamanhos no cadastro de camisas
+
+- O cadastro administrativo de produtos passou a solicitar estoque por tamanho para a categoria Camisas, criando variações P, M, G e GG reais na API. A loja só oferece os tamanhos cadastrados para camisas, mostra os esgotados como indisponíveis e bloqueia a compra de camisas antigas ainda sem tamanhos definidos.
+- Camisas antigas com variação `UNICO` podem ser corrigidas pelo editor: o estoque anterior precisa ser distribuído, e a variação antiga é mantida com estoque zero para preservar o histórico dos pedidos. Alteração de formulário e mapeamento da interface sobre a API e o banco existentes, sem migração. Verificação: lint, checagem de tipos e `git diff --check` passaram; validação no navegador com os serviços iniciados ainda pendente.
 
 ### 25/11/2026 — Feedback ao adicionar produtos na Loja
 

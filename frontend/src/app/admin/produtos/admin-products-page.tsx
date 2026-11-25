@@ -15,6 +15,11 @@ import styles from "./page.module.css";
 
 type ProductDraft = Omit<AdminProduct, "id">;
 const emptyDraft: ProductDraft = { name: "", category: "Camisas", priceCents: 0, stock: 0, variations: [], active: true };
+const shirtSizes = ["P", "M", "G", "GG"] as const;
+
+function withShirtSizes(variations: NonNullable<ProductDraft["variations"]>) {
+  return [...variations, ...shirtSizes.filter((size) => !variations.some((variation) => variation.size === size)).map((size) => ({ size, stock: 0 }))];
+}
 
 function PencilIcon() {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m4 20 4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" /><path d="m14 7 3 3" /></svg>;
@@ -34,6 +39,7 @@ export function AdminProductsPage() {
   const [priceInput, setPriceInput] = useState("");
   const [imageError, setImageError] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [legacyShirtStock, setLegacyShirtStock] = useState(0);
   const filteredItems = items.filter((item) => `${item.name} ${item.category}`.toLocaleLowerCase("pt-BR").includes(query.trim().toLocaleLowerCase("pt-BR")));
   const deletingItem = items.find((item) => item.id === deletingId);
 
@@ -43,7 +49,7 @@ export function AdminProductsPage() {
   async function changeStock(id: number, change: number) {
     const item = items.find((product) => product.id === id); if (!item) return;
     const variations = [...(item.variations ?? [{ size: "UNICO", stock: item.stock }])];
-    const variationIndex = change < 0 ? variations.findIndex((variation) => variation.stock > 0) : 0;
+    const variationIndex = change < 0 ? variations.findIndex((variation) => variation.stock > 0 && (item.category === "Camisas" ? variation.size !== "UNICO" : variation.size === "UNICO")) : variations.findIndex((variation) => item.category === "Camisas" ? variation.size !== "UNICO" : variation.size === "UNICO");
     if (variationIndex < 0 || !variations[variationIndex]) return; variations[variationIndex] = { ...variations[variationIndex], stock: Math.max(0, variations[variationIndex].stock + change) };
     try { const response = await apiClient<ApiItem<ApiProduct>>(`/admin/products/${id}`, { method: "PUT", auth: true, body: JSON.stringify({ name: item.name, description: item.description ?? null, priceCents: item.priceCents, category: apiCategory(item.category), imageUrl: item.image ?? null, active: item.active ?? true, variations }) }); setItems((current) => current.map((product) => product.id === id ? mapProduct(response.data) : product)); setMessage("Estoque atualizado."); }
     catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível atualizar o estoque."); }
@@ -51,7 +57,9 @@ export function AdminProductsPage() {
 
   function openEditor(item?: AdminProduct) {
     setEditingId(item?.id ?? null);
-    setDraft(item ? { name: item.name, category: item.category, priceCents: item.priceCents, stock: item.stock, image: item.image, description: item.description, active: item.active, variations: item.variations?.map((variation) => ({ ...variation })) ?? [] } : { ...emptyDraft });
+    const variations = item?.variations?.map((variation) => ({ ...variation })) ?? [];
+    setDraft(item ? { name: item.name, category: item.category, priceCents: item.priceCents, stock: item.stock, image: item.image, description: item.description, active: item.active, variations: item.category === "Camisas" ? withShirtSizes(variations) : variations } : { ...emptyDraft, variations: withShirtSizes([]) });
+    setLegacyShirtStock(item?.category === "Camisas" ? variations.find((variation) => variation.size === "UNICO")?.stock ?? 0 : 0);
     setPriceInput(item ? (item.priceCents / 100).toFixed(2).replace(".", ",") : "");
     setImageError("");
     setSaveError("");
@@ -80,9 +88,17 @@ export function AdminProductsPage() {
     if (!draft) return;
     const name = draft.name.trim();
     const price = Number(priceInput.replace(",", "."));
-    if (!name || !Number.isFinite(price) || price <= 0 || !Number.isInteger(draft.stock) || draft.stock < 0) return;
-    const baseVariations = draft.variations?.length ? draft.variations.map((variation) => ({ ...variation })) : [{ size: "UNICO", stock: 0 }];
-    let remainingStock = draft.stock; for (const variation of baseVariations) { variation.stock = Math.min(variation.stock, remainingStock); remainingStock -= variation.stock; } baseVariations[0]!.stock += remainingStock;
+    if (!name || !Number.isFinite(price) || price <= 0) return;
+    let baseVariations;
+    if (draft.category === "Camisas") {
+      baseVariations = withShirtSizes(draft.variations ?? []).map((variation) => ({ ...variation, stock: variation.size === "UNICO" ? 0 : variation.stock }));
+      const sizedStock = baseVariations.reduce((total, variation) => total + variation.stock, 0);
+      if (sizedStock < legacyShirtStock) { setSaveError(`Distribua pelo menos ${legacyShirtStock} unidades antigas entre os tamanhos antes de salvar.`); return; }
+    } else {
+      if (!Number.isInteger(draft.stock) || draft.stock < 0) return;
+      baseVariations = draft.variations?.length ? draft.variations.map((variation) => ({ ...variation, stock: variation.size === "UNICO" ? draft.stock : 0 })) : [{ size: "UNICO", stock: draft.stock }];
+      if (!baseVariations.some((variation) => variation.size === "UNICO")) baseVariations.push({ size: "UNICO", stock: draft.stock });
+    }
     try { const response = await apiClient<ApiItem<ApiProduct>>(`/admin/products${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ name, description: draft.description ?? null, priceCents: Math.round(price * 100), category: apiCategory(draft.category), imageUrl: draft.image ?? null, active: draft.active ?? true, variations: baseVariations }) }); const mapped = mapProduct(response.data); setItems((current) => editingId === null ? [mapped, ...current] : current.map((item) => item.id === editingId ? mapped : item)); setMessage(editingId === null ? "Produto cadastrado na loja." : "Produto atualizado."); setSaveError(""); }
     catch (reason) { setSaveError(reason instanceof Error ? reason.message : "Não foi possível salvar o produto."); return; }
     setDraft(null);
@@ -134,10 +150,14 @@ export function AdminProductsPage() {
         <form className={styles.form} onSubmit={saveProduct}>
           <label>Nome do produto<input autoFocus required maxLength={100} value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} placeholder="Ex.: Camisa Octacore" /></label>
           <div className={styles.formRow}>
-            <label>Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })}>{adminProductCategories.map((category) => <option key={category}>{category}</option>)}</select></label>
+            <label>Categoria<select value={draft.category} onChange={(event) => { const category = event.target.value; if (category === "Camisas") setLegacyShirtStock(draft.variations?.find((variation) => variation.size === "UNICO")?.stock ?? 0); else setLegacyShirtStock(0); setDraft({ ...draft, category, stock: draft.category === "Camisas" ? draft.variations?.filter((variation) => variation.size !== "UNICO").reduce((total, variation) => total + variation.stock, 0) ?? 0 : draft.stock, variations: category === "Camisas" ? withShirtSizes(draft.variations ?? []) : draft.variations }); }}>{adminProductCategories.map((category) => <option key={category}>{category}</option>)}</select></label>
             <label>Preço (R$)<input required inputMode="decimal" pattern="[0-9]+([,.][0-9]{1,2})?" title="Digite um valor positivo com até duas casas decimais" value={priceInput} onChange={(event) => setPriceInput(event.target.value)} placeholder="59,90" /></label>
           </div>
-          <label>Quantidade em estoque<input required type="number" min="0" step="1" value={draft.stock} onChange={(event) => setDraft({ ...draft, stock: Number(event.target.value) })} /></label>
+          {draft.category === "Camisas" ? <fieldset className={styles.sizeStock}>
+            <legend>Estoque por tamanho</legend>
+            <div className={styles.sizeStockGrid}>{shirtSizes.map((size) => <label key={size}>Tamanho {size}<input required type="number" min="0" step="1" value={draft.variations?.find((variation) => variation.size === size)?.stock ?? 0} onChange={(event) => { const stock = Number(event.target.value); setDraft({ ...draft, variations: withShirtSizes(draft.variations ?? []).map((variation) => variation.size === size ? { ...variation, stock } : variation) }); setSaveError(""); }} /></label>)}</div>
+            {legacyShirtStock > 0 && <small>Este produto tem {legacyShirtStock} unidades antigas sem tamanho. Distribua pelo menos essa quantidade nos campos acima; a variação antiga ficará sem estoque para preservar pedidos anteriores.</small>}
+          </fieldset> : <label>Quantidade em estoque<input required type="number" min="0" step="1" value={draft.stock} onChange={(event) => setDraft({ ...draft, stock: Number(event.target.value) })} /></label>}
           <label>Imagem do produto (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /><small>JPG, PNG ou WebP, até 2 MB.</small></label>
           {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}
           {draft.image && <div className={styles.selectedImage}><Image src={displayImageUrl(draft.image)} alt="Prévia da imagem do produto" width={82} height={82} unoptimized /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover imagem</button></div>}

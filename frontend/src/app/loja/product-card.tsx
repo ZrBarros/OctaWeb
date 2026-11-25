@@ -58,11 +58,13 @@ export function ProductCard({ product }: { product: Product }) {
                 type="button"
                 className={size === option ? styles.selectedSize : ""}
                 aria-pressed={size === option}
-                aria-label={`Tamanho ${option} de ${product.name}`}
+                aria-label={`Tamanho ${option} de ${product.name}${product.variations?.find((variation) => variation.size === option)?.stock === 0 ? ", esgotado" : ""}`}
+                disabled={product.variations?.find((variation) => variation.size === option)?.stock === 0}
                 onClick={() => { setSize(option); clearFeedback(); }}
               >{option}</button>
             ))}
           </div>
+          {product.sizes.length === 0 && <p className={styles.stockNotice}>Tamanhos ainda não cadastrados.</p>}
         </fieldset>
       )}
 
@@ -75,7 +77,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </div>
 
-      <button className={`${styles.addButton} ${wasAdded ? styles.addButtonSuccess : ""}`} type="button" onClick={handleAdd} disabled={Boolean(size || !product.sizes) && available === 0}>{wasAdded ? "Adicionado ✓" : "Adicionar ao carrinho"}</button>
+      <button className={`${styles.addButton} ${wasAdded ? styles.addButtonSuccess : ""}`} type="button" onClick={handleAdd} disabled={product.sizes?.length === 0 || (Boolean(size || !product.sizes) && available === 0)}>{wasAdded ? "Adicionado ✓" : "Adicionar ao carrinho"}</button>
       {feedback && !wasAdded && <p className={styles.feedbackError} role="alert">{feedback}</p>}
       <Link className={styles.detailsLink} href={`/loja/${product.slug}`}>Ver detalhes <span aria-hidden="true">↗</span></Link>
     </article>

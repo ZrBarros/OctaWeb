@@ -37,6 +37,8 @@
 .sizeOptions { display: flex; flex-wrap: wrap; gap: 7px; }
 .sizeOptions button { min-width: 39px; min-height: 39px; border: 1px solid #60436a; border-radius: 5px; background: #11051d; color: #fff; cursor: pointer; font: inherit; font-size: 12px; font-weight: 800; }
 .sizeOptions button:hover, .sizeOptions .selectedSize { border-color: var(--orange); background: var(--orange); color: #210b19; }
+.sizeOptions button:disabled { opacity: .45; cursor: not-allowed; }
+.stockNotice { margin: 8px 0 0; color: #d8becf; font-size: 11px; }
 .quantityRow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; margin-bottom: 12px; }
 .quantityRow > span { margin: 0; }
 .quantityControl { display: flex; align-items: center; border: 1px solid #60436a; border-radius: 5px; overflow: hidden; }
