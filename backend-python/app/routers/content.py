@@ -2,9 +2,12 @@ from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Query, status
+from sqlalchemy import delete, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-from app.dependencies import AdminUser, DbSession
+from app.dependencies import AdminUser, CurrentUser, DbSession, OptionalCurrentUser
 from app.errors import not_found
+from app.models import PresencaEvento, Usuario
 from app.repositories.content import ContentRepository
 from app.schemas import AchievementInput, EventInput, MemberInput, MilestoneInput, ModalityInput, NewsInput, ResultInput
 from app.serializers import achievement, event, member, milestone, modality, news, sports_result
@@ -81,6 +84,49 @@ def get_event(slug: str, db: DbSession) -> dict:
     if not item:
         raise not_found("Evento")
     return {"data": event(item)}
+
+
+def event_attendance_data(db: DbSession, event_id: int, user_id: int | None = None) -> dict:
+    attendees = db.execute(
+        select(Usuario.id, Usuario.nome)
+        .join(PresencaEvento, PresencaEvento.usuario_id == Usuario.id)
+        .where(PresencaEvento.evento_id == event_id)
+        .order_by(PresencaEvento.confirmado_em, Usuario.nome)
+    ).all()
+    return {
+        "count": len(attendees),
+        "confirmedByMe": user_id is not None and any(attendee.id == user_id for attendee in attendees),
+        "attendees": [{"id": attendee.id, "name": attendee.nome} for attendee in attendees],
+    }
+
+
+@public_router.get("/events/{slug}/attendance")
+def get_event_attendance(slug: str, db: DbSession, user: OptionalCurrentUser) -> dict:
+    item = ContentRepository(db).event_by_slug(slug)
+    if not item:
+        raise not_found("Evento")
+    return {"data": event_attendance_data(db, item.id, user.id if user else None)}
+
+
+@public_router.post("/events/{slug}/attendance")
+def confirm_event_attendance(slug: str, db: DbSession, user: CurrentUser) -> dict:
+    item = ContentRepository(db).event_by_slug(slug)
+    if not item:
+        raise not_found("Evento")
+    statement = pg_insert(PresencaEvento).values(evento_id=item.id, usuario_id=user.id)
+    db.execute(statement.on_conflict_do_nothing(constraint="uq_presenca_evento_usuario"))
+    db.commit()
+    return {"data": event_attendance_data(db, item.id, user.id)}
+
+
+@public_router.delete("/events/{slug}/attendance")
+def cancel_event_attendance(slug: str, db: DbSession, user: CurrentUser) -> dict:
+    item = ContentRepository(db).event_by_slug(slug)
+    if not item:
+        raise not_found("Evento")
+    db.execute(delete(PresencaEvento).where(PresencaEvento.evento_id == item.id, PresencaEvento.usuario_id == user.id))
+    db.commit()
+    return {"data": event_attendance_data(db, item.id, user.id)}
 
 
 @public_router.get("/results")

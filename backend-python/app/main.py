@@ -1,5 +1,6 @@
 import logging
 import time
+from contextlib import asynccontextmanager
 from collections import defaultdict, deque
 from collections.abc import Awaitable, Callable
 
@@ -15,10 +16,18 @@ from starlette.responses import Response
 from app.config import get_settings
 from app.database import engine
 from app.errors import AppError
+from app.models import PresencaEvento
 from app.routers import admin, auth, content, store, uploads
 
 settings = get_settings()
 logger = logging.getLogger("octacore")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Adiciona a tabela da funcionalidade sem recriar ou alterar as tabelas existentes.
+    PresencaEvento.__table__.create(bind=engine, checkfirst=True)
+    yield
 
 
 class SecurityAndLimitMiddleware(BaseHTTPMiddleware):
@@ -66,6 +75,7 @@ app = FastAPI(
     docs_url="/docs",
     openapi_url="/docs/openapi.json",
     servers=[{"url": settings.public_api_url}],
+    lifespan=lifespan,
 )
 app.add_middleware(SecurityAndLimitMiddleware)
 app.add_middleware(CORSMiddleware, allow_origins=[settings.frontend_origin], allow_credentials=True, allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], allow_headers=["*"])

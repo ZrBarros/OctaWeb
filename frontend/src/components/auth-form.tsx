@@ -11,7 +11,7 @@ import styles from "./auth-form.module.css";
 
 type AuthMode = "login" | "cadastro";
 
-export function AuthForm({ mode, initialMessage = "" }: { mode: AuthMode; initialMessage?: string }) {
+export function AuthForm({ mode, initialMessage = "", returnTo }: { mode: AuthMode; initialMessage?: string; returnTo?: string }) {
   const isSignup = mode === "cadastro";
   const [message, setMessage] = useState(initialMessage);
   const [submitting, setSubmitting] = useState(false);
@@ -38,7 +38,8 @@ export function AuthForm({ mode, initialMessage = "" }: { mode: AuthMode; initia
         : { email: data.get("email"), password: data.get("password") };
       const response = await apiClient<{ data: { user: ApiUser; accessToken: string } }>(`/auth/${isSignup ? "register" : "login"}`, { method: "POST", body: JSON.stringify(body) });
       establishSession(response.data.user, response.data.accessToken);
-      router.push(response.data.user.perfil === "ADMIN" ? "/admin" : "/minha-conta");
+      const safeReturnTo = returnTo?.startsWith("/") && !returnTo.startsWith("//") ? returnTo : null;
+      router.push(safeReturnTo ?? (response.data.user.perfil === "ADMIN" ? "/admin" : "/minha-conta"));
       router.refresh();
     } catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível acessar a conta."); }
     finally { setSubmitting(false); }
