@@ -41,10 +41,12 @@ export function ProductPurchase({ product }: { product: Product }) {
                 type="button"
                 className={selectedSize === size ? styles.selectedSize : ""}
                 aria-pressed={selectedSize === size}
+                disabled={product.variations?.find((variation) => variation.size === size)?.stock === 0}
                 onClick={() => { setSelectedSize(size); clearFeedback(); }}
               >{size}</button>
             ))}
           </div>
+          {product.sizes.length === 0 && <p className={styles.sizeNote}>Tamanhos ainda não cadastrados.</p>}
           {selectedSize && <p className={styles.sizeNote}>{available > 0 ? `${available} ${available === 1 ? "unidade disponível" : "unidades disponíveis"} para adicionar` : "Estoque disponível atingido para este tamanho."}</p>}
         </div>
       )}
@@ -65,7 +67,7 @@ export function ProductPurchase({ product }: { product: Product }) {
           disabled={Boolean(product.sizes && !selectedSize) || available === 0}
           onClick={handleAdd}
         >{wasAdded ? "Adicionado ✓" : "Adicionar ao carrinho"}</button>
-        {product.sizes && !selectedSize && <p>Escolha um tamanho para continuar.</p>}
+        {product.sizes && product.sizes.length > 0 && !selectedSize && <p>Escolha um tamanho para continuar.</p>}
         {feedback && !wasAdded && <p className={styles.purchaseFeedbackError} role="alert">{feedback}</p>}
         {!wasAdded && cart && cart.length > 0 && <Link className={styles.cartShortcut} href="/carrinho">Ver carrinho ({cart.reduce((total, item) => total + item.quantity, 0)}) →</Link>}
       </div>

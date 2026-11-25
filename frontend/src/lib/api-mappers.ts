@@ -11,7 +11,7 @@ const titleCase: Record<string, string> = {
 
 export function mapProduct(item: ApiProduct): Product {
   const variations = item.variacoes.map((variation) => ({ id: variation.id, size: variation.tamanho, stock: variation.estoque }));
-  const sizes = variations.some((variation) => variation.size !== "UNICO") ? variations.filter((variation) => variation.stock > 0).map((variation) => variation.size) : undefined;
+  const sizes = item.categoria === "CAMISAS" ? variations.filter((variation) => variation.size !== "UNICO").map((variation) => variation.size) : undefined;
   return { id: item.id, slug: item.slug, name: item.nome, priceCents: Math.round(Number(item.preco) * 100), description: item.descricao ?? "", category: titleCase[item.categoria] ?? item.categoria, image: item.imagemUrl ?? undefined, alt: `Imagem de ${item.nome}`, sizes, variations };
 }
 
