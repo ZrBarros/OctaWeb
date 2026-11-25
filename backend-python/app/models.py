@@ -1,7 +1,7 @@
 from datetime import date, datetime, time
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, SmallInteger, String, Text, Time, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, Numeric, SmallInteger, String, Text, Time, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 SCHEMA = "octacore"
@@ -108,6 +108,15 @@ class Evento(Base):
     modalidade_id: Mapped[int | None] = mapped_column(ForeignKey(f"{SCHEMA}.modalidade.id", ondelete="SET NULL"))
     modalidade: Mapped[Modalidade | None] = relationship(back_populates="eventos")
     resultado: Mapped["Resultado | None"] = relationship(back_populates="evento", uselist=False)
+
+
+class PresencaEvento(Base):
+    __tablename__ = "presenca_evento"
+    __table_args__ = (UniqueConstraint("evento_id", "usuario_id", name="uq_presenca_evento_usuario"), {"schema": SCHEMA})
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    evento_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.evento.id", ondelete="CASCADE"))
+    usuario_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.usuario.id", ondelete="CASCADE"))
+    confirmado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class Resultado(Base):

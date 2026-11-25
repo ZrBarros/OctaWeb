@@ -2,16 +2,48 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/components/auth-provider";
 import type { EventDetail } from "@/data/event-details";
+import { apiClient } from "@/lib/api";
+import type { ApiEventAttendance, ApiItem } from "@/lib/api-types";
 import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 export function EventAttendancePage({ event }: { event: EventDetail }) {
+  const { status } = useAuth();
   const [favorite, setFavorite] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
-  const [showAttendees, setShowAttendees] = useState(false);
-  const count = event.confirmedCount + Number(confirmed);
+  const [attendance, setAttendance] = useState<ApiEventAttendance>({ count: 0, confirmedByMe: false, attendees: [] });
+  const [loadedKey, setLoadedKey] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const requestKey = `${event.slug}:${status}`;
+  const loading = status === "loading" || loadedKey !== requestKey;
+
+  useEffect(() => {
+    if (status === "loading") return;
+    let active = true;
+    void apiClient<ApiItem<ApiEventAttendance>>(`/events/${encodeURIComponent(event.slug)}/attendance`, { auth: status === "authenticated" })
+      .then((response) => { if (active) { setAttendance(response.data); setMessage(""); } })
+      .catch((reason: unknown) => { if (active) setMessage(reason instanceof Error ? reason.message : "Não foi possível carregar as presenças."); })
+      .finally(() => { if (active) setLoadedKey(requestKey); });
+    return () => { active = false; };
+  }, [event.slug, requestKey, status]);
+
+  async function toggleAttendance() {
+    setSubmitting(true);
+    setMessage("");
+    try {
+      const response = await apiClient<ApiItem<ApiEventAttendance>>(`/events/${encodeURIComponent(event.slug)}/attendance`, { method: attendance.confirmedByMe ? "DELETE" : "POST", auth: true });
+      setAttendance(response.data);
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : "Não foi possível atualizar sua presença.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const loginHref = `/login?redirect=${encodeURIComponent(`/agenda/${event.slug}`)}`;
 
   return (
     <main className={styles.main}>
@@ -21,7 +53,7 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
             ? <Image src={displayImageUrl(event.heroImage)} alt={`Imagem de ${event.title}`} width={1440} height={320} priority unoptimized />
             : <div className={styles.heroPlaceholder} role="img" aria-label={`Imagem de ${event.title} pendente`} />}
         </div>
-        <p className={styles.demoNotice}>Prévia demonstrativa · presença não é registrada</p>
+        <p className={styles.demoNotice}>{status === "authenticated" ? "Confirmações vinculadas à sua conta Octacore" : "Entre na sua conta para confirmar presença neste evento"}</p>
         <div className={styles.layout}>
           <div className={styles.eventContent}>
             <div className={styles.titleRow}>
@@ -37,7 +69,7 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
             <div className={styles.facts} aria-label="Informações do compromisso">
               <div><span>Data e hora</span><strong><time dateTime={event.dateTime}>{event.displayDate}</time></strong></div>
               <div><span>Local</span><strong>{event.place}</strong></div>
-              <div><span>Presença confirmada</span><strong>{count} atletas confirmados</strong></div>
+              <div><span>Presença confirmada</span><strong>{attendance.count} pessoas confirmadas</strong></div>
             </div>
 
             <section className={styles.description} aria-labelledby="description-title">
@@ -47,27 +79,27 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
 
             <section className={styles.confirmation} aria-labelledby="confirmation-title">
               <div>
-                <h2 id="confirmation-title">{confirmed ? "Presença marcada nesta prévia" : "Sua presença está confirmada?"}</h2>
-                <p>{confirmed ? "Esta confirmação é apenas visual e será perdida ao recarregar a página." : "Confirme sua presença para ajudar a organização a se planejar."}</p>
+                <h2 id="confirmation-title">{attendance.confirmedByMe ? "Sua presença está confirmada" : "Vai participar?"}</h2>
+                <p>{attendance.confirmedByMe ? "Sua confirmação está salva e continuará aqui quando você voltar." : "Confirme sua presença para ajudar a organização a se planejar."}</p>
+                {message && <p className={styles.confirmationMessage} role="alert">{message}</p>}
               </div>
-              <button type="button" onClick={() => setConfirmed(!confirmed)}>{confirmed ? "Desfazer confirmação" : "Confirmar presença"}</button>
+              {status === "authenticated"
+                ? <button type="button" onClick={() => void toggleAttendance()} disabled={loading || submitting}>{submitting ? "Salvando…" : attendance.confirmedByMe ? "Desfazer confirmação" : "Confirmar presença"}</button>
+                : <Link className={styles.confirmationAction} href={loginHref}>{status === "loading" ? "Verificando conta…" : "Entrar para confirmar"}</Link>}
             </section>
             <Link className={styles.backLink} href="/agenda">← Voltar à agenda</Link>
           </div>
 
           <aside className={styles.attendees} aria-labelledby="attendees-title">
-            <h2 id="attendees-title">Confirmados ({count})</h2>
+            <h2 id="attendees-title">Confirmados ({attendance.count})</h2>
             <ul>
-              {event.confirmedAthletes.map((athlete) => <li key={athlete.name}>
-                <span className={styles.avatar} aria-hidden="true">{athlete.initials}</span>
-                <span className={styles.person}><strong>{athlete.name}</strong><small>{athlete.position}</small></span>
+              {attendance.attendees.map((attendee) => <li key={attendee.id}>
+                <span className={styles.avatar} aria-hidden="true">{attendee.name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("")}</span>
+                <span className={styles.person}><strong>{attendee.name}</strong><small>Presença confirmada</small></span>
                 <span className={styles.check} aria-label="Presença confirmada">✓</span>
               </li>)}
-              {confirmed && <li><span className={styles.avatar} aria-hidden="true">VC</span><span className={styles.person}><strong>Você (prévia)</strong><small>Confirmação visual</small></span><span className={styles.check} aria-label="Presença simulada">✓</span></li>}
-              {event.confirmedAthletes.length === 0 && !confirmed && <li className={styles.emptyAttendees}>Nenhuma confirmação nesta prévia.</li>}
+              {attendance.attendees.length === 0 && <li className={styles.emptyAttendees}>{loading ? "Carregando confirmações…" : "Ninguém confirmou presença ainda."}</li>}
             </ul>
-            {event.confirmedAthletes.length > 0 && <button type="button" className={styles.allAttendees} aria-expanded={showAttendees} onClick={() => setShowAttendees(!showAttendees)}>{showAttendees ? "Ocultar informação" : "Ver todos os confirmados"}</button>}
-            {showAttendees && <p className={styles.attendeeNote}>O protótipo informa {event.confirmedCount} presenças, mas apresenta apenas estes cinco nomes. A lista completa dependerá dos dados reais do backend.</p>}
           </aside>
         </div>
       </div>

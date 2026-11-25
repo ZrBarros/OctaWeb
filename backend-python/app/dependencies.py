@@ -20,6 +20,15 @@ DbSession = Annotated[Session, Depends(get_db)]
 AppSettings = Annotated[Settings, Depends(get_settings)]
 
 
+def optional_current_user(settings: AppSettings, authorization: Annotated[str | None, Header()] = None) -> AuthUser | None:
+    if not authorization:
+        return None
+    if not authorization.startswith("Bearer "):
+        raise unauthorized()
+    payload = decode_token(settings, "access", authorization[7:])
+    return AuthUser(id=int(payload.sub), perfil=payload.perfil)
+
+
 def current_user(settings: AppSettings, authorization: Annotated[str | None, Header()] = None) -> AuthUser:
     if not authorization or not authorization.startswith("Bearer "):
         raise unauthorized()
@@ -34,5 +43,6 @@ def admin_user(user: Annotated[AuthUser, Depends(current_user)]) -> AuthUser:
 
 
 CurrentUser = Annotated[AuthUser, Depends(current_user)]
+OptionalCurrentUser = Annotated[AuthUser | None, Depends(optional_current_user)]
 AdminUser = Annotated[AuthUser, Depends(admin_user)]
 

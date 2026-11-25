@@ -1,6 +1,6 @@
 # Documentação de desenvolvimento — Octacore
 
-**Última atualização:** 11/11/2026
+**Última atualização:** 25/11/2026
 
 **Estado:** MVP full stack integrado; backend Python/FastAPI ativo no Docker Compose e banco preservado, com limitações de schema documentadas
 
@@ -14,9 +14,9 @@ O site reúne informações da atlética, notícias, modalidades, agenda, mural 
 
 - **Front end escolhido:** Next.js, React e TypeScript.
 - **Backend implementado:** Python 3.13, FastAPI, SQLAlchemy 2, Pydantic e psycopg, em `backend-python/`; a pasta antiga `backend/`, com Fastify, foi removida.
-- **Banco:** PostgreSQL, com as 14 tabelas oficiais do schema `octacore`; o backend apenas mapeia o schema e não o altera.
-- **Integração real:** autenticação, conteúdo público, administração, uploads, estoque e pedidos.
-- **Ainda demonstrativo:** pagamento, presença/favorito em eventos, ranking, estatística individual e atividades administrativas, pois o schema não possui entidades correspondentes.
+- **Banco:** PostgreSQL no schema `octacore`; as tabelas existentes são preservadas, e a API cria idempotentemente `presenca_evento` para registrar confirmações de presença.
+- **Integração real:** autenticação, conteúdo público, administração, uploads, estoque, pedidos e presenças em eventos.
+- **Ainda demonstrativo:** pagamento/favorito em eventos, ranking, estatística individual e atividades administrativas. Presenças em eventos persistem por usuário autenticado.
 
 Os documentos de planejamento originais ficam em `assets/` apenas no ambiente local; a pasta é ignorada pelo Git. Esta página registra o estado **implementado**; ideias desses documentos só passam para “pronto” depois de aparecerem no código e serem verificadas.
 
@@ -27,7 +27,7 @@ O MVP possui três tipos de acesso. A API aplica autenticação e autorização 
 | Perfil | Acesso previsto | Estado atual |
 | --- | --- | --- |
 | Visitante | Navegar pelas páginas públicas, consultar notícias, modalidades, agenda, mural e loja; montar carrinho no navegador. | Conteúdo vem da API; o carrinho permanece local e não exige conta. |
-| Usuário autenticado | Tudo do visitante, mais conta própria e acompanhamento de pedidos. | Cadastro, login, refresh, logout, perfil e pedidos reais estão integrados; presença e favorito não persistem. |
+| Usuário autenticado | Tudo do visitante, mais conta própria e acompanhamento de pedidos. | Cadastro, login, refresh, logout, perfil, pedidos e confirmação/cancelamento de presença persistem; favorito não persiste. |
 | Administrador | Tudo do usuário autenticado, mais acesso autorizado ao painel e gestão de conteúdo, integrantes, resultados e pedidos. | API e interface exigem conta `ADMIN`; CRUD e alterações persistem no PostgreSQL. |
 
 A separação é validada pela API em cada rota protegida. A interface também redireciona usuários sem acesso, mas a autorização do servidor é a barreira efetiva.
@@ -35,7 +35,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 ## 1.2 Arquitetura integrada
 
 - O frontend usa `API_URL` em Server Components e `NEXT_PUBLIC_API_URL` nas telas interativas.
-- A API usa rotas FastAPI, serviços e repositórios, validação Pydantic, SQLAlchemy/psycopg, erros padronizados, CORS, cabeçalhos de segurança e rate limiting. Os modelos mapeiam o schema existente sem gerar migrações.
+- A API usa rotas FastAPI, serviços e repositórios, validação Pydantic, SQLAlchemy/psycopg, erros padronizados, CORS, cabeçalhos de segurança e rate limiting. Os modelos mapeiam o schema existente; a única extensão atual é a criação idempotente de `presenca_evento`.
 - O access token fica em memória no navegador; o refresh token usa cookie `httpOnly` e é renovado automaticamente. Sem tabela de tokens, logout remove o cookie do cliente, mas não mantém lista de revogação no servidor.
 - O checkout exige usuário autenticado. A criação do pedido usa transação serializável, valida estoque, desconta quantidades e congela o preço nos itens; o trigger do banco recalcula o total.
 - Uploads administrativos aceitam JPG, PNG ou WebP de até 2 MB, conferem assinatura binária e são servidos apenas por nome UUID validado.
@@ -53,7 +53,7 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
 | `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. | **Prévia visual:** números de exemplo, sem cálculo automático |
 | `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e cards inteiros clicáveis para suas páginas de detalhe; filtro compacto em celular. O fundo segue a navbar sem faixa abrupta, e os cards usam uma superfície roxa translúcida discreta. | **Integração real:** eventos da API; fundo e cards são tratamento de interface |
-| `/agenda/[slug]` | Detalhe do evento persistido, com imagem, modalidade, data, local e descrição. | **Integração parcial:** conteúdo real; presença e favorito continuam simulações no navegador porque não há tabelas correspondentes |
+| `/agenda/[slug]` | Detalhe do evento e lista atualizada de confirmações. Usuários autenticados podem confirmar ou cancelar presença; após login retornam ao evento solicitado. | **Integração real:** conteúdo e presença por conta/evento no PostgreSQL; favorito ainda é apenas local |
 | `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. A abertura do Mural tem fundo contínuo com a navbar, superfícies roxas discretas e três cards inteiros clicáveis. | **Integração real:** história, integrantes e conquistas vêm da API; parte das imagens é placeholder; o novo tratamento visual vale para a abertura do Mural |
 | `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidades. | **Integração real:** dados do PostgreSQL; foto pode estar pendente |
 | `/loja` | Catálogo com busca, filtro, variações disponíveis, estoque e carrinho. A abertura usa fundo contínuo com a navbar; os cards têm superfícies roxas discretas e a barra recebe sua camada escura somente quando fica fixa durante a rolagem. | **Integração real:** catálogo/estoque da API; seleção do carrinho no navegador; novo tratamento visual somente de interface |
@@ -198,14 +198,14 @@ O cabeçalho consulta um estado compartilhado de autenticação: visitantes abre
 
 `/ranking` segue o quadro `octacore-ranking-estatisticas` do Figma: quatro indicadores da temporada, três posições no Campeonato Universitário e barras de aproveitamento para Futsal, Basquete, Voleibol e Handebol. O link “Ver ranking e estatísticas” em `/modalidades` leva à página. Os valores estão em `data/ranking.ts` e são exemplos independentes das partidas em `data/admin-results.ts` e do perfil do atleta; **não são calculados a partir de resultados nem sincronizados com o backend**.
 
-`/agenda/treino-volei-octacore` segue o quadro `octacore-evento-presenca` do Figma. A imagem de capa foi exportada do próprio protótipo para `public/images/treino-volei-hero.png`. O treino foi acrescentado à Agenda e seu cartão abre o detalhe. Favoritar e confirmar presença mudam apenas a interface aberta: a confirmação mostra “Você (prévia)” e soma um ao contador demonstrativo, mas tudo é descartado ao sair ou recarregar. O quadro mostra 18 confirmados e só fornece cinco nomes; “Ver todos os confirmados” explica essa limitação, sem inventar as demais pessoas. A Agenda ordena os compromissos por data. **Não há autenticação, inscrição ou registro de presença no backend.**
+`/agenda/treino-volei-octacore` segue o quadro `octacore-evento-presenca` do Figma. A imagem de capa foi exportada do próprio protótipo para `public/images/treino-volei-hero.png`. O treino foi acrescentado à Agenda e seu cartão abre o detalhe. Usuários autenticados confirmam/cancelam presença, identificada pela conta, e veem a lista real; a restrição única por usuário/evento evita duplicatas. A API cria a tabela `presenca_evento` com `checkfirst` na inicialização, sem recriar nem alterar as tabelas pré-existentes. A autenticação é exigida para alterar a presença, e visitantes são direcionados ao login com retorno ao evento. Favoritos continuam locais. Dados de presença do protótipo (18 confirmações e cinco nomes) não são tratados como registros reais.
 
 A navegação administrativa mantém o comportamento responsivo anterior. A navbar reúne marca, busca, perfil autenticado e saída real; a API volta a verificar `ADMIN` em cada operação. Tabelas largas rolam no próprio painel e pedidos usam cartões no celular.
 
 ## 7. Próximos passos
 
 1. Configurar e validar SMTP real; os demais fluxos do Compose, banco, autenticação, conteúdo, pedido/estoque e uploads já foram exercitados contra PostgreSQL.
-2. Decidir e versionar uma evolução de schema para refresh/reset tokens revogáveis, presença/favoritos, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
+2. Planejar evolução de schema para refresh/reset tokens revogáveis, favoritos, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
 3. Revisar acessibilidade/responsividade em dispositivos físicos e substituir placeholders pelas imagens aprovadas. Avaliar os cards de vidro em Notícias antes de levar o estilo a outras telas.
 
 Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando acontecer.
@@ -223,11 +223,18 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - “Minha Conta” e “Meus Pedidos” usam sessão, perfil, troca de senha e pedidos reais. O cabeçalho acompanha login, atualização de nome e logout sem depender da rota atual.
 - O perfil público do atleta também usa dados fixos e não compartilha ainda estatísticas com as outras páginas.
 - O ranking público usa números fixos do Figma e não é recalculado a partir das partidas do painel ou das estatísticas individuais.
-- Favoritar evento e confirmar presença alteram somente o estado da tela atual. A contagem de 18 e os cinco nomes visíveis vêm do Figma; nenhuma presença real é criada.
+- Favoritar evento permanece local. Presenças são vinculadas às contas autenticadas e não reutilizam os números ou nomes demonstrativos do Figma.
 - O painel exige `ADMIN` e persiste notícias, produtos, estoque, eventos, integrantes, resultados e status de pedidos. Atividades recentes não são fabricadas: permanecem vazias sem uma tabela de auditoria.
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 25/11/2026 — Persistência de presença em eventos
+
+- Criada a tabela `octacore.presenca_evento`, adicionada idempotentemente pela API sem alterar as tabelas existentes; cada registro liga usuário e evento com restrição única.
+- Implementadas rotas para consultar a lista e o contador, confirmar e cancelar presença. Alterações exigem autenticação; visitante pode entrar e retornar ao evento após login.
+- O detalhe agora carrega a presença do backend e apresenta nomes reais, removendo o texto e a confirmação temporária que se perdiam ao atualizar. Favoritar evento permanece local.
+- Verificação: `python -m compileall -q app`, lint, TypeScript, build Webpack do frontend (30 rotas) e `git diff --check`. `pytest` e teste integrado não puderam rodar: dependências Python não estão instaladas e o Docker/PostgreSQL não estão acessíveis neste ambiente.
 
 ### 12/11/2026 — Atualização visual do detalhe de evento
 
