@@ -33,8 +33,10 @@
 .purchaseActions { margin: 28px 0 22px; }
 .purchaseActions > button { width: 100%; border: 0; cursor: pointer; }
 .purchaseActions > button:disabled { background: #634b65; color: #d2c8d3; cursor: not-allowed; transform: none; }
+.purchaseActions > .addButtonSuccess { background: #a9e4c2; color: #183322; }
+.purchaseActions > .addButtonSuccess:disabled { background: #a9e4c2; color: #183322; }
 .purchaseActions p { margin: 9px 0 0; color: #c8bcca; font-size: 12px; }
-.purchaseActions .purchaseFeedback { min-height: 18px; color: #f2d3fc; }
+.purchaseActions .purchaseFeedbackError { margin-top: 12px; padding: 11px 13px; border: 1px solid #ff8a6191; border-radius: 7px; background: #3d1a25c9; color: #ffe5da; font-size: 13px; line-height: 1.45; }
 .cartShortcut { display: inline-flex; align-items: center; min-height: 40px; margin-top: 7px; color: var(--orange); font-size: 13px; font-weight: 800; }
 .cartShortcut:hover { text-decoration: underline; }
 @supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .visual, .details { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }

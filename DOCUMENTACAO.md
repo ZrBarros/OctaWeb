@@ -162,7 +162,7 @@ Preços são enviados pela interface em centavos e persistidos pelo PostgreSQL c
 
 1. A lista em `/loja` consulta produtos ativos e variações da API; cada card oferece compra rápida e link explícito para `/loja/<slug>`.
 2. O detalhe consulta o produto pelo `slug` e limita a quantidade ao estoque disponível.
-3. Ao adicionar, `cart.ts` grava identificador, tamanho e quantidade em `localStorage`, na chave `octacore-cart`. A pessoa permanece na loja ou no detalhe e vê uma confirmação por 3,5 segundos; o acesso ao carrinho exibe a contagem de itens. A quantidade por produto e tamanho é limitada a 99.
+3. Ao adicionar, `cart.ts` grava identificador, tamanho e quantidade em `localStorage`, na chave `octacore-cart`. A pessoa permanece na loja ou no detalhe; abre-se um painel lateral modal com imagem, nome, tamanho, quantidade adicionada, preço correspondente e ações para ver o carrinho ou continuar comprando. O botão também confirma brevemente a adição. O acesso fixo ao carrinho exibe a contagem de itens. A quantidade por produto e tamanho é limitada a 99 e pela disponibilidade da variação.
 4. `/carrinho` lê esses itens, consulta os preços atuais da API e calcula o total.
 5. `/checkout` exige sessão, revalida variações e envia nome, telefone, retirada e observações. A API cria pedido e itens em transação, congela preços e desconta estoque.
 
@@ -228,6 +228,41 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 25/11/2026 — Feedback ao adicionar produtos na Loja
+
+- Cards e detalhes do produto agora abrem um painel lateral após a adição, com imagem e dados do item, contagem atual e ações para ver o carrinho ou continuar comprando. O botão confirma brevemente a ação. O painel pode ser fechado pelo botão, pelo fundo ou pela tecla Escape; não há recomendações de outros produtos. Falhas de disponibilidade recebem aviso distinto. O detalhe usa o estoque real da variação no lugar da mensagem genérica de disponibilidade a confirmar.
+- Alteração de interface sobre o carrinho local existente. Catálogo e estoque continuam vindo da API; não houve mudança na criação real de pedidos, no banco ou na API. Verificação: lint, checagem de tipos e `git diff --check` passaram. A inspeção do fluxo no navegador ainda depende de iniciar os serviços; o checkout de um pedido não faz parte desta alteração.
+
+### 25/11/2026 — Atualização visual do Checkout
+
+- A rota `/checkout` passou a compartilhar o gradiente da Loja e do Carrinho com a navbar. Formulário, resumo fixo em telas largas, campos, erros, estados vazios e confirmação usam superfícies roxas translúcidas discretas e layout responsivo.
+- Mudança somente de interface. O carrinho continua local no navegador; criação real do pedido, validação de estoque e valores na API/PostgreSQL permanecem como antes, sem cobrança online. Verificação: lint, build do frontend no Docker e inspeção visual do formulário com um item no carrinho; o envio de um pedido de teste não foi realizado nesta revisão.
+
+### 25/11/2026 — Identidade visual nas demais telas administrativas
+
+- Cabeçalho, navegação, fundos, tabelas, cartões, filtros, formulários, diálogos e estados vazios das rotas `/admin/noticias`, `/admin/produtos`, `/admin/eventos`, `/admin/modalidades`, `/admin/integrantes`, `/admin/mural`, `/admin/resultados`, `/admin/pedidos`, `/admin/usuarios` e `/admin/perfil` passaram a seguir as superfícies roxas translúcidas discretas da Visão Geral. Fotos ainda pendentes usam fundo escuro em vez de branco na tabela de produtos e na prévia de notícias.
+- Alteração visual, sem mudança nas operações da API ou no banco. Conteúdo e cadastros continuam integrados ao backend; atividades recentes do dashboard continuam sem simulação. Verificação: lint e build do frontend no Docker. A inspeção visual autenticada ainda precisa ser feita por um administrador no navegador.
+
+### 25/11/2026 — Atualização visual da Visão Geral administrativa
+
+- O dashboard `/admin` recebeu fundo roxo contínuo, cabeçalho e navegação com superfícies discretas, cartões de indicadores e painéis de vendas/atividades alinhados à identidade visual pública. Os estados sem vendas ou atividades agora têm mensagens claras; o título de indicadores deixou de chamá-los de exemplo.
+- Mudança visual e de apresentação dos estados vazios, sem alterar regras ou métricas. Números e vendas continuam vindo da API/PostgreSQL; atividades não são simuladas sem tabela de auditoria. Verificação: lint e build do frontend no Docker. A inspeção visual com dados reais ainda depende de abrir a rota com uma sessão administrativa; o navegador de verificação redirecionou para login.
+
+### 25/11/2026 — Atualização visual de Conquistas no Mural
+
+- A rota `/mural/conquistas` passou a compartilhar o gradiente contínuo do Mural desde a navbar. Os cartões de conquistas receberam roxo translúcido discreto; a galeria usa espaços escuros para fotos pendentes em vez de blocos brancos. Incluído um estado vazio para ausência de conquistas.
+- Mudança de interface, sem alterar a integração: conquistas continuam vindo da API/PostgreSQL; as imagens pendentes seguem como placeholders. Verificação: lint, build do frontend no Docker e inspeção visual no navegador.
+
+### 25/11/2026 — Correção dos marcos históricos
+
+- A fundação da Octacore foi corrigida para 2018. A linha do tempo agora registra que a atlética completou oito anos em 2026 e conquistou seu primeiro título do INTERENG no mesmo ano. Os antigos marcos demonstrativos de 2023 a 2025 foram retirados.
+- O seed foi atualizado para instalações novas e `database/03_update_history_2026.sql` foi aplicado ao PostgreSQL local já existente, sem apagar outros marcos administrativos. A página continua lendo os dados reais da API; não usa a lista legada do frontend. Verificação: execução do script no banco local e consulta da API `/history`.
+
+### 25/11/2026 — Atualização visual da História do Mural
+
+- A rota `/mural/historia` passou a compartilhar o gradiente contínuo do Mural desde a navbar. A linha do tempo recebeu eixo contínuo, cartões roxos translúcidos e layout responsivo; um estado vazio substitui a lista quando não há registros. Chaves de lista agora distinguem marcos com o mesmo ano.
+- Mudança de interface, sem alteração da integração: os marcos continuam vindos da API e do PostgreSQL. Verificação: lint, build do frontend no Docker e inspeção visual no navegador em desktop.
 
 ### 12/11/2026 — Atualização visual do detalhe de evento
 
