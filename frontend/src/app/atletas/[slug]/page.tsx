@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { athleteProfiles } from "@/data/athletes";
 import styles from "./page.module.css";
@@ -52,7 +51,6 @@ export default async function AthleteProfilePage({ params }: Props) {
           </li>)}</ul>
         </section>
       </div>
-      <Link className={styles.backLink} href="/modalidades/futsal">← Voltar ao Futsal</Link>
     </div>
   </main>;
 }

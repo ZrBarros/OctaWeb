@@ -234,6 +234,11 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Reunidas na `main` as superfícies visuais do painel administrativo, Checkout, História e Conquistas do Mural. Incluídos o seed e o script para os marcos de 2018 e 2026, preservando a confirmação de presença real em eventos já existente na API/PostgreSQL.
 - As mudanças de aparência são apenas de interface; história e conquistas continuam consultando a API. O script para bancos existentes foi versionado, mas não foi executado novamente nesta integração. Verificação: lint, TypeScript e build do frontend (30 páginas), compilação dos módulos Python e `git diff --check` passaram. A inspeção visual autenticada do painel continua pendente.
 
+### 25/11/2026 — Ação Voltar em todas as telas
+
+- Adicionada uma ação Voltar compartilhada nas telas internas públicas e nas rotas administrativas, exceto Home e páginas principais de Notícias, Modalidades, Agenda, Mural e Loja. A ação usa seta à esquerda e texto laranja sem fundo, retorna ao histórico de navegação e usa uma rota contextual quando não há página anterior.
+- Alteração somente de navegação da interface; não altera dados, API ou autenticação. Verificação: `git diff --check` passou e as estruturas compartilhadas públicas e administrativas foram conferidas; lint e inspeção visual ainda pendentes.
+
 ### 25/11/2026 — Tamanhos no cadastro de camisas
 
 - O cadastro administrativo de produtos passou a solicitar estoque por tamanho para a categoria Camisas, criando variações P, M, G e GG reais na API. A loja só oferece os tamanhos cadastrados para camisas, mostra os esgotados como indisponíveis e bloqueia a compra de camisas antigas ainda sem tamanhos definidos.

@@ -37,7 +37,6 @@ export default async function NewsDetailPage({ params }: Props) {
             <div className={styles.placeholder} role="img" aria-label={`Imagem da notícia ${article.title} pendente`} />
             <p className={styles.lead}>{article.summary}</p>
             {article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-            <Link className={styles.back} href="/noticias"><span aria-hidden="true">←</span> Voltar para notícias</Link>
           </article>
 
           <aside className={styles.sidebar} aria-label="Outras notícias">
