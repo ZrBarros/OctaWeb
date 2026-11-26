@@ -8,6 +8,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { BackNavigation } from "@/components/back-navigation";
 import styles from "./admin.module.css";
 
 export type AdminIconName = "dashboard" | "news" | "products" | "events" | "users" | "modalities" | "history" | "results" | "orders" | "search" | "logout";
@@ -134,6 +135,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     </aside>
 
     <main className={styles.main}>
+      <BackNavigation admin />
       {feedback && <p className={styles.shellFeedback} role="status">{feedback}</p>}
       <div className={styles.pageTransition} key={pathname}>
         {children}

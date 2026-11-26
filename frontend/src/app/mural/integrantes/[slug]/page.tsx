@@ -38,7 +38,6 @@ export default async function MemberPage({ params }: Props) {
               <div><dt>Curso</dt><dd>{member.course}</dd></div>
               <div><dt>Modalidade</dt><dd>{member.modality}</dd></div>
             </dl>
-            <Link className={styles.backLink} href="/mural/integrantes">← Voltar aos integrantes</Link>
           </div>
         </article>
         <p className={styles.demoNotice}>Perfil cadastrado pela diretoria.</p>

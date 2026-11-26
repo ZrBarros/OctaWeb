@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { SiteHeader } from "./site-header";
 import { SiteFooter } from "./site-footer";
+import { BackNavigation } from "./back-navigation";
 import styles from "./site-header.module.css";
 
 export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -13,7 +14,7 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
   }
 
   if (pathname === "/") {
-    return <><div className={styles.homeShell}><SiteHeader />{children}</div><SiteFooter /></>;
+    return <><div className={styles.homeShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
   }
 
   if (pathname === "/noticias" || pathname.startsWith("/noticias/")) {
@@ -25,19 +26,19 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
   }
 
   if (pathname === "/agenda" || pathname.startsWith("/agenda/")) {
-    return <><div className={styles.agendaShell}><SiteHeader />{children}</div><SiteFooter /></>;
+    return <><div className={styles.agendaShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
   }
 
   if (pathname === "/mural" || pathname.startsWith("/mural/integrantes") || pathname === "/mural/historia" || pathname === "/mural/conquistas") {
-    return <><div className={styles.muralShell}><SiteHeader />{children}</div><SiteFooter /></>;
+    return <><div className={styles.muralShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
   }
 
   if (pathname === "/loja" || pathname.startsWith("/loja/")) {
-    return <><div className={styles.storeShell}><SiteHeader />{children}</div><SiteFooter /></>;
+    return <><div className={styles.storeShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
   }
 
   if (pathname === "/minha-conta") {
-    return <><div className={styles.accountShell}><SiteHeader />{children}</div><SiteFooter /></>;
+    return <><div className={styles.accountShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
   }
 
   if (pathname === "/login" || pathname === "/cadastro") {
@@ -45,8 +46,8 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
   }
 
   if (pathname === "/carrinho" || pathname === "/checkout") {
-    return <><div className={styles.cartShell}><SiteHeader />{children}</div><SiteFooter /></>;
+    return <><div className={styles.cartShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
   }
 
-  return <><SiteHeader />{children}<SiteFooter /></>;
+  return <><SiteHeader /><BackNavigation />{children}<SiteFooter /></>;
 }

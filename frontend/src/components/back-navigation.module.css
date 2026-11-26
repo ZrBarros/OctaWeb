@@ -1,0 +1,52 @@
+.backNavigation {
+  width: min(1280px, calc(100% - 48px));
+  margin: 16px auto 8px;
+}
+
+.adminBackNavigation {
+  width: auto;
+  margin: 24px 34px 18px;
+}
+
+.backButton {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--orange);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.backButton:hover {
+  color: #ffad7e;
+  transform: translateX(-2px);
+}
+
+.backButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 600px) {
+  .backNavigation {
+    width: calc(100% - 36px);
+    margin-top: 12px;
+  }
+
+  .adminBackNavigation {
+    width: auto;
+    margin-inline: 16px;
+    margin-top: 0;
+  }
+}
+
+@media (min-width: 651px) and (max-width: 1250px) {
+  .adminBackNavigation {
+    margin-inline: 22px;
+  }
+}

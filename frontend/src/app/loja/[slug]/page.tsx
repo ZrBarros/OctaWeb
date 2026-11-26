@@ -48,7 +48,6 @@ export default async function ProductDetailPage({ params }: Props) {
 
             <ProductPurchase product={product} />
 
-            <Link className="button buttonOutline" href="/loja">← Voltar para a loja</Link>
           </section>
         </div>
       </div>
