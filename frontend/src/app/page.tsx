@@ -4,7 +4,7 @@ import { formatPrice } from "@/data/products";
 import { mapEvent, mapProduct } from "@/lib/api-mappers";
 import { apiServer } from "@/lib/server-api";
 import { displayImageUrl } from "@/lib/display-image-url";
-import type { ApiEvent, ApiPage, ApiProduct } from "@/lib/api-types";
+import type { ApiEvent, ApiItem, ApiPage, ApiProduct, ApiResult } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -12,8 +12,17 @@ export const dynamic = "force-dynamic";
 const sports = ["Futsal", "Basquete", "Vôlei", "Handebol", "E-sports"];
 
 export default async function Home() {
-  const [eventResponse, productResponse] = await Promise.all([apiServer<ApiPage<ApiEvent>>("/events?pageSize=10&sort=asc&from=" + encodeURIComponent(new Date().toISOString())), apiServer<ApiPage<ApiProduct>>("/products?pageSize=4")]);
+  const now = new Date().toISOString();
+  const [eventResponse, productResponse, resultResponse, featuredResponse] = await Promise.all([
+    apiServer<ApiPage<ApiEvent>>(`/events?pageSize=100&sort=asc&from=${encodeURIComponent(now)}`),
+    apiServer<ApiPage<ApiProduct>>("/products?pageSize=4"),
+    apiServer<ApiPage<ApiResult>>(`/results?pageSize=1&sort=desc&to=${encodeURIComponent(now)}`),
+    apiServer<ApiItem<ApiResult | null>>("/results/featured"),
+  ]);
   const upcomingEvents = eventResponse.data.map(mapEvent);
+  const nextGame = eventResponse.data.find((item) => item.tipo === "JOGO" || item.tipo === "CAMPEONATO");
+  const latestResult = featuredResponse.data ?? resultResponse.data[0];
+  const resultStatus = latestResult && (latestResult.placarOcta > latestResult.placarAdversario ? "Vitória" : latestResult.placarOcta < latestResult.placarAdversario ? "Derrota" : "Empate");
   const products = productResponse.data.map(mapProduct);
 
   return (
@@ -37,16 +46,26 @@ export default async function Home() {
             <h2 id="arena-title" className={styles.sectionTitle}>Destaques de arena</h2>
           </div>
           <section className={styles.arenaGrid} aria-labelledby="arena-title">
-            <article className={styles.arenaCard}>
-              <p className={styles.cardLabel}>Próximo jogo · Futsal</p>
-              <div className={styles.matchup}><strong>Octacore</strong><span>vs</span><strong>Atlética adversária</strong></div>
-              <p className={styles.cardMeta}>▣ 25/09 às 20h | Quadra UFAL</p>
-            </article>
-            <article className={`${styles.arenaCard} ${styles.resultCard}`}>
-              <p className={styles.cardLabel}>Resultado recente · Basquete</p>
-              <strong className={styles.score}>Octacore 72 <span>×</span> 64 Adversário</strong>
-              <span className={styles.winBadge}>Vitória</span>
-            </article>
+            {nextGame ? <Link className={styles.arenaCard} href={`/agenda/${nextGame.slug}`} aria-label={`Ver detalhes do próximo jogo: ${nextGame.titulo}`}>
+              <p className={styles.cardLabel}>Próximo jogo · {nextGame.modalidade?.nome ?? "Octacore"}</p>
+              <strong className={styles.arenaTitle}>{nextGame.titulo}</strong>
+              <p className={styles.cardMeta}>▣ {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Maceio" }).format(new Date(nextGame.dataHora))} · {nextGame.local}</p>
+              <span className={styles.cardAction}>Ver jogo →</span>
+            </Link> : <Link className={styles.arenaCard} href="/agenda">
+              <p className={styles.cardLabel}>Próximo jogo</p>
+              <strong className={styles.arenaTitle}>Nenhum jogo futuro cadastrado.</strong>
+              <span className={styles.cardAction}>Ver agenda →</span>
+            </Link>}
+            {latestResult ? <Link className={`${styles.arenaCard} ${styles.resultCard}`} href={latestResult.evento?.slug ? `/agenda/${latestResult.evento.slug}` : `/modalidades/${latestResult.modalidade.slug}`} aria-label={`Ver resultado de Octacore contra ${latestResult.adversario}`}>
+              <p className={styles.cardLabel}>Resultado cadastrado · {latestResult.modalidade.nome}</p>
+              <strong className={styles.score}>Octacore {latestResult.placarOcta} <span>×</span> {latestResult.placarAdversario} {latestResult.adversario}</strong>
+              <span className={`${styles.winBadge} ${resultStatus === "Derrota" ? styles.lossBadge : resultStatus === "Empate" ? styles.drawBadge : ""}`}>{resultStatus}</span>
+              <span className={styles.cardAction}>Ver detalhes →</span>
+            </Link> : <Link className={`${styles.arenaCard} ${styles.resultCard}`} href="/modalidades">
+              <p className={styles.cardLabel}>Resultado recente</p>
+              <strong className={styles.arenaTitle}>Nenhum resultado cadastrado.</strong>
+              <span className={styles.cardAction}>Conhecer modalidades →</span>
+            </Link>}
           </section>
 
           <section className={styles.eventsCard} aria-labelledby="events-title">

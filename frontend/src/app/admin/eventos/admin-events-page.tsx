@@ -66,10 +66,10 @@ export function AdminEventsPage() {
     event.preventDefault();
     if (!draft) return;
     const saved = { ...draft, title: draft.title.trim(), description: draft.description.trim(), place: draft.place.trim() };
-    if (!saved.title || !saved.description || !saved.place || !saved.dateTime || Number.isNaN(eventDate(saved.dateTime).getTime())) return;
+    if (!saved.title || !saved.place || !saved.dateTime || Number.isNaN(eventDate(saved.dateTime).getTime())) return;
     const typeMap: Record<string, string> = { Jogo: "JOGO", Campeonato: "CAMPEONATO", Seletiva: "SELETIVA", Treino: "TREINO", Festa: "FESTA", Reunião: "REUNIAO", Outro: "EVENTO" };
     try {
-      const response = await apiClient<ApiItem<ApiEvent>>(`/admin/events${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ title: saved.title, type: typeMap[saved.category] ?? saved.category, dateTime: new Date(saved.dateTime).toISOString(), description: saved.description, place: saved.place, imageUrl: saved.image ?? null, modalityId: saved.modalityId ?? null }) });
+      const response = await apiClient<ApiItem<ApiEvent>>(`/admin/events${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ title: saved.title, type: typeMap[saved.category] ?? saved.category, dateTime: new Date(saved.dateTime).toISOString(), description: saved.description || null, place: saved.place, imageUrl: saved.image ?? null, modalityId: saved.modalityId ?? null }) });
       const item = response.data; const mapped = { id: item.id, title: item.titulo, category: eventTypeLabels[item.tipo] ?? item.tipo, dateTime: item.dataHora.slice(0, 16), description: item.descricao ?? "", place: item.local, image: item.imagemUrl ?? undefined, modalityId: item.modalidadeId };
       setItems((current) => editingId === null ? [...current, mapped] : current.map((old) => old.id === editingId ? mapped : old));
       setMessage(editingId === null ? "Evento criado e publicado na agenda." : "Evento atualizado.");
@@ -130,7 +130,7 @@ export function AdminEventsPage() {
         <div className={styles.formRow}><label>Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })}>{adminEventCategories.map((category) => <option key={category}>{category}</option>)}</select></label><label>Data e hora<input required type="datetime-local" value={draft.dateTime} onChange={(event) => setDraft({ ...draft, dateTime: event.target.value })} /></label></div>
         <label>Modalidade vinculada<select value={draft.modalityId ?? ""} onChange={(event) => setDraft({ ...draft, modalityId: event.target.value ? Number(event.target.value) : null })}><option value="">Evento geral</option>{modalities.map((item) => <option value={item.id} key={item.id}>{item.nome}</option>)}</select></label>
         <label>Local<input required maxLength={100} value={draft.place} onChange={(event) => setDraft({ ...draft, place: event.target.value })} placeholder="Onde será o evento" /></label>
-        <label>Descrição<textarea required maxLength={300} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Apresente o evento em poucas palavras" /></label>
+        <label>Descrição (opcional)<textarea maxLength={300} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Apresente o evento em poucas palavras" /></label>
         <label>Imagem do evento (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /><small>JPG, PNG ou WebP, até 2 MB.</small></label>
         {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}
         {draft.image && <div className={styles.selectedImage}><Image src={displayImageUrl(draft.image)} alt="Prévia da imagem do evento" width={160} height={90} unoptimized /><button type="button" onClick={() => setDraft({ ...draft, image: undefined })}>Remover imagem</button></div>}

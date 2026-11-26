@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from app.models import Conquista, Evento, Integrante, IntegranteModalidade, MarcoHistorico, Modalidade, Noticia, Resultado
+from app.models import Conquista, Evento, FotoMural, Integrante, IntegranteModalidade, MarcoHistorico, Modalidade, Noticia, Resultado
 
 
 class ContentRepository:
@@ -108,6 +108,9 @@ class ContentRepository:
     def result_by_id(self, item_id: int) -> Resultado | None:
         return self.db.scalar(select(Resultado).options(joinedload(Resultado.modalidade), joinedload(Resultado.evento)).where(Resultado.id == item_id))
 
+    def featured_result(self) -> Resultado | None:
+        return self.db.scalar(select(Resultado).options(joinedload(Resultado.modalidade), joinedload(Resultado.evento)).where(Resultado.destaque_home.is_(True)))
+
     def achievements(self, modality_id: int | None = None) -> list[Conquista]:
         filters = [Conquista.modalidade_id == modality_id] if modality_id else []
         return list(self.db.scalars(select(Conquista).options(joinedload(Conquista.modalidade)).where(*filters).order_by(Conquista.ano.desc(), Conquista.id.desc())).unique())
@@ -116,8 +119,14 @@ class ContentRepository:
         return self.db.scalar(select(Conquista).options(joinedload(Conquista.modalidade)).where(Conquista.id == item_id))
 
     def milestones(self) -> list[MarcoHistorico]:
-        return list(self.db.scalars(select(MarcoHistorico).order_by(MarcoHistorico.ordem, MarcoHistorico.ano)))
+        return list(self.db.scalars(select(MarcoHistorico).order_by(MarcoHistorico.ano, MarcoHistorico.id)))
 
     def milestone_by_id(self, item_id: int) -> MarcoHistorico | None:
         return self.db.get(MarcoHistorico, item_id)
+
+    def gallery_photos(self) -> list[FotoMural]:
+        return list(self.db.scalars(select(FotoMural).order_by(FotoMural.criado_em.desc(), FotoMural.id.desc())))
+
+    def gallery_photo_by_id(self, item_id: int) -> FotoMural | None:
+        return self.db.get(FotoMural, item_id)
 

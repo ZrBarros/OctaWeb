@@ -1,0 +1,3 @@
+.thumbnail, .preview { display: block; width: 100%; height: auto; aspect-ratio: 1.68; border-radius: 10px; object-fit: cover; }
+.thumbnail { margin-bottom: 15px; }
+.preview { max-height: 250px; }

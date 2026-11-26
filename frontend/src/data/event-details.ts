@@ -11,6 +11,7 @@ export type EventDetail = {
   confirmedCount: number;
   description: string;
   heroImage?: string;
+  result?: { ourScore: number; opponentScore: number; opponent: string; competition?: string | null };
   confirmedAthletes: ConfirmedAthlete[];
 };
 

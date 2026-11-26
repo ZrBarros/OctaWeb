@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { displayImageUrl } from "@/lib/display-image-url";
 import { apiServer } from "@/lib/server-api";
-import type { ApiAchievement, ApiItem } from "@/lib/api-types";
+import type { ApiAchievement, ApiGalleryPhoto, ApiItem } from "@/lib/api-types";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = { title: "Conquistas e galeria | Octacore" };
 
 export default async function AchievementsPage() {
   const achievements = (await apiServer<ApiItem<ApiAchievement[]>>("/achievements")).data.map((item) => ({ year: String(item.ano), result: item.colocacao, title: item.titulo, description: item.descricao ?? item.campeonato }));
+  const photos = (await apiServer<ApiItem<ApiGalleryPhoto[]>>("/gallery")).data;
   return (
     <main className={styles.main}>
       <div className={styles.container}>
@@ -33,12 +35,9 @@ export default async function AchievementsPage() {
           <div className={styles.kicker}><span>Galeria</span><i /></div>
           <h2 id="gallery-title">Mosaico de fotos</h2>
           <p className={styles.intro}>Registros reais de nossas festas, jogos, treinos e momentos que nos dão orgulho.</p>
-          <div className={styles.gallery}>
-            <Image src="/images/imagem-galeria.png" alt="Integrantes reunidos em um evento esportivo da Octacore" width={500} height={300} />
-            {Array.from({ length: 4 }, (_, index) => (
-              <div className={styles.placeholder} role="img" aria-label={`Foto ${index + 2} da galeria pendente`} key={index} />
-            ))}
-          </div>
+          {photos.length > 0 ? <div className={styles.gallery}>
+            {photos.map((photo) => <figure className={styles.photo} key={photo.id}><Image src={displayImageUrl(photo.imageUrl)} alt={photo.description} width={500} height={300} unoptimized />{photo.caption && <figcaption>{photo.caption}</figcaption>}</figure>)}
+          </div> : <p className={styles.empty}>Ainda não há fotos cadastradas na galeria.</p>}
         </section>
       </div>
     </main>

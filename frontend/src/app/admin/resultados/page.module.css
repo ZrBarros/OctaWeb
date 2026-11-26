@@ -52,6 +52,11 @@
 .form input::placeholder { color: #8c8091; }
 .form input:focus, .form select:focus { border-color: var(--orange); }
 .formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.form .featuredOption { display: flex; align-items: flex-start; gap: 12px; padding: 14px; border: 1px solid #b77fc647; border-radius: 10px; background: #35164555; cursor: pointer; }
+.featuredOption input[type="checkbox"] { width: 18px; min-width: 18px; height: 18px; min-height: 18px; margin: 1px 0 0; padding: 0; accent-color: var(--orange); }
+.featuredOption span { display: grid; gap: 4px; }
+.featuredOption small { color: #c9bdce; font-size: 11px; font-weight: 400; line-height: 1.4; }
+.featuredBadge { display: inline-block; margin: 4px 0 0 8px; padding: 3px 6px; border: 1px solid #ff7f3f7a; border-radius: 999px; color: var(--orange); font-size: 9px; font-weight: 800; white-space: nowrap; }
 .form .calculatedStatus { margin: -3px 0 0; color: #bbb0bf; font-size: 12px; }
 .calculatedStatus strong { color: var(--orange); }
 .dialogActions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 12px; }

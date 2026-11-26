@@ -16,7 +16,7 @@ from starlette.responses import Response
 from app.config import get_settings
 from app.database import engine
 from app.errors import AppError
-from app.models import PresencaEvento
+from app.models import FavoritoEvento, FotoMural, PresencaEvento
 from app.routers import admin, auth, content, store, uploads
 
 settings = get_settings()
@@ -27,6 +27,11 @@ logger = logging.getLogger("octacore")
 async def lifespan(_app: FastAPI):
     # Adiciona a tabela da funcionalidade sem recriar ou alterar as tabelas existentes.
     PresencaEvento.__table__.create(bind=engine, checkfirst=True)
+    FotoMural.__table__.create(bind=engine, checkfirst=True)
+    FavoritoEvento.__table__.create(bind=engine, checkfirst=True)
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE octacore.resultado ADD COLUMN IF NOT EXISTS destaque_home BOOLEAN NOT NULL DEFAULT false"))
+        connection.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS uq_resultado_destaque_home ON octacore.resultado (destaque_home) WHERE destaque_home"))
     yield
 
 

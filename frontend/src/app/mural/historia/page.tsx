@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 export const metadata: Metadata = { title: "Nossa história | Octacore" };
 
 export default async function HistoryPage() {
-  const historyMilestones = (await apiServer<ApiItem<ApiMilestone[]>>("/history")).data.map((item) => ({ year: String(item.ano), label: "Marco histórico", title: item.titulo, description: item.descricao ?? "" }));
+  const historyMilestones = (await apiServer<ApiItem<ApiMilestone[]>>("/history")).data.sort((a, b) => a.ano - b.ano || a.id - b.id).map((item) => ({ year: String(item.ano), label: "Marco histórico", title: item.titulo, description: item.descricao ?? "" }));
   return (
     <main className={styles.main}>
       <div className={styles.container}>

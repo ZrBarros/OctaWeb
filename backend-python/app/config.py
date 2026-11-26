@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     reset_token_ttl: str = "15m"
     cookie_secure: bool = False
     upload_dir: str = "uploads"
-    max_upload_bytes: int = Field(default=2 * 1024 * 1024, gt=0)
+    max_upload_bytes: int = Field(default=6 * 1024 * 1024, gt=0)
     smtp_host: str | None = None
     smtp_port: int = 587
     smtp_secure: bool = False

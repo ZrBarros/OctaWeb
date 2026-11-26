@@ -17,12 +17,12 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
     return <><div className={styles.homeShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/noticias") {
-    return <><div className={styles.newsShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
+  if (pathname === "/noticias" || pathname.startsWith("/noticias/")) {
+    return <><div className={styles.newsShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/modalidades") {
-    return <><div className={styles.modalityShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
+  if (pathname === "/modalidades" || pathname.startsWith("/modalidades/") || pathname === "/ranking") {
+    return <><div className={styles.modalityShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
   if (pathname === "/agenda" || pathname.startsWith("/agenda/")) {
@@ -39,6 +39,10 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
 
   if (pathname === "/minha-conta") {
     return <><div className={styles.accountShell}><SiteHeader /><BackNavigation />{children}</div><SiteFooter /></>;
+  }
+
+  if (pathname === "/login" || pathname === "/cadastro") {
+    return <><div className={styles.accountShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
   if (pathname === "/carrinho" || pathname === "/checkout") {

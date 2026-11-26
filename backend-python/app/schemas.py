@@ -127,7 +127,7 @@ class ModalityInput(ApiModel):
 class MemberInput(ApiModel):
     slug: Slug | None = None
     name: str = Field(min_length=2, max_length=120)
-    course: str | None = Field(default=None, max_length=100)
+    course: str = Field(min_length=2, max_length=100)
     role: str | None = Field(default=None, max_length=80)
     boardMember: bool = False
     photoUrl: str | None = Field(default=None, max_length=255)
@@ -156,6 +156,7 @@ class ResultInput(ApiModel):
     opponentScore: int = Field(ge=0)
     competition: str | None = Field(default=None, max_length=150)
     date: date
+    featured: bool = False
 
 
 class AchievementInput(ApiModel):
@@ -172,6 +173,13 @@ class MilestoneInput(ApiModel):
     title: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=50_000)
     order: int = 0
+
+
+class GalleryPhotoInput(ApiModel):
+    imageUrl: str = Field(max_length=255)
+    description: str = Field(min_length=2, max_length=200)
+    caption: str | None = Field(default=None, max_length=200)
+    _image = field_validator("imageUrl")(validate_asset_url)
 
 
 class VariationInput(ApiModel):

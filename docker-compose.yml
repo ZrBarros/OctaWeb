@@ -34,7 +34,7 @@ services:
       RESET_TOKEN_TTL: 15m
       COOKIE_SECURE: "false"
       UPLOAD_DIR: /app/uploads
-      MAX_UPLOAD_BYTES: 2097152
+      MAX_UPLOAD_BYTES: 6291456
       PASSWORD_RESET_URL: http://localhost:3000/redefinir-senha
     ports:
       - "3333:3333"

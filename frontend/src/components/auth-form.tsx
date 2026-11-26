@@ -18,6 +18,9 @@ export function AuthForm({ mode, initialMessage = "", returnTo }: { mode: AuthMo
   const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const { establishSession } = useAuth();
+  const safeReturnTo = returnTo?.startsWith("/") && !returnTo.startsWith("//") ? returnTo : null;
+  const loginHref = safeReturnTo ? `/login?redirect=${encodeURIComponent(safeReturnTo)}` : "/login";
+  const signupHref = safeReturnTo ? `/cadastro?redirect=${encodeURIComponent(safeReturnTo)}` : "/cadastro";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,7 +41,6 @@ export function AuthForm({ mode, initialMessage = "", returnTo }: { mode: AuthMo
         : { email: data.get("email"), password: data.get("password") };
       const response = await apiClient<{ data: { user: ApiUser; accessToken: string } }>(`/auth/${isSignup ? "register" : "login"}`, { method: "POST", body: JSON.stringify(body) });
       establishSession(response.data.user, response.data.accessToken);
-      const safeReturnTo = returnTo?.startsWith("/") && !returnTo.startsWith("//") ? returnTo : null;
       router.push(safeReturnTo ?? (response.data.user.perfil === "ADMIN" ? "/admin" : "/minha-conta"));
       router.refresh();
     } catch (reason) { setMessage(reason instanceof Error ? reason.message : "Não foi possível acessar a conta."); }
@@ -57,13 +59,17 @@ export function AuthForm({ mode, initialMessage = "", returnTo }: { mode: AuthMo
       <section className={styles.card} aria-labelledby="auth-title">
         {isSignup ? (
           <header className={styles.signupHeading}>
+            <Image src="/images/logo-octacore.png" alt="Octacore" width={64} height={64} priority />
+            <span className={styles.loginEyebrow}>ÁREA DA COMUNIDADE</span>
             <h1 id="auth-title">Junte-se à Octacore</h1>
-            <p>Crie seu perfil de atleta, torcedor ou apoiador da Computação</p>
+            <p>Crie sua conta para fazer pedidos, acompanhar suas compras e confirmar presença nos eventos da Octacore.</p>
           </header>
         ) : (
           <header className={styles.loginHeading}>
             <Image src="/images/logo-octacore.png" alt="Octacore" width={64} height={64} priority />
+            <span className={styles.loginEyebrow}>ÁREA DA COMUNIDADE</span>
             <h1 id="auth-title">Acesse sua conta</h1>
+            <p>Entre para concluir pedidos, acompanhar suas compras e confirmar presença nos eventos da Octacore.</p>
           </header>
         )}
 
@@ -97,18 +103,18 @@ export function AuthForm({ mode, initialMessage = "", returnTo }: { mode: AuthMo
           )}
 
           {isSignup ? (
-            <p className={styles.supportingText}>Ao se cadastrar, você concorda com a integração esportiva acadêmica.</p>
+            <p className={styles.supportingText}>Explorar notícias, modalidades e produtos não exige cadastro.</p>
           ) : (
             <div className={styles.loginLinks}>
               <button type="button" onClick={() => void forgotPassword()}>Esqueci minha senha</button>
-              <span>Não tem conta? <Link href="/cadastro">Cadastre-se</Link></span>
+              <span>Não tem conta? <Link href={signupHref}>Cadastre-se</Link></span>
             </div>
           )}
 
           {message && <p className={styles.feedback} role="status">{message}</p>}
           <button className={`button buttonPrimary ${styles.submit}`} type="submit" disabled={submitting}>{submitting ? "Aguarde..." : isSignup ? "Criar minha conta" : "Entrar na conta"}</button>
         </form>
-        {isSignup && <Link className={`button buttonOutline ${styles.backToLogin}`} href="/login">Fazer login</Link>}
+        {isSignup && <Link className={`button buttonOutline ${styles.backToLogin}`} href={loginHref}>Fazer login</Link>}
       </section>
     </main>
   );

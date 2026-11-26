@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AccountSettings, type AccountSettingsMode } from "@/components/account-settings";
 import { useAuth } from "@/components/auth-provider";
 import styles from "./page.module.css";
+import { FavoriteEvents } from "./favorite-events";
 
 type IconName = "person" | "lock" | "bag" | "box";
 
@@ -74,6 +75,7 @@ export function AccountDashboard() {
               <p>Escolha o que deseja atualizar ou consultar.</p>
             </div>
             <div className={styles.actionList}>
+              {profile.perfil === "ADMIN" && <Link className={styles.actionCard} href="/admin"><span className={styles.actionIcon}><ActionIcon name="person" /></span><span className={styles.actionText}><strong>Abrir painel admin</strong><small>Gerencie conteúdos, produtos e pedidos</small></span><span className={styles.arrow} aria-hidden="true">→</span></Link>}
               {actions.map((action) => {
                 const content = <><span className={styles.actionIcon}><ActionIcon name={action.icon} /></span><span className={styles.actionText}><strong>{action.title}</strong><small>{action.description}</small></span><span className={styles.arrow} aria-hidden="true">→</span></>;
                 return action.href
@@ -84,6 +86,7 @@ export function AccountDashboard() {
             {message && <p className={styles.feedback} role="status">{message}</p>}
           </section>
         </div>
+        <FavoriteEvents />
       </div>
       {editor && <AccountSettings mode={editor} onClose={() => setEditor(null)} onComplete={setMessage} />}
     </main>

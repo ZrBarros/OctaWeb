@@ -19,7 +19,7 @@ export function NewsCard({ article }: { article: NewsArticle }) {
             <time dateTime={article.dateTime}>{article.date}</time>
           </div>
           <h2>{article.title}</h2>
-          <p>{article.summary}</p>
+          {article.summary && <p>{article.summary}</p>}
           <span className={styles.readMore}>Ler notícia <span aria-hidden="true">→</span></span>
         </div>
       </Link>

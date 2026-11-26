@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { useAuth } from "@/components/auth-provider";
 import { AdminIcon, AdminPageHeading, AdminToolbarSearch } from "../admin-shell";
 import { adminNewsCategories, type AdminNewsItem, type AdminNewsCategory, type AdminNewsStatus } from "@/data/admin-news";
 import { apiCategory } from "@/lib/api-mappers";
@@ -13,7 +14,7 @@ import shared from "../admin.module.css";
 import styles from "./page.module.css";
 
 type NewsDraft = Omit<AdminNewsItem, "id" | "date">;
-const emptyDraft: NewsDraft = { title: "", summary: "", body: "", category: "Comunicados", author: "Diretoria Octacore", status: "Publicado", imageAlt: "" };
+const emptyDraft: NewsDraft = { title: "", summary: "", body: "", category: "Comunicados", author: "", status: "Publicado", imageAlt: "" };
 const allowedImageTypes = ["image/jpeg", "image/png", "image/webp"];
 const maxImageBytes = 2 * 1024 * 1024;
 
@@ -26,6 +27,7 @@ function TrashIcon() {
 }
 
 export function AdminNewsPage() {
+  const { user } = useAuth();
   const [items, setItems] = useState<AdminNewsItem[]>([]);
   const [filter, setFilter] = useState<"Todos" | AdminNewsCategory>("Todos");
   const [query, setQuery] = useState("");
@@ -74,10 +76,10 @@ export function AdminNewsPage() {
 
   async function saveDraft() {
     if (!draft) return;
-    const normalized: NewsDraft = { ...draft, title: draft.title.trim(), summary: draft.summary.trim(), body: draft.body.trim(), author: draft.author.trim(), imageAlt: draft.imageAlt.trim() };
-    if (!normalized.title || !normalized.summary || !normalized.body || !normalized.author || (normalized.imageSrc && !normalized.imageAlt)) return;
+    const normalized: NewsDraft = { ...draft, title: draft.title.trim(), summary: draft.summary.trim(), body: draft.body.trim(), imageAlt: draft.imageAlt.trim() };
+    if (!normalized.title || !normalized.body) return;
     try {
-      const response = await apiClient<ApiItem<ApiNews>>(`/admin/news${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ title: normalized.title, summary: normalized.summary, content: normalized.body, category: apiCategory(normalized.category), imageUrl: normalized.imageSrc ?? null, status: "Publicado" }) });
+      const response = await apiClient<ApiItem<ApiNews>>(`/admin/news${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ title: normalized.title, summary: normalized.summary || null, content: normalized.body, category: apiCategory(normalized.category), imageUrl: normalized.imageSrc ?? null, status: "Publicado" }) });
       const item = response.data; const mapped: AdminNewsItem = { id: item.id, title: item.titulo, summary: item.resumo ?? "", body: item.conteudo, category: normalized.category, author: item.autor.nome, date: new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium" }).format(new Date(item.criadoEm)), status: "Publicado", imageSrc: item.imagemCapaUrl ?? undefined, imageAlt: normalized.imageAlt };
       setItems((current) => editingId === null ? [mapped, ...current] : current.map((old) => old.id === editingId ? mapped : old));
       setMessage(editingId === null ? "Notícia publicada." : "Notícia atualizada.");
@@ -152,14 +154,14 @@ export function AdminNewsPage() {
         <p>Salvar publica a notícia no site. O schema atual não possui estado de rascunho.</p>
 
         {editorStep === "edit" ? <form onSubmit={(event) => { event.preventDefault(); setEditorStep("preview"); }} className={styles.form}>
-          <label>Título<input required maxLength={160} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
-          <label>Resumo<textarea required rows={3} maxLength={300} value={draft.summary} onChange={(event) => setDraft({ ...draft, summary: event.target.value })} placeholder="Uma apresentação curta da notícia" /></label>
+          <label>Título<input required minLength={3} maxLength={160} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} /></label>
+          <label>Resumo (opcional)<textarea rows={3} maxLength={300} value={draft.summary} onChange={(event) => setDraft({ ...draft, summary: event.target.value })} placeholder="Uma apresentação curta da notícia" /></label>
           <label>Texto da notícia<textarea required rows={8} value={draft.body} onChange={(event) => setDraft({ ...draft, body: event.target.value })} placeholder="Escreva o conteúdo completo. Separe os parágrafos com uma linha em branco." /></label>
           <div className={styles.formRow}>
             <label>Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value as AdminNewsCategory })}>{adminNewsCategories.map((category) => <option key={category}>{category}</option>)}</select></label>
             <label>Status<select value={draft.status} onChange={(event) => setDraft({ ...draft, status: event.target.value as AdminNewsStatus })}><option>Publicado</option></select></label>
           </div>
-          <label>Autor<input required readOnly value={draft.author} /><small>O autor será confirmado pela conta administrativa conectada.</small></label>
+          <p>Autor: {user?.nome || "conta administrativa conectada"}</p>
           <div className={styles.imageInput}>
             <label>Imagem de destaque (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /></label>
             <small>JPG, PNG ou WebP, até 2 MB.</small>
@@ -169,14 +171,14 @@ export function AdminNewsPage() {
               <Image src={displayImageUrl(draft.imageSrc)} alt={draft.imageAlt || "Imagem selecionada para a notícia"} width={960} height={540} unoptimized />
               <button type="button" onClick={() => setDraft({ ...draft, imageSrc: undefined, imageAlt: "" })}>Remover imagem</button>
             </div>}
-            {draft.imageSrc && <label>Descrição da imagem<input required value={draft.imageAlt} onChange={(event) => setDraft({ ...draft, imageAlt: event.target.value })} placeholder="Descreva o que aparece na imagem" /></label>}
+            {draft.imageSrc && <label>Descrição da imagem (opcional)<input value={draft.imageAlt} onChange={(event) => setDraft({ ...draft, imageAlt: event.target.value })} placeholder="Descreva o que aparece na imagem" /></label>}
           </div>
           <div className={styles.dialogActions}><button type="button" className={styles.cancelButton} onClick={closeEditor}>Cancelar</button><button type="submit" className={styles.saveButton}>Pré-visualizar</button></div>
         </form> : <>
           <article className={styles.articlePreview} aria-label="Prévia visual da notícia">
             <div className={styles.previewTop}><span className={styles.previewCategory}>{draft.category}</span><span className={styles.published}>{draft.status}</span></div>
             <h3>{draft.title.trim()}</h3>
-            <div className={styles.previewMeta}>Por {draft.author.trim()} <span aria-hidden="true">•</span> {editingId === null ? "Hoje" : items.find((item) => item.id === editingId)?.date}</div>
+            <div className={styles.previewMeta}>Por {user?.nome || "conta administrativa conectada"} <span aria-hidden="true">•</span> {editingId === null ? "Hoje" : items.find((item) => item.id === editingId)?.date}</div>
             {draft.imageSrc ? <Image className={styles.previewImage} src={displayImageUrl(draft.imageSrc)} alt={draft.imageAlt.trim()} width={960} height={540} unoptimized /> : <div className={styles.previewPlaceholder} role="img" aria-label="Imagem da notícia ainda não adicionada" />}
             <p className={styles.previewLead}>{draft.summary.trim()}</p>
             <div className={styles.previewBody}>{draft.body.trim().split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>

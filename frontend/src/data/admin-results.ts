@@ -9,6 +9,7 @@ export type AdminResult = {
   date: string;
   modalityId?: number;
   eventId?: number | null;
+  featured?: boolean;
 };
 
 export type ResultStatus = "Vitória" | "Empate" | "Derrota";

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { formatPrice } from "@/data/products";
 import { clearCart, useCart } from "@/lib/cart";
 import { mapProduct } from "@/lib/api-mappers";
-import type { ApiItem, ApiOrder, ApiPage, ApiProduct } from "@/lib/api-types";
+import { ApiError, type ApiItem, type ApiOrder, type ApiPage, type ApiProduct } from "@/lib/api-types";
 import { apiClient } from "@/lib/api";
 import { useApiData } from "@/lib/use-api";
 import styles from "./page.module.css";
@@ -44,7 +44,7 @@ export function CheckoutContent() {
       const result = await apiClient<ApiItem<ApiOrder>>("/orders", { method: "POST", auth: true, body: JSON.stringify({ contactName: name, contactPhone: phone, pickupMethod: pickup === "campus" ? "CAMPUS" : "COMBINAR", notes: String(data.get("notes") ?? "").trim() || null, items: orderItems }) });
       setError(""); clearCart();
       setConfirmation({ orderId: result.data.id, name, pickup: pickup === "campus" ? "No campus da UFAL" : "A combinar com a atlética", totalCents: Math.round(Number(result.data.valorTotal) * 100) });
-    } catch (reason) { setError(reason instanceof Error ? reason.message : "Não foi possível registrar o pedido."); }
+    } catch (reason) { setError(reason instanceof ApiError && reason.status === 401 ? "É necessário fazer login para finalizar a compra!" : reason instanceof Error ? reason.message : "Não foi possível registrar o pedido."); }
   }
 
   return (

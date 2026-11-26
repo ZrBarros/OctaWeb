@@ -19,6 +19,6 @@ export default async function Page({ params }: Props) {
   try { data = (await apiServer<ApiItem<ApiEvent>>(`/events/${encodeURIComponent(slug)}`)).data; }
   catch (error) { if (error instanceof ApiError && error.status === 404) notFound(); throw error; }
   const date = new Date(data.dataHora);
-  const event: EventDetail = { slug: data.slug, title: data.titulo, modality: data.modalidade?.nome ?? "Octacore", category: data.tipo, dateTime: data.dataHora, displayDate: new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Maceio" }).format(date), place: data.local, confirmedCount: 0, description: data.descricao ?? "", heroImage: data.imagemUrl ?? undefined, confirmedAthletes: [] };
+  const event: EventDetail = { slug: data.slug, title: data.titulo, modality: data.modalidade?.nome ?? "Octacore", category: data.tipo, dateTime: data.dataHora, displayDate: new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Maceio" }).format(date), place: data.local, confirmedCount: 0, description: data.descricao ?? "", heroImage: data.imagemUrl ?? undefined, result: data.resultado ? { ourScore: data.resultado.placarOcta, opponentScore: data.resultado.placarAdversario, opponent: data.resultado.adversario, competition: data.resultado.campeonato } : undefined, confirmedAthletes: [] };
   return <EventAttendancePage event={event} />;
 }
