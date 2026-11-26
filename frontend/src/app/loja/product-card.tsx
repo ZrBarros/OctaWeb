@@ -26,7 +26,8 @@ export function ProductCard({ product }: { product: Product }) {
       showFeedback("Escolha um tamanho para adicionar ao carrinho.");
       return;
     }
-    const added = Math.min(quantity, available);
+    if (quantity > available) { showFeedback(`Restam ${available} ${available === 1 ? "unidade" : "unidades"} disponíveis para adicionar.`); return; }
+    const added = quantity;
     if (added < 1 || !addToCart(product.slug, size ?? undefined, added)) {
       showFeedback("Estoque disponível atingido para esta opção.");
       return;
@@ -60,7 +61,7 @@ export function ProductCard({ product }: { product: Product }) {
                 aria-pressed={size === option}
                 aria-label={`Tamanho ${option} de ${product.name}${product.variations?.find((variation) => variation.size === option)?.stock === 0 ? ", esgotado" : ""}`}
                 disabled={product.variations?.find((variation) => variation.size === option)?.stock === 0}
-                onClick={() => { setSize(option); clearFeedback(); }}
+                onClick={() => { setSize(option); setQuantity(1); clearFeedback(); }}
               >{option}</button>
             ))}
           </div>
@@ -73,7 +74,7 @@ export function ProductCard({ product }: { product: Product }) {
         <div className={styles.quantityControl}>
           <button type="button" aria-label={`Diminuir quantidade de ${product.name}`} disabled={quantity === 1} onClick={() => { setQuantity((current) => current - 1); clearFeedback(); }}>−</button>
           <output aria-label={`Quantidade selecionada: ${quantity}`}>{quantity}</output>
-          <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity === 99} onClick={() => { setQuantity((current) => current + 1); clearFeedback(); }}>+</button>
+          <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity >= (size || !product.sizes ? available : 99)} onClick={() => { setQuantity((current) => current + 1); clearFeedback(); }}>+</button>
         </div>
       </div>
 

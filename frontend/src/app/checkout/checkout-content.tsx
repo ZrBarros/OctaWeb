@@ -24,10 +24,12 @@ export function CheckoutContent() {
     return product ? [{ ...item, product }] : [];
   }) ?? [];
   const totalCents = lines.reduce((total, item) => total + item.product.priceCents * item.quantity, 0);
+  const hasStockIssue = lines.some((item) => item.quantity > (item.product.variations?.find((variation) => variation.size === (item.size ?? "UNICO"))?.stock ?? 0));
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (lines.length === 0) return;
+    if (hasStockIssue) { setError("Um ou mais produtos excedem o estoque disponível. Ajuste o carrinho antes de finalizar."); return; }
 
     const data = new FormData(event.currentTarget);
     const name = String(data.get("name") ?? "").trim();
@@ -111,7 +113,8 @@ export function CheckoutContent() {
                     </label>
                   </div>
                   {error && <p className={styles.error} role="alert">{error}</p>}
-                  <button className="button buttonPrimary" type="submit">Registrar pedido</button>
+                  {hasStockIssue && <p className={styles.error} role="alert">Um ou mais produtos excedem o estoque disponível. <Link href="/carrinho">Ajustar carrinho</Link></p>}
+                  <button className="button buttonPrimary" type="submit" disabled={hasStockIssue}>Registrar pedido</button>
                 </form>
 
                 <aside className={styles.summary} aria-labelledby="summary-title">

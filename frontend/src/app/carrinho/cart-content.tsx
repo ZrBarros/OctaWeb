@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { formatPrice } from "@/data/products";
 import { mapProduct } from "@/lib/api-mappers";
 import type { ApiPage, ApiProduct } from "@/lib/api-types";
@@ -11,6 +12,10 @@ import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 export function CartContent() {
+  const [pendingRemoval, setPendingRemoval] = useState<{ slug: string; size?: string; name: string } | null>(null);
+  const removalDialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => { const dialog = removalDialog.current; if (pendingRemoval && dialog && !dialog.open) dialog.showModal(); }, [pendingRemoval]);
+  function closeRemoval() { removalDialog.current?.close(); setPendingRemoval(null); }
   const items = useCart();
   const { data: response, loading, error } = useApiData<ApiPage<ApiProduct>>("/products?pageSize=100", { data: [], meta: { page: 1, pageSize: 100, total: 0, totalPages: 0 } });
   const products = response.data.map(mapProduct);
@@ -20,6 +25,7 @@ export function CartContent() {
   }) ?? [];
   const totalCents = lines.reduce((total, item) => total + item.product.priceCents * item.quantity, 0);
   const itemCount = lines.reduce((total, item) => total + item.quantity, 0);
+  const hasStockIssue = lines.some((item) => { const stock = item.product.variations?.find((variation) => variation.size === (item.size ?? "UNICO"))?.stock ?? 0; return item.quantity > stock; });
 
   return (
     <main className={styles.main}>
@@ -44,7 +50,9 @@ export function CartContent() {
         ) : (
           <div className={styles.layout}>
             <section className={styles.items} aria-label="Produtos no carrinho">
-              {lines.map(({ slug, size, quantity, product }) => (
+              {lines.map(({ slug, size, quantity, product }) => {
+                const stock = product.variations?.find((variation) => variation.size === (size ?? "UNICO"))?.stock ?? 0;
+                return (
                 <article className={styles.item} key={`${slug}:${size ?? ""}`}>
                   <Link className={styles.visual} href={`/loja/${slug}`} aria-label={`Ver ${product.name}`}>
                     {product.image ? (
@@ -57,31 +65,41 @@ export function CartContent() {
                     <Link className={styles.productName} href={`/loja/${slug}`}>{product.name}</Link>
                     <p>{product.category}{size ? ` · Tamanho ${size}` : ""}</p>
                     <strong>{formatPrice(product.priceCents)}</strong>
-                    <button className={styles.remove} type="button" onClick={() => removeFromCart(slug, size)}>Remover</button>
+                    {quantity > stock && <p className={styles.stockWarning} role="alert">{stock > 0 ? `Apenas ${stock} ${stock === 1 ? "unidade disponível" : "unidades disponíveis"}.` : "Produto esgotado."} {stock > 0 && <button type="button" onClick={() => changeCartQuantity(slug, size, stock)}>Ajustar quantidade</button>}</p>}
                   </div>
                   <div className={styles.itemTotals}>
-                    <div className={styles.quantity} aria-label={`Quantidade de ${product.name}${size ? `, tamanho ${size}` : ""}`}>
-                      <button type="button" aria-label={`Diminuir quantidade de ${product.name}`} disabled={quantity === 1} onClick={() => changeCartQuantity(slug, size, quantity - 1)}>−</button>
-                      <span>{quantity}</span>
-                      <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity === 99} onClick={() => changeCartQuantity(slug, size, quantity + 1)}>+</button>
+                    <div className={styles.itemControls}>
+                      <div className={styles.quantity} aria-label={`Quantidade de ${product.name}${size ? `, tamanho ${size}` : ""}`}>
+                        <button type="button" aria-label={`Diminuir quantidade de ${product.name}`} disabled={quantity === 1} onClick={() => changeCartQuantity(slug, size, quantity - 1)}>−</button>
+                        <span>{quantity}</span>
+                        <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity >= Math.min(99, stock)} onClick={() => changeCartQuantity(slug, size, quantity + 1)}>+</button>
+                      </div>
+                      <button className={styles.removeIcon} type="button" aria-label={`Remover ${product.name} do carrinho`} title="Remover do carrinho" onClick={() => setPendingRemoval({ slug, size, name: product.name })}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5" /></svg></button>
                     </div>
                     <strong>{formatPrice(product.priceCents * quantity)}</strong>
                   </div>
                 </article>
-              ))}
+              ); })}
             </section>
 
             <aside className={styles.summary} aria-labelledby="summary-title">
               <h2 id="summary-title">Resumo do pedido</h2>
               <div className={styles.summaryRow}><span>Produtos ({itemCount})</span><strong>{formatPrice(totalCents)}</strong></div>
               <div className={`${styles.summaryRow} ${styles.total}`}><span>Total</span><strong>{formatPrice(totalCents)}</strong></div>
-              <Link className={`button buttonPrimary ${styles.checkoutLink}`} href="/checkout">Ir para checkout</Link>
+              {hasStockIssue ? <p className={styles.checkoutWarning} role="alert">Ajuste os itens acima do estoque disponível antes de finalizar.</p> : <Link className={`button buttonPrimary ${styles.checkoutLink}`} href="/checkout">Ir para checkout</Link>}
               <p>O pedido será registrado sem cobrança online.</p>
               <Link className={styles.continueLink} href="/loja">← Continuar comprando</Link>
             </aside>
           </div>
         )}
       </div>
+      <dialog ref={removalDialog} className={styles.confirmDialog} aria-labelledby="remove-item-title" aria-describedby="remove-item-description" onClose={() => setPendingRemoval(null)} onClick={(event) => { if (event.target === removalDialog.current) closeRemoval(); }}>
+        <div className={styles.confirmContent}>
+          <div className={styles.confirmHeader}><h2 id="remove-item-title">Remover item?</h2><button type="button" aria-label="Fechar confirmação" onClick={closeRemoval}>×</button></div>
+          <p id="remove-item-description">Você deseja mesmo remover <strong>{pendingRemoval?.name}</strong>{pendingRemoval?.size ? ` (tamanho ${pendingRemoval.size})` : ""} do seu carrinho?</p>
+          <div className={styles.confirmActions}><button type="button" className={styles.cancelRemoval} onClick={closeRemoval}>Cancelar</button><button type="button" className={styles.confirmRemoval} onClick={() => { if (pendingRemoval) removeFromCart(pendingRemoval.slug, pendingRemoval.size); closeRemoval(); }}>Remover item</button></div>
+        </div>
+      </dialog>
     </main>
   );
 }
