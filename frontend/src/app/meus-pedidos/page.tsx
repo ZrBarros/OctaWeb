@@ -47,7 +47,6 @@ export default function MeusPedidosPage() {
       <p className={styles.sectionDescription}>{showingHistory ? "Pedidos entregues ou cancelados." : "Pedidos em andamento, até ficarem disponíveis para retirada."}</p>
       {loading ? <p role="status">Carregando pedidos...</p> : error ? <p role="alert">{error} <Link href="/login">Fazer login</Link></p> : visibleOrders.length === 0 ? <p className={styles.empty}>{showingHistory ? "Nenhum pedido entregue ou cancelado no histórico." : "Nenhum pedido ativo no momento."}</p> : <div className={styles.orderList}>{visibleOrders.map((order) => <OrderCard order={order} key={order.id} />)}</div>}
     </section>
-    <Link className={styles.backLink} href="/minha-conta">← Voltar para Minha Conta</Link>
   </div></main>;
 }
 

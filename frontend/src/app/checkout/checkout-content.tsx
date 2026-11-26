@@ -65,7 +65,7 @@ export function CheckoutContent() {
               <div><span>Total</span><strong>{formatPrice(confirmation.totalCents)}</strong></div>
               <div><span>Status</span><strong>Pendente</strong></div>
             </div>
-            <Link className="button buttonPrimary" href="/loja">Voltar à loja</Link>
+            <Link className="button buttonPrimary" href="/loja">Continuar comprando</Link>
           </section>
         ) : (
           <>

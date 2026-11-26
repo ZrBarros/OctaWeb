@@ -123,7 +123,6 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
                 ? <button type="button" onClick={() => void toggleAttendance()} disabled={loading || submitting}>{submitting ? "Salvando…" : attendance.confirmedByMe ? "Desfazer confirmação" : "Confirmar presença"}</button>
                 : <Link className={styles.confirmationAction} href={loginHref}>{status === "loading" ? "Verificando conta…" : "Entrar para confirmar"}</Link>}
             </section>
-            <Link className={styles.backLink} href="/agenda">← Voltar à agenda</Link>
           </div>
 
           <aside className={styles.attendees} aria-labelledby="attendees-title">
