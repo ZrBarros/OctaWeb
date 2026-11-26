@@ -134,6 +134,15 @@ CREATE TABLE evento (
 CREATE INDEX ix_evento_data_hora  ON evento (data_hora);
 CREATE INDEX ix_evento_modalidade ON evento (modalidade_id);
 
+CREATE TABLE favorito_evento (
+    id         INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    evento_id  INTEGER NOT NULL REFERENCES evento (id) ON DELETE CASCADE,
+    usuario_id INTEGER NOT NULL REFERENCES usuario (id) ON DELETE CASCADE,
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT uq_favorito_evento_usuario UNIQUE (evento_id, usuario_id)
+);
+CREATE INDEX ix_favorito_evento_usuario ON favorito_evento (usuario_id, criado_em DESC);
+
 CREATE TABLE resultado (
     id                INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     modalidade_id     INTEGER      NOT NULL REFERENCES modalidade (id) ON DELETE RESTRICT,
@@ -142,9 +151,11 @@ CREATE TABLE resultado (
     placar_octa       INTEGER      NOT NULL CHECK (placar_octa >= 0),
     placar_adversario INTEGER      NOT NULL CHECK (placar_adversario >= 0),
     campeonato        VARCHAR(150),
-    data              DATE         NOT NULL
+    data              DATE         NOT NULL,
+    destaque_home     BOOLEAN      NOT NULL DEFAULT false
 );
 CREATE INDEX ix_resultado_modalidade ON resultado (modalidade_id, data DESC);
+CREATE UNIQUE INDEX uq_resultado_destaque_home ON resultado (destaque_home) WHERE destaque_home;
 
 CREATE TABLE conquista (
     id            INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -163,6 +174,14 @@ CREATE TABLE marco_historico (
     titulo    VARCHAR(150) NOT NULL,
     descricao TEXT,
     ordem     INTEGER      NOT NULL DEFAULT 0
+);
+
+CREATE TABLE foto_mural (
+    id        INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    imagem_url VARCHAR(255) NOT NULL,
+    descricao  VARCHAR(200) NOT NULL,
+    legenda    VARCHAR(200),
+    criado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- =====================================================================

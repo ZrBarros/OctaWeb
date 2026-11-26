@@ -16,11 +16,11 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
     return <><div className={styles.homeShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/noticias") {
+  if (pathname === "/noticias" || pathname.startsWith("/noticias/")) {
     return <><div className={styles.newsShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
-  if (pathname === "/modalidades") {
+  if (pathname === "/modalidades" || pathname.startsWith("/modalidades/") || pathname === "/ranking") {
     return <><div className={styles.modalityShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 
@@ -37,6 +37,10 @@ export function SiteChrome({ children }: Readonly<{ children: React.ReactNode }>
   }
 
   if (pathname === "/minha-conta") {
+    return <><div className={styles.accountShell}><SiteHeader />{children}</div><SiteFooter /></>;
+  }
+
+  if (pathname === "/login" || pathname === "/cadastro") {
     return <><div className={styles.accountShell}><SiteHeader />{children}</div><SiteFooter /></>;
   }
 

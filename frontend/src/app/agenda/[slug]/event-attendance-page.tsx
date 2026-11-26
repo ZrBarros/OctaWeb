@@ -11,13 +11,17 @@ import { displayImageUrl } from "@/lib/display-image-url";
 import styles from "./page.module.css";
 
 export function EventAttendancePage({ event }: { event: EventDetail }) {
-  const { status } = useAuth();
+  const { user, status } = useAuth();
   const [favorite, setFavorite] = useState(false);
+  const [favoriteLoadedKey, setFavoriteLoadedKey] = useState("");
+  const [favoriteSubmitting, setFavoriteSubmitting] = useState(false);
   const [attendance, setAttendance] = useState<ApiEventAttendance>({ count: 0, confirmedByMe: false, attendees: [] });
   const [loadedKey, setLoadedKey] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const requestKey = `${event.slug}:${status}`;
+  const favoriteKey = `${event.slug}:${user?.id ?? ""}`;
+  const favoriteLoading = favoriteLoadedKey !== favoriteKey;
   const loading = status === "loading" || loadedKey !== requestKey;
 
   useEffect(() => {
@@ -29,6 +33,30 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
       .finally(() => { if (active) setLoadedKey(requestKey); });
     return () => { active = false; };
   }, [event.slug, requestKey, status]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    let active = true;
+    void apiClient<ApiItem<{ favorited: boolean }>>(`/events/${encodeURIComponent(event.slug)}/favorite`, { auth: true })
+      .then((response) => { if (active) setFavorite(response.data.favorited); })
+      .catch((reason: unknown) => { if (active) setMessage(reason instanceof Error ? reason.message : "Não foi possível carregar o favorito."); })
+      .finally(() => { if (active) setFavoriteLoadedKey(favoriteKey); });
+    return () => { active = false; };
+  }, [event.slug, favoriteKey, status]);
+
+  async function toggleFavorite() {
+    if (status !== "authenticated" || favoriteLoading || favoriteSubmitting) return;
+    setFavoriteSubmitting(true);
+    setMessage("");
+    try {
+      const response = await apiClient<ApiItem<{ favorited: boolean }>>(`/events/${encodeURIComponent(event.slug)}/favorite`, { method: favorite ? "DELETE" : "POST", auth: true });
+      setFavorite(response.data.favorited);
+    } catch (reason) {
+      setMessage(reason instanceof Error ? reason.message : "Não foi possível atualizar o favorito.");
+    } finally {
+      setFavoriteSubmitting(false);
+    }
+  }
 
   async function toggleAttendance() {
     setSubmitting(true);
@@ -61,9 +89,11 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
                 <div className={styles.tags}><span>{event.category}</span><span>{event.modality}</span></div>
                 <h1>{event.title}</h1>
               </div>
-              <button type="button" className={`${styles.favorite} ${favorite ? styles.isFavorite : ""}`} aria-pressed={favorite} onClick={() => setFavorite(!favorite)}>
-                <span aria-hidden="true">{favorite ? "★" : "☆"}</span> {favorite ? "Favoritado" : "Favoritar Evento"}
-              </button>
+              {status === "authenticated"
+                ? <button type="button" className={`${styles.favorite} ${favorite ? styles.isFavorite : ""}`} aria-pressed={favorite} disabled={favoriteLoading || favoriteSubmitting} onClick={() => void toggleFavorite()}>
+                    <span aria-hidden="true">{favorite ? "★" : "☆"}</span> {favoriteSubmitting ? "Salvando…" : favorite ? "Favoritado" : "Favoritar Evento"}
+                  </button>
+                : <Link className={styles.favorite} href={loginHref}><span aria-hidden="true">☆</span> Entrar para favoritar</Link>}
             </div>
 
             <div className={styles.facts} aria-label="Informações do compromisso">
@@ -71,6 +101,12 @@ export function EventAttendancePage({ event }: { event: EventDetail }) {
               <div><span>Local</span><strong>{event.place}</strong></div>
               <div><span>Presença confirmada</span><strong>{attendance.count} pessoas confirmadas</strong></div>
             </div>
+
+            {event.result && <section className={styles.result} aria-labelledby="event-result-title">
+              <h2 id="event-result-title">Resultado cadastrado</h2>
+              <strong>Octacore {event.result.ourScore} × {event.result.opponentScore} {event.result.opponent}</strong>
+              {event.result.competition && <p>{event.result.competition}</p>}
+            </section>}
 
             <section className={styles.description} aria-labelledby="description-title">
               <h2 id="description-title">Descrição do compromisso</h2>

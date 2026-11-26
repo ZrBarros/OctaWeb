@@ -1,11 +1,12 @@
 from datetime import UTC, datetime, time
 
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 
 from app.errors import bad_request, not_found
-from app.models import Conquista, Evento, HorarioTreino, Integrante, IntegranteModalidade, MarcoHistorico, Modalidade, Noticia, Resultado
+from app.models import Conquista, Evento, FotoMural, HorarioTreino, Integrante, IntegranteModalidade, MarcoHistorico, Modalidade, Noticia, Resultado
 from app.repositories.content import ContentRepository
-from app.schemas import AchievementInput, EventInput, MemberInput, MilestoneInput, ModalityInput, NewsInput, ResultInput
+from app.schemas import AchievementInput, EventInput, GalleryPhotoInput, MemberInput, MilestoneInput, ModalityInput, NewsInput, ResultInput
 from app.utils import make_slug
 
 
@@ -121,7 +122,9 @@ class ContentService:
         self.repository.delete(item)
 
     def create_result(self, data: ResultInput) -> Resultado:
-        item = Resultado(modalidade_id=data.modalityId, evento_id=data.eventId, adversario=data.opponent, placar_octa=data.ourScore, placar_adversario=data.opponentScore, campeonato=data.competition, data=data.date)
+        if data.featured:
+            self.db.execute(update(Resultado).where(Resultado.destaque_home.is_(True)).values(destaque_home=False))
+        item = Resultado(modalidade_id=data.modalityId, evento_id=data.eventId, adversario=data.opponent, placar_octa=data.ourScore, placar_adversario=data.opponentScore, campeonato=data.competition, data=data.date, destaque_home=data.featured)
         self.repository.save(item)
         return self.repository.result_by_id(item.id)  # type: ignore[return-value]
 
@@ -131,6 +134,9 @@ class ContentService:
             raise not_found("Resultado")
         item.modalidade_id, item.evento_id, item.adversario = data.modalityId, data.eventId, data.opponent
         item.placar_octa, item.placar_adversario, item.campeonato, item.data = data.ourScore, data.opponentScore, data.competition, data.date
+        if data.featured:
+            self.db.execute(update(Resultado).where(Resultado.destaque_home.is_(True)).values(destaque_home=False))
+        item.destaque_home = data.featured
         self.repository.save(item)
         return self.repository.result_by_id(item.id)  # type: ignore[return-value]
 
@@ -174,5 +180,21 @@ class ContentService:
         item = self.repository.milestone_by_id(item_id)
         if not item:
             raise not_found("Marco histórico")
+        self.repository.delete(item)
+
+    def create_gallery_photo(self, data: GalleryPhotoInput) -> FotoMural:
+        return self.repository.save(FotoMural(imagem_url=data.imageUrl, descricao=data.description, legenda=data.caption, criado_em=datetime.now(UTC)))
+
+    def update_gallery_photo(self, item_id: int, data: GalleryPhotoInput) -> FotoMural:
+        item = self.repository.gallery_photo_by_id(item_id)
+        if not item:
+            raise not_found("Foto do mural")
+        item.imagem_url, item.descricao, item.legenda = data.imageUrl, data.description, data.caption
+        return self.repository.save(item)
+
+    def delete_gallery_photo(self, item_id: int) -> None:
+        item = self.repository.gallery_photo_by_id(item_id)
+        if not item:
+            raise not_found("Foto do mural")
         self.repository.delete(item)
 

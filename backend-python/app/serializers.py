@@ -66,7 +66,7 @@ def event(item: models.Evento, include_relations: bool = True) -> dict[str, Any]
 
 
 def sports_result(item: models.Resultado, include_relations: bool = True) -> dict[str, Any]:
-    result = {"id": item.id, "modalidadeId": item.modalidade_id, "eventoId": item.evento_id, "adversario": item.adversario, "placarOcta": item.placar_octa, "placarAdversario": item.placar_adversario, "campeonato": item.campeonato, "data": item.data.isoformat()}
+    result = {"id": item.id, "modalidadeId": item.modalidade_id, "eventoId": item.evento_id, "adversario": item.adversario, "placarOcta": item.placar_octa, "placarAdversario": item.placar_adversario, "campeonato": item.campeonato, "data": item.data.isoformat(), "destaqueHome": item.destaque_home}
     if include_relations:
         result["modalidade"] = modality_scalar(item.modalidade)
         result["evento"] = event(item.evento, include_relations=False) if item.evento else None
@@ -79,6 +79,10 @@ def achievement(item: models.Conquista) -> dict[str, Any]:
 
 def milestone(item: models.MarcoHistorico) -> dict[str, Any]:
     return {"id": item.id, "ano": item.ano, "titulo": item.titulo, "descricao": item.descricao, "ordem": item.ordem}
+
+
+def gallery_photo(item: models.FotoMural) -> dict[str, Any]:
+    return {"id": item.id, "imageUrl": item.imagem_url, "description": item.descricao, "caption": item.legenda, "createdAt": iso_datetime(item.criado_em)}
 
 
 def variation(item: models.ProdutoVariacao, include_product: bool = False) -> dict[str, Any]:

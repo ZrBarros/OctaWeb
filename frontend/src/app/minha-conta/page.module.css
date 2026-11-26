@@ -35,8 +35,19 @@
 .arrow { align-self: center; margin-left: auto; padding-left: 8px; color: var(--orange); font-size: 20px; }
 .actionCard:focus-visible, .logout:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
 .feedback { margin: 18px 0 0; padding: 14px 16px; border: 1px solid #74357d; border-radius: 8px; background: #24042e; color: #e2c7e7; font-size: 13px; }
+.favorites { margin-top: 26px; padding: 28px 30px; border: 1px solid #a66bb42b; border-radius: 18px; background: linear-gradient(155deg, #281331d9, #1a0d26e8 70%, #160a22ef); box-shadow: inset 0 1px 0 #ffffff0d, 0 18px 34px -27px #000b; }
+.favoritesHeading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.favorites h2 { margin: 0; font-size: 21px; font-weight: 900; text-transform: uppercase; }
+.favoritesHeading a { color: var(--orange); font-size: 12px; font-weight: 800; }
+.favorites p { margin: 16px 0 0; color: #c3b7ca; font-size: 13px; }
+.favorites ul { display: grid; gap: 10px; margin: 20px 0 0; padding: 0; list-style: none; }
+.favorites li a { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; min-height: 58px; padding: 13px 16px; border: 1px solid #b16bc83b; border-radius: 10px; background: #35164555; }
+.favorites li a:hover { border-color: var(--orange); background: #ffffff0c; }
+.favorites li strong { font-size: 14px; }
+.favorites li span { color: #c3b7ca; font-size: 12px; }
 @supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .profileCard, .actions { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
 @media (prefers-reduced-transparency: reduce) { .profileCard, .actions { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
 @media (max-width: 650px) { .main { min-height: 0; padding: 50px 0 70px; } .container { width: min(100% - 32px, 1280px); } .heading { margin-bottom: 28px; } .profileCard, .actions { padding: 23px; } .actions { padding-bottom: 12px; } .actionCard { min-height: 84px; padding: 14px 2px; } }
+@media (max-width: 650px) { .favorites { padding: 23px; } }
 @media (prefers-reduced-motion: reduce) { .actionCard, .logout { transition: none; } }

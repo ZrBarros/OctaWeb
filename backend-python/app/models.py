@@ -119,6 +119,15 @@ class PresencaEvento(Base):
     confirmado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class FavoritoEvento(Base):
+    __tablename__ = "favorito_evento"
+    __table_args__ = (UniqueConstraint("evento_id", "usuario_id", name="uq_favorito_evento_usuario"), {"schema": SCHEMA})
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    evento_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.evento.id", ondelete="CASCADE"))
+    usuario_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.usuario.id", ondelete="CASCADE"))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Resultado(Base):
     __tablename__ = "resultado"
     __table_args__ = {"schema": SCHEMA}
@@ -130,6 +139,7 @@ class Resultado(Base):
     placar_adversario: Mapped[int] = mapped_column(Integer)
     campeonato: Mapped[str | None] = mapped_column(String(150))
     data: Mapped[date] = mapped_column(Date)
+    destaque_home: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     modalidade: Mapped[Modalidade] = relationship(back_populates="resultados")
     evento: Mapped[Evento | None] = relationship(back_populates="resultado")
 
@@ -155,6 +165,16 @@ class MarcoHistorico(Base):
     titulo: Mapped[str] = mapped_column(String(150))
     descricao: Mapped[str | None] = mapped_column(Text)
     ordem: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class FotoMural(Base):
+    __tablename__ = "foto_mural"
+    __table_args__ = {"schema": SCHEMA}
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    imagem_url: Mapped[str] = mapped_column(String(255))
+    descricao: Mapped[str] = mapped_column(String(200))
+    legenda: Mapped[str | None] = mapped_column(String(200))
+    criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class Produto(Base):

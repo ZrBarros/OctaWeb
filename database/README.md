@@ -1,10 +1,10 @@
 # Banco de dados do OctaWeb
 
-Esquema PostgreSQL da versão 1 (MVP) da plataforma da Octacore, derivado do MER do projeto. Esta pasta é a **fonte oficial da estrutura do banco**: o backend NestJS deve seguir estas tabelas, e qualquer mudança de estrutura deve ser feita aqui e versionada no repositório.
+Esquema PostgreSQL da versão 1 (MVP) da plataforma da Octacore, derivado do MER do projeto. Esta pasta registra a estrutura oficial do banco usada pelo backend FastAPI; mudanças de estrutura devem ser versionadas aqui.
 
 | Arquivo | Conteúdo |
 |---|---|
-| `01_schema.sql` | Cria o schema `octacore` com 14 tabelas, chaves, índices, restrições e triggers. **Apaga e recria tudo** a cada execução. |
+| `01_schema.sql` | Cria o schema `octacore` com 16 tabelas, incluindo `foto_mural` e `favorito_evento`, chaves, índices, restrições e triggers. **Apaga e recria tudo** a cada execução. |
 | `02_seed.sql` | Dados de exemplo para desenvolvimento e demonstração. |
 | `03_update_history_2026.sql` | Corrige os marcos históricos em bancos já criados, preservando outros registros. Execute uma vez; não reinicializa o banco. |
 | `docker-compose.yml` | Alternativa opcional: sobe o banco em Docker já com os dois scripts aplicados. |
@@ -45,13 +45,15 @@ docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d octacore < data
 
 O script corrige a fundação para 2018, substitui os marcos demonstrativos antigos e registra os oito anos da Octacore e seu primeiro título do INTERENG em 2026. Bancos novos recebem esses dados diretamente de `02_seed.sql`.
 
+Para bancos existentes, a API FastAPI cria `foto_mural` e `favorito_evento` na inicialização, se ainda não existirem, e adiciona `resultado.destaque_home` com índice que permite apenas um destaque na Home. Essas atualizações preservam os registros anteriores. As imagens enviadas ficam no volume de uploads do Compose.
+
 ### Conferência
 
 ```sql
 SET search_path TO octacore;
 SELECT (SELECT count(*) FROM information_schema.tables WHERE table_schema = 'octacore') AS tabelas,
        (SELECT valor_total FROM pedido WHERE id = 1) AS total_pedido_exemplo;
--- esperado: 14 | 139.70
+-- esperado após o schema novo: 16 | 139.70
 ```
 
 ## Conexão para o backend
@@ -115,4 +117,4 @@ A API deve converter entre o código do banco e o rótulo exibido.
 
 ## Fora do MVP
 
-Confirmação de presença, ranking, estatísticas, perfil de atleta (`/atletas/[slug]`), favoritos e notificações ainda não têm tabelas. Elas devem ser acrescentadas aqui quando o grupo decidir implementá-las.
+Ranking, estatísticas, perfil de atleta (`/atletas/[slug]`) e notificações ainda não têm tabelas. Presença e favoritos de eventos usam tabelas criadas pela API em bancos existentes e declaradas no schema para novas instalações.

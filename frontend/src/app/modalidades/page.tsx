@@ -20,19 +20,20 @@ export default async function ModalitiesPage() {
 
         <div className={styles.grid}>
           {modalities.map((modality) => (
-            <article className={`${styles.card} hoverCard`} key={modality.slug}>
+            <article className={styles.card} key={modality.slug}>
               <div className={styles.cardHeading}>
                 <h2>{modality.nome}</h2>
-                <span>M{String(modality.id).padStart(2, "0")}</span>
+                <span>Octacore</span>
               </div>
               {modality.imagemUrl ? (
-                <Image className={styles.image} src={displayImageUrl(modality.imagemUrl)} alt="" width={720} height={380} unoptimized />
+                <Image className={styles.image} src={displayImageUrl(modality.imagemUrl)} alt={`Modalidade ${modality.nome}`} width={720} height={380} unoptimized />
               ) : null}
-              <p>{modality.descricao}</p>
-              <Link href={`/modalidades/${modality.slug}`} className={styles.details}>Ver detalhes</Link>
+              <p>{modality.descricao || "Conheça os treinos, a equipe e as novidades desta modalidade."}</p>
+              <Link href={`/modalidades/${modality.slug}`} className={styles.details} aria-label={`Ver detalhes de ${modality.nome}`}>Conhecer modalidade <span aria-hidden="true">→</span></Link>
             </article>
           ))}
         </div>
+        {modalities.length === 0 && <p className={styles.empty}>Ainda não há modalidades cadastradas.</p>}
       </div>
     </main>
   );

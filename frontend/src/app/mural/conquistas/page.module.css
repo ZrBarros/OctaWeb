@@ -20,8 +20,9 @@
 .empty { max-width: 720px; margin: 0; padding: 30px; color: #d0c7d2; }
 .gallerySection { margin-top: 68px; }
 .gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
-.gallery img, .placeholder { display: block; width: 100%; aspect-ratio: 1.68; border: 1px solid #a66bb43d; border-radius: 14px; object-fit: cover; box-shadow: 0 18px 34px -27px #000b; }
-.placeholder { background: radial-gradient(ellipse at 25% 15%, #5a2a6a52, transparent 64%), linear-gradient(150deg, #281431, #180c22); }
+.photo { min-width: 0; margin: 0; overflow: hidden; border: 1px solid #a66bb43d; border-radius: 14px; background: #21112d; box-shadow: 0 18px 34px -27px #000b; }
+.photo img { display: block; width: 100%; height: auto; aspect-ratio: 1.68; object-fit: cover; }
+.photo figcaption { padding: 12px 14px; color: #e4d7e7; font-size: 13px; line-height: 1.4; }
 @supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .achievement, .empty { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
 @media (prefers-reduced-transparency: reduce) { .achievement, .empty { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }
 @media (max-width: 800px) { .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; } }

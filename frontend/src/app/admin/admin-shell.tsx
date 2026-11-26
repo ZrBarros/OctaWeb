@@ -112,6 +112,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
         <div className={styles.navbarActions}>
           <div id="admin-toolbar-search" ref={setToolbarSearchTarget} className={styles.toolbarSearchSlot} />
+          <Link className={styles.publicSiteLink} href="/">Ver site</Link>
           <Link className={styles.adminProfileLink} href="/admin/perfil" aria-label={`Abrir perfil de ${profile?.nome ?? "administrador"}`}>
             <span className={styles.adminIdentity}><strong>{profile?.nome ?? "Carregando..."}</strong><small>Administrador</small></span>
             <span className={styles.adminAvatar} aria-hidden="true">{profile?.nome.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toLocaleUpperCase("pt-BR") ?? "AD"}</span>
@@ -127,6 +128,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           return <Link className={active ? styles.activeNav : styles.navItem} href={section.href} aria-current={active ? "page" : undefined} onClick={() => { setFeedback(""); setMobileMenuOpen(false); }} key={section.label}>{content}</Link>;
         })}
         <Link className={styles.mobileProfileNav} href="/admin/perfil" aria-current={pathname === "/admin/perfil" ? "page" : undefined} onClick={() => { setFeedback(""); setMobileMenuOpen(false); }}><AdminIcon name="users" /><span>Meu perfil</span>{pathname === "/admin/perfil" && <span className={styles.activeDot} aria-hidden="true" />}</Link>
+        <Link className={styles.mobilePublicSiteNav} href="/" onClick={() => setMobileMenuOpen(false)}>Ver site</Link>
       </nav>
 
     </aside>
@@ -145,7 +147,7 @@ export function AdminLogoutButton({ placement }: { placement: "desktop" | "mobil
   const { logout } = useAuth();
   const placementClass = placement === "mobile" ? styles.logoutMobile : styles.logoutTopbar;
   async function signOut() { await logout(); router.push("/login"); router.refresh(); }
-  return <button className={`${styles.logoutIcon} ${placementClass}`} type="button" aria-label="Sair do painel" title="Sair do painel" onClick={() => void signOut()}>
+  return <button className={`${styles.logoutIcon} ${placementClass}`} type="button" aria-label="Sair da conta" title="Sair da conta" onClick={() => void signOut()}>
     <AdminIcon name="logout" />
   </button>;
 }

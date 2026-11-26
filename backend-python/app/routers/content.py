@@ -7,10 +7,10 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.dependencies import AdminUser, CurrentUser, DbSession, OptionalCurrentUser
 from app.errors import not_found
-from app.models import PresencaEvento, Usuario
+from app.models import Evento, FavoritoEvento, PresencaEvento, Usuario
 from app.repositories.content import ContentRepository
-from app.schemas import AchievementInput, EventInput, MemberInput, MilestoneInput, ModalityInput, NewsInput, ResultInput
-from app.serializers import achievement, event, member, milestone, modality, news, sports_result
+from app.schemas import AchievementInput, EventInput, GalleryPhotoInput, MemberInput, MilestoneInput, ModalityInput, NewsInput, ResultInput
+from app.serializers import achievement, event, gallery_photo, member, milestone, modality, news, sports_result
 from app.services.content import ContentService
 from app.utils import page_result
 
@@ -78,12 +78,57 @@ def list_events(db: DbSession, page: int = 1, pageSize: int = 20, search: str | 
     return page_result([event(value) for value in items], total, page, pageSize)
 
 
+@public_router.get("/events/favorites")
+def list_favorite_events(db: DbSession, user: CurrentUser) -> dict:
+    items = db.scalars(
+        select(Evento)
+        .join(FavoritoEvento, FavoritoEvento.evento_id == Evento.id)
+        .where(FavoritoEvento.usuario_id == user.id)
+        .order_by(Evento.data_hora, Evento.id)
+    ).all()
+    return {"data": [event(item) for item in items]}
+
+
 @public_router.get("/events/{slug}")
 def get_event(slug: str, db: DbSession) -> dict:
     item = ContentRepository(db).event_by_slug(slug)
     if not item:
         raise not_found("Evento")
     return {"data": event(item)}
+
+
+def event_favorite_data(db: DbSession, event_id: int, user_id: int) -> dict:
+    saved = db.scalar(select(FavoritoEvento.id).where(FavoritoEvento.evento_id == event_id, FavoritoEvento.usuario_id == user_id))
+    return {"favorited": saved is not None}
+
+
+@public_router.get("/events/{slug}/favorite")
+def get_event_favorite(slug: str, db: DbSession, user: CurrentUser) -> dict:
+    item = ContentRepository(db).event_by_slug(slug)
+    if not item:
+        raise not_found("Evento")
+    return {"data": event_favorite_data(db, item.id, user.id)}
+
+
+@public_router.post("/events/{slug}/favorite")
+def favorite_event(slug: str, db: DbSession, user: CurrentUser) -> dict:
+    item = ContentRepository(db).event_by_slug(slug)
+    if not item:
+        raise not_found("Evento")
+    statement = pg_insert(FavoritoEvento).values(evento_id=item.id, usuario_id=user.id)
+    db.execute(statement.on_conflict_do_nothing(constraint="uq_favorito_evento_usuario"))
+    db.commit()
+    return {"data": {"favorited": True}}
+
+
+@public_router.delete("/events/{slug}/favorite")
+def unfavorite_event(slug: str, db: DbSession, user: CurrentUser) -> dict:
+    item = ContentRepository(db).event_by_slug(slug)
+    if not item:
+        raise not_found("Evento")
+    db.execute(delete(FavoritoEvento).where(FavoritoEvento.evento_id == item.id, FavoritoEvento.usuario_id == user.id))
+    db.commit()
+    return {"data": {"favorited": False}}
 
 
 def event_attendance_data(db: DbSession, event_id: int, user_id: int | None = None) -> dict:
@@ -136,6 +181,12 @@ def list_results(db: DbSession, page: int = 1, pageSize: int = 20, search: str |
     return page_result([sports_result(value) for value in items], total, page, pageSize)
 
 
+@public_router.get("/results/featured")
+def get_featured_result(db: DbSession) -> dict:
+    item = ContentRepository(db).featured_result()
+    return {"data": sports_result(item) if item else None}
+
+
 @public_router.get("/achievements")
 def list_achievements(db: DbSession, modalityId: int | None = None) -> dict:
     return {"data": [achievement(value) for value in ContentRepository(db).achievements(modalityId)]}
@@ -144,6 +195,11 @@ def list_achievements(db: DbSession, modalityId: int | None = None) -> dict:
 @public_router.get("/history")
 def list_history(db: DbSession) -> dict:
     return {"data": [milestone(value) for value in ContentRepository(db).milestones()]}
+
+
+@public_router.get("/gallery")
+def list_gallery(db: DbSession) -> dict:
+    return {"data": [gallery_photo(value) for value in ContentRepository(db).gallery_photos()]}
 
 
 @admin_router.get("/news")
@@ -284,4 +340,24 @@ def update_milestone(item_id: int, data: MilestoneInput, actor: AdminUser, db: D
 @admin_router.delete("/history/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_milestone(item_id: int, actor: AdminUser, db: DbSession) -> None:
     svc(db).delete_milestone(item_id)
+
+
+@admin_router.get("/gallery")
+def admin_gallery(actor: AdminUser, db: DbSession) -> dict:
+    return list_gallery(db)
+
+
+@admin_router.post("/gallery", status_code=status.HTTP_201_CREATED)
+def create_gallery_photo(data: GalleryPhotoInput, actor: AdminUser, db: DbSession) -> dict:
+    return {"data": gallery_photo(svc(db).create_gallery_photo(data))}
+
+
+@admin_router.put("/gallery/{item_id}")
+def update_gallery_photo(item_id: int, data: GalleryPhotoInput, actor: AdminUser, db: DbSession) -> dict:
+    return {"data": gallery_photo(svc(db).update_gallery_photo(item_id, data))}
+
+
+@admin_router.delete("/gallery/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_gallery_photo(item_id: int, actor: AdminUser, db: DbSession) -> None:
+    svc(db).delete_gallery_photo(item_id)
 

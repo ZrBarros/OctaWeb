@@ -14,9 +14,9 @@ O site reúne informações da atlética, notícias, modalidades, agenda, mural 
 
 - **Front end escolhido:** Next.js, React e TypeScript.
 - **Backend implementado:** Python 3.13, FastAPI, SQLAlchemy 2, Pydantic e psycopg, em `backend-python/`; a pasta antiga `backend/`, com Fastify, foi removida.
-- **Banco:** PostgreSQL no schema `octacore`; as tabelas existentes são preservadas, e a API cria idempotentemente `presenca_evento` para registrar confirmações de presença.
+- **Banco:** PostgreSQL no schema `octacore`; as tabelas existentes são preservadas, e a API cria idempotentemente `presenca_evento` para confirmações de presença, `favorito_evento` para eventos salvos e `foto_mural` para a galeria administrativa.
 - **Integração real:** autenticação, conteúdo público, administração, uploads, estoque, pedidos e presenças em eventos.
-- **Ainda demonstrativo:** pagamento/favorito em eventos, ranking, estatística individual e atividades administrativas. Presenças em eventos persistem por usuário autenticado.
+- **Ainda demonstrativo:** pagamento, ranking, estatística individual e atividades administrativas. Presenças e favoritos em eventos persistem por usuário autenticado.
 
 Os documentos de planejamento originais ficam em `assets/` apenas no ambiente local; a pasta é ignorada pelo Git. Esta página registra o estado **implementado**; ideias desses documentos só passam para “pronto” depois de aparecerem no código e serem verificadas.
 
@@ -27,7 +27,7 @@ O MVP possui três tipos de acesso. A API aplica autenticação e autorização 
 | Perfil | Acesso previsto | Estado atual |
 | --- | --- | --- |
 | Visitante | Navegar pelas páginas públicas, consultar notícias, modalidades, agenda, mural e loja; montar carrinho no navegador. | Conteúdo vem da API; o carrinho permanece local e não exige conta. |
-| Usuário autenticado | Tudo do visitante, mais conta própria e acompanhamento de pedidos. | Cadastro, login, refresh, logout, perfil, pedidos e confirmação/cancelamento de presença persistem; favorito não persiste. |
+| Usuário autenticado | Tudo do visitante, mais conclusão e acompanhamento de pedidos, edição da conta, confirmação de presença e favoritos em eventos. | Cadastro, login, refresh, logout, perfil, pedidos, presença e favoritos persistem; navegação pública e carrinho não exigem conta. |
 | Administrador | Tudo do usuário autenticado, mais acesso autorizado ao painel e gestão de conteúdo, integrantes, resultados e pedidos. | API e interface exigem conta `ADMIN`; CRUD e alterações persistem no PostgreSQL. |
 
 A separação é validada pela API em cada rota protegida. A interface também redireciona usuários sem acesso, mas a autorização do servidor é a barreira efetiva.
@@ -35,43 +35,43 @@ A separação é validada pela API em cada rota protegida. A interface também r
 ## 1.2 Arquitetura integrada
 
 - O frontend usa `API_URL` em Server Components e `NEXT_PUBLIC_API_URL` nas telas interativas.
-- A API usa rotas FastAPI, serviços e repositórios, validação Pydantic, SQLAlchemy/psycopg, erros padronizados, CORS, cabeçalhos de segurança e rate limiting. Os modelos mapeiam o schema existente; a única extensão atual é a criação idempotente de `presenca_evento`.
+- A API usa rotas FastAPI, serviços e repositórios, validação Pydantic, SQLAlchemy/psycopg, erros padronizados, CORS, cabeçalhos de segurança e rate limiting. Os modelos mapeiam o schema existente; `presenca_evento`, `favorito_evento` e `foto_mural` são criadas de forma idempotente em bancos existentes.
 - O access token fica em memória no navegador; o refresh token usa cookie `httpOnly` e é renovado automaticamente. Sem tabela de tokens, logout remove o cookie do cliente, mas não mantém lista de revogação no servidor.
 - O checkout exige usuário autenticado. A criação do pedido usa transação serializável, valida estoque, desconta quantidades e congela o preço nos itens; o trigger do banco recalcula o total.
-- Uploads administrativos aceitam JPG, PNG ou WebP de até 2 MB, conferem assinatura binária e são servidos apenas por nome UUID validado.
+- A API aceita uploads administrativos JPG, PNG ou WebP de até 6 MB, confere assinatura binária e serve os arquivos apenas por nome UUID validado. O formulário da galeria do Mural usa esse limite; os demais formulários ainda limitam a seleção a 2 MB na interface.
 - `docker-compose.yml` inicia frontend, API e PostgreSQL; o OpenAPI fica em `/docs/openapi.json` e o health check em `/health`.
 
 ## 2. Estado das telas
 
 | Rota | O que existe hoje | Estado |
 | --- | --- | --- |
-| `/` | Página inicial com apresentação, mascote, destaques, produtos e até três compromissos futuros. | **Integração real:** produtos e agenda vêm da API; destaques esportivos permanecem editoriais na tela |
+| `/` | Página inicial com apresentação, mascote, próximo jogo e resultado em destaque, produtos e até três compromissos futuros. O destaque usa o resultado escolhido no admin; sem escolha, usa o mais recente até hoje. Os cards esportivos abrem o evento ou a modalidade correspondente; quando faltam registros, mostram estados vazios com navegação. | **Integração real:** produtos, agenda e resultados vêm da API/PostgreSQL; apenas a apresentação visual é de interface |
 | Todas as rotas do App Router | O conteúdo da rota entra com opacidade, leve deslocamento e desfoque em 440 ms; seções, cartões, formulários e tabelas abaixo da dobra são revelados progressivamente durante o scroll. Cabeçalho e estruturas compartilhadas permanecem estáveis. | Animação local no navegador, com `IntersectionObserver` e respeito a `prefers-reduced-motion`; sem dependência de backend |
 | `/motion-octaweb.html` | Peça animada de apresentação do OctaWeb, com identidade visual da Octacore, apresentação da plataforma e seus principais espaços. | Apresentação em HTML/CSS; animação local no navegador, sem exportação de vídeo |
-| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. Todos os cards usam o mesmo visual de vidro discreto e mostram a capa cadastrada, quando existe. Na lista, navbar e conteúdo compartilham um gradiente contínuo. | **Integração real:** notícias e capas vêm do PostgreSQL/API; o efeito de vidro e o gradiente são somente de interface |
-| `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades, horários, responsáveis, elenco, resultados e próximos eventos disponíveis. Na lista, os cards têm superfície roxa translúcida discreta e fundo contínuo com a navbar; imagens cadastradas aparecem, e modalidades sem imagem não reservam uma área vazia. | **Integração real:** dados e imagens da API; o tratamento visual dos cards e do fundo é somente de interface na lista |
+| `/noticias` e `/noticias/[slug]` | Lista com filtro por categoria e página individual de cada notícia; no mobile, os filtros ocupam um seletor compacto. A lista e o detalhe compartilham o gradiente da navbar. O detalhe mostra a capa cadastrada sem bloco vazio quando não existe foto e alinha à capa cartões compactos de outras notícias. | **Integração real:** notícias e capas vêm do PostgreSQL/API; o efeito de vidro, o gradiente e a disposição dos cartões são somente de interface |
+| `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades, horários, responsáveis, elenco, resultados e próximos eventos disponíveis. Ambas compartilham o fundo contínuo com a navbar e cartões roxos translúcidos discretos; imagens cadastradas aparecem na lista e no detalhe, enquanto modalidades sem imagem não reservam uma área vazia. Os cards da lista são inteiros clicáveis. | **Integração real:** dados e imagens da API; fundo, cartões e navegação ampliada são tratamento de interface |
 | `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
-| `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. | **Prévia visual:** números de exemplo, sem cálculo automático |
+| `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. Fundo contínuo com a navbar, cartões translúcidos discretos e aviso de números ilustrativos. | **Prévia visual:** números de exemplo, sem cálculo automático ou integração com a API; o tratamento visual é somente de interface |
 | `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e cards inteiros clicáveis para suas páginas de detalhe; filtro compacto em celular. O fundo segue a navbar sem faixa abrupta, e os cards usam uma superfície roxa translúcida discreta. | **Integração real:** eventos da API; fundo e cards são tratamento de interface |
-| `/agenda/[slug]` | Detalhe do evento e lista atualizada de confirmações. Usuários autenticados podem confirmar ou cancelar presença; após login retornam ao evento solicitado. | **Integração real:** conteúdo e presença por conta/evento no PostgreSQL; favorito ainda é apenas local |
-| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. As telas do Mural compartilham um fundo contínuo com a navbar e superfícies roxas discretas. A História usa uma linha do tempo com os marcos confirmados de fundação em 2018, oito anos em 2026 e primeiro título do INTERENG em 2026. Conquistas mostra estado vazio quando não há títulos e a galeria distingue fotos reais de espaços ainda pendentes. | **Integração real:** história, integrantes e conquistas vêm da API/PostgreSQL; parte das imagens é placeholder; gradiente e cartões são apenas interface |
+| `/agenda/[slug]` | Detalhe do evento, placar quando há resultado vinculado e lista atualizada de confirmações. Usuários autenticados podem confirmar ou cancelar presença e favoritar/desfavoritar; após login retornam ao evento solicitado. | **Integração real:** conteúdo, resultado vinculado, presença e favoritos por conta/evento no PostgreSQL |
+| `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. As telas do Mural compartilham um fundo contínuo com a navbar e superfícies roxas discretas. A História ordena os marcos por ano. Conquistas mostra estado vazio quando não há títulos; a galeria mostra apenas fotos cadastradas e estado vazio quando não há fotos. | **Integração real:** história, integrantes, conquistas e galeria vêm da API/PostgreSQL; o upload de fotos de até 6 MB foi confirmado no Docker pelo usuário. Gradiente e cartões são apenas interface |
 | `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidades. | **Integração real:** dados do PostgreSQL; foto pode estar pendente |
 | `/loja` | Catálogo com busca, filtro, variações disponíveis, estoque e carrinho. A abertura usa fundo contínuo com a navbar; os cards têm superfícies roxas discretas e a barra recebe sua camada escura somente quando fica fixa durante a rolagem. | **Integração real:** catálogo/estoque da API; seleção do carrinho no navegador; novo tratamento visual somente de interface |
 | `/loja/[slug]` | Detalhe de produto com variação, quantidade e estoque disponível. | **Integração real:** produto da API |
 | `/carrinho` | Alteração de quantidade, remoção e cálculo com preços atuais. | **Integração parcial:** seleção local, catálogo/preços reais |
 | `/checkout` | Dados de retirada, resumo, estados vazio/erro e confirmação do pedido com gradiente contínuo desde a navbar e superfícies roxas discretas como no Carrinho. | **Integração real:** pedido transacional e estoque; tratamento visual somente de interface, sem cobrança/pagamento |
-| `/login`, `/cadastro` e `/redefinir-senha` | Cadastro, login, recuperação e redefinição. | **Integração real:** bcrypt, JWT e cookie `httpOnly` |
-| `/minha-conta` | Painel do usuário conectado, edição de nome/curso, troca de senha e logout. | **Integração real:** sessão compartilhada, perfil e credenciais da API |
+| `/login`, `/cadastro` e `/redefinir-senha` | Cadastro, login, recuperação e redefinição. Login e cadastro compartilham o gradiente contínuo com a navbar, cartão roxo translúcido e campos de alto contraste; explicam que a conta serve para concluir/acompanhar pedidos e confirmar presença, enquanto a navegação pública não exige conta. O retorno ao evento é preservado ao alternar entre login e cadastro. | **Integração real:** bcrypt, JWT e cookie `httpOnly`; o visual e os textos são de interface e o retorno usa a navegação existente |
+| `/minha-conta` | Painel do usuário conectado, edição de nome/curso, troca de senha, lista de eventos favoritos e logout. Para administradores, também oferece acesso ao painel admin; o cabeçalho do site mostra separadamente conta e painel. | **Integração real:** sessão compartilhada, perfil, credenciais e favoritos da API/PostgreSQL; alternar entre site e painel preserva a sessão |
 | `/meus-pedidos` e `/meus-pedidos#historico` | Abas separadas de pedidos ativos e histórico; apenas a lista selecionada aparece. Ativos incluem Pendente, Confirmado, Em separação e Disponível para retirada; histórico inclui Entregue e Cancelado. | **Integração real:** pedidos do usuário autenticado, classificados pelo status retornado pela API |
-| `/admin` | Visão geral com cartões de indicadores, gráfico de vendas e atalhos; usa superfícies roxas translúcidas e estados vazios claros. Indicadores e vendas vêm do banco; atividades recentes ficam vazias por falta de tabela de auditoria. | **Integração real:** rota protegida por ADMIN; tratamento visual somente de interface |
+| `/admin` | Visão geral com cartões de indicadores, gráfico de vendas e atalhos; usa superfícies roxas translúcidas e estados vazios claros. Indicadores e vendas vêm do banco; atividades recentes ficam vazias por falta de tabela de auditoria. O cabeçalho do painel oferece “Ver site” sem encerrar a sessão; “Sair da conta” encerra a sessão. | **Integração real:** rota protegida por ADMIN; navegação entre áreas usa a sessão existente, tratamento visual somente de interface |
 | `/admin/perfil` | Perfil da conta administrativa, edição de dados, troca de senha e atalhos; cartões acompanham o visual do painel. | **Integração real:** usa a mesma sessão e operações da conta |
-| `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão; tabela e editor seguem as superfícies do painel. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
+| `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão; resumo é opcional e o autor vem da sessão. Tabela e editor seguem as superfícies do painel. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
 | `/admin/produtos` | Busca, estoque, cadastro, edição, desativação e upload; tabela e formulário seguem as superfícies do painel. | **Integração real:** altera loja e estoque |
-| `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload; cartões, calendário e formulário seguem as superfícies do painel. | **Integração real:** altera agenda pública |
+| `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload; descrição é opcional. Cartões, calendário e formulário seguem as superfícies do painel. | **Integração real:** altera agenda pública |
 | `/admin/modalidades` | Cadastro, edição, exclusão, imagem com prévia e remoção, responsável, local e horários de treino. A edição preserva horários que não mudaram; cartões e formulários seguem as superfícies do painel. | **Integração real:** persiste dados e imagens na API e altera as páginas de modalidades |
-| `/admin/integrantes` | Busca, cadastro, edição, remoção e foto; cartões e formulário seguem as superfícies do painel. | **Integração real:** altera mural público |
-| `/admin/mural` | Gestão de conquistas e marcos históricos; usa os cartões e formulários compartilhados do painel. | **Integração real:** altera as duas páginas públicas do mural |
-| `/admin/resultados` | Busca, filtros, cadastro, edição e remoção; tabela e formulário seguem as superfícies do painel. | **Integração real:** persiste resultados |
+| `/admin/integrantes` | Busca, cadastro, edição, remoção e foto; nome e curso são obrigatórios, função e Instagram opcionais. Cartões e formulário seguem as superfícies do painel. | **Integração real:** altera mural público |
+| `/admin/mural` | Gestão de conquistas, marcos históricos e fotos da galeria; marcos são exibidos por ano e não pedem ordem manual. A aba Fotos permite adicionar, trocar e remover imagens, com descrição obrigatória e legenda opcional. | **Integração real:** História e Conquistas existentes usam PostgreSQL; a nova gestão de fotos está conectada no código, com persistência real ainda pendente de teste no Docker |
+| `/admin/resultados` | Busca, filtros, cadastro, edição e remoção; campeonato é opcional. O formulário permite marcar um resultado para destaque na Home; somente um pode estar marcado. A tabela identifica o selecionado. | **Integração real:** persiste resultados e escolha do destaque no PostgreSQL |
 | `/admin/pedidos` | Busca, filtros, itens e transições válidas de status; tabela, cartões móveis e detalhes seguem as superfícies do painel. | **Integração real:** gerencia pedidos; notificações ao cliente não existem |
 | `/admin/usuarios` | Busca, filtro, edição de dados/perfil e exclusão controlada; usa os cartões e formulários compartilhados do painel. | **Integração real:** gerencia contas; impede autoexclusão e autorrebaixamento administrativo |
 
@@ -145,6 +145,7 @@ Notícias, produtos, estoque, modalidades, horários, agenda, integrantes, resul
 | Configuração de API no frontend | `frontend/.env.local` |
 | Configuração da API | `backend-python/.env` |
 | Confirmações de presença em evento | API `/api/v1/events/<slug>/attendance` e PostgreSQL; `frontend/src/data/event-details.ts` permanece como referência visual legada |
+| Eventos favoritos | API `/api/v1/events/favorites` e `/api/v1/events/<slug>/favorite`, tabela `favorito_evento`; lista em `/minha-conta` |
 | Perfil e estatísticas do atleta | `frontend/src/data/athletes.ts` |
 | Ranking e estatísticas esportivas gerais | `frontend/src/data/ranking.ts` |
 | Indicadores, gráfico e atividades do painel | `frontend/src/data/admin.ts` |
@@ -198,14 +199,14 @@ O cabeçalho consulta um estado compartilhado de autenticação: visitantes abre
 
 `/ranking` segue o quadro `octacore-ranking-estatisticas` do Figma: quatro indicadores da temporada, três posições no Campeonato Universitário e barras de aproveitamento para Futsal, Basquete, Voleibol e Handebol. O link “Ver ranking e estatísticas” em `/modalidades` leva à página. Os valores estão em `data/ranking.ts` e são exemplos independentes das partidas em `data/admin-results.ts` e do perfil do atleta; **não são calculados a partir de resultados nem sincronizados com o backend**.
 
-`/agenda/treino-volei-octacore` segue o quadro `octacore-evento-presenca` do Figma. A imagem de capa foi exportada do próprio protótipo para `public/images/treino-volei-hero.png`. O treino foi acrescentado à Agenda e seu cartão abre o detalhe. Usuários autenticados confirmam/cancelam presença, identificada pela conta, e veem a lista real; a restrição única por usuário/evento evita duplicatas. A API cria a tabela `presenca_evento` com `checkfirst` na inicialização, sem recriar nem alterar as tabelas pré-existentes. A autenticação é exigida para alterar a presença, e visitantes são direcionados ao login com retorno ao evento. Favoritos continuam locais. Dados de presença do protótipo (18 confirmações e cinco nomes) não são tratados como registros reais.
+`/agenda/treino-volei-octacore` segue o quadro `octacore-evento-presenca` do Figma. A imagem de capa foi exportada do próprio protótipo para `public/images/treino-volei-hero.png`. O treino foi acrescentado à Agenda e seu cartão abre o detalhe. Usuários autenticados confirmam/cancelam presença, identificada pela conta, e veem a lista real; a restrição única por usuário/evento evita duplicatas. A API cria as tabelas `presenca_evento` e `favorito_evento` com `checkfirst` na inicialização, sem recriar nem alterar as tabelas pré-existentes. A autenticação é exigida para alterar presença ou favorito, e visitantes são direcionados ao login com retorno ao evento. Os favoritos aparecem em Minha Conta. Dados de presença do protótipo (18 confirmações e cinco nomes) não são tratados como registros reais.
 
 A navegação administrativa mantém o comportamento responsivo anterior. A navbar reúne marca, busca, perfil autenticado e saída real; a API volta a verificar `ADMIN` em cada operação. Tabelas largas rolam no próprio painel e pedidos usam cartões no celular.
 
 ## 7. Próximos passos
 
 1. Configurar e validar SMTP real; os demais fluxos do Compose, banco, autenticação, conteúdo, pedido/estoque e uploads já foram exercitados contra PostgreSQL.
-2. Planejar evolução de schema para refresh/reset tokens revogáveis, favoritos, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
+2. Planejar evolução de schema para refresh/reset tokens revogáveis, rascunhos, auditoria, estatísticas/classificação e, se necessário, pagamento/notificações.
 3. Revisar acessibilidade/responsividade em dispositivos físicos e substituir placeholders pelas imagens aprovadas. Avaliar os cards de vidro em Notícias antes de levar o estilo a outras telas.
 
 Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando acontecer.
@@ -217,7 +218,7 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - O protótipo do Figma orienta a interface; a fonte Outfit e os arquivos em `assets/` compõem a identidade visual atual.
 - Fotos ainda indisponíveis permanecem como placeholders, conforme combinado para galeria, mural e integrantes.
 - A fundação em 2018, os oito anos e o primeiro título do INTERENG em 2026 foram informados pela equipe. Os demais conteúdos, preços e detalhes de produtos são dados de exemplo e precisam de confirmação da atlética.
-- A Home mantém alguns destaques diretamente na página; ao integrar a API, vale reunir dados compartilhados para evitar divergências.
+- A Home consulta agenda e resultados para os destaques esportivos; o próximo jogo considera eventos futuros dos tipos JOGO e CAMPEONATO. O resultado em destaque é escolhido em `/admin/resultados`; sem seleção, aparece o placar de data mais recente até hoje. O placar de Futsal Octacore 5 × 2 Atlética X é **dado de exemplo** de `database/02_seed.sql`, vinculado ao evento de 10/10/2026; não deve ser apresentado como resultado oficial sem confirmação da atlética. Os textos de apresentação continuam editoriais.
 - O checkout registra pedido real e desconta estoque, mas não cobra: não existe integração de pagamento no schema ou na interface.
 - Login, cadastro, refresh, logout e recuperação de senha são reais. A recuperação só envia e-mail quando SMTP é configurado; sem tabela de token, reset e refresh não têm revogação individual no servidor.
 - “Minha Conta” e “Meus Pedidos” usam sessão, perfil, troca de senha e pedidos reais. O cabeçalho acompanha login, atualização de nome e logout sem depender da rota atual.
@@ -228,6 +229,76 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 25/11/2026 — Escolha administrativa do resultado em destaque
+
+- O formulário de resultados ganhou “Destacar na Home”. A API salva a escolha em `resultado.destaque_home` e desmarca o destaque anterior na mesma transação; índice único parcial impede dois destaques simultâneos. A inicialização da API adiciona a coluna e o índice em bancos existentes sem apagar resultados. A Home usa o resultado selecionado e, quando não há seleção, retorna ao resultado mais recente até hoje. A tabela administrativa indica o destaque atual.
+- Verificação: lint, checagem de tipos, build do frontend, compilação Python e `git diff --check`. Persistência e visualização no Docker ainda precisam de teste após reconstrução dos serviços.
+
+### 25/11/2026 — Origem do placar exibido na Home
+
+- Identificado que o 5 × 2 contra a Atlética X veio do seed de demonstração e está registrado em `resultado` com vínculo ao evento `octa-x-atletica-x`. O detalhe desse evento passou a exibir o placar cadastrado, de modo que o card da Home leva ao contexto correspondente; o card agora usa o rótulo “Resultado cadastrado”. O registro de exemplo permanece no banco até a equipe confirmar ou remover esse conteúdo no painel administrativo.
+- Verificação: rastreamento do seed, da consulta da API e do vínculo com o evento; lint, checagem de tipos, build do frontend e `git diff --check`. Conferência visual no Docker ainda pendente.
+
+### 25/11/2026 — Destaques esportivos reais na Home
+
+- Os cards de próximo jogo e resultado recente deixaram de exibir placares, adversário e data fictícios. A Home usa eventos e resultados da API, calcula vitória/empate/derrota pelo placar e liga cada card ao detalhe do evento ou da modalidade. Sem dados, os cards mostram uma mensagem clara e um caminho para Agenda ou Modalidades.
+- Verificação: lint, checagem de tipos, build do frontend e `git diff --check`. A conferência visual com dados do banco no Docker ainda está pendente.
+
+### 25/11/2026 — Eventos favoritos por conta
+
+- A API cria idempotentemente `favorito_evento` em bancos existentes. Contas autenticadas podem consultar, adicionar e remover favoritos por evento; a restrição única evita duplicatas. O detalhe do evento carrega o estado salvo e Minha Conta lista os favoritos com links para a Agenda. Visitantes são encaminhados ao login com retorno ao evento.
+- Verificação: compilação do backend, lint, tipos e build do frontend, `git diff --check`. A persistência real e a navegação no Docker ainda precisam de teste após reconstruir os serviços.
+
+### 25/11/2026 — Identidade visual da tela de cadastro
+
+- O cadastro passou a compartilhar o fundo contínuo da navbar e o acabamento do login: logo, cartão roxo translúcido, bordas suaves, campos com contraste reforçado e ações consistentes em desktop e celular. Formulário e integração real com a API permanecem os mesmos.
+- Verificação: lint, checagem de tipos, build do frontend e `git diff --check`. Inspeção visual no navegador fica pendente após reconstruir o frontend no Docker.
+
+### 25/11/2026 — Papel da conta comum no acesso
+
+- Login e cadastro explicam os benefícios efetivos da conta: concluir e acompanhar pedidos e confirmar presença em eventos. O cadastro deixa claro que a navegação pública não exige conta. O retorno à página solicitada é preservado entre login e cadastro, inclusive ao criar uma conta a partir de um evento.
+- Verificação: lint, checagem de tipos, build do frontend e `git diff --check`. O fluxo completo no navegador ainda precisa de conferência após reconstruir o frontend no Docker.
+
+### 25/11/2026 — Navegação entre site e painel administrativo
+
+- O cabeçalho público separa “Minha conta” de “Painel admin” para contas ADMIN, inclusive no menu móvel. A conta oferece atalho de volta ao painel, enquanto o painel oferece “Ver site” em desktop e no menu móvel. Essa alternância usa a sessão existente; sair da conta continua encerrando a sessão.
+- Verificação: lint, checagem de tipos, build do frontend e `git diff --check`. A navegação visual no navegador ainda precisa ser conferida após reconstruir o frontend no Docker.
+
+### 25/11/2026 — Limite de 6 MB para fotos do Mural
+
+- A aba Fotos do Mural aceita imagens JPG, PNG ou WebP de até 6 MB e informa esse limite no formulário. O limite da API e as configurações de Docker foram ajustados para permitir a persistência de arquivos desse tamanho; os demais formulários de imagem continuam limitados a 2 MB na interface. O usuário confirmou o upload real após reconstruir o Docker.
+- Verificação: checagem de tipos do frontend, compilação do backend e `git diff --check`.
+
+### 25/11/2026 — Galeria de fotos administrável no Mural
+
+- A galeria fixa de `/mural/conquistas` foi substituída por fotos reais consultadas na API. `/admin/mural` ganhou aba Fotos para incluir, editar e remover registros, com upload JPG/PNG/WebP de até 6 MB, descrição acessível obrigatória e legenda opcional. Uma tabela `foto_mural` é criada no schema SQL de novas instalações e pela API de forma idempotente em bancos existentes, sem alterar os outros dados.
+- A exclusão remove o registro da galeria; o arquivo físico enviado permanece no volume de uploads, pois o sistema ainda não faz limpeza de arquivos sem referência. Verificação: lint, checagem de tipos, build do frontend, compilação Python e `git diff --check` passaram. Testes de API, upload e inspeção visual ficaram pendentes porque o Docker Desktop não respondeu, mesmo após encerramento e nova abertura; `docker info` excedeu 20 segundos.
+
+### 25/11/2026 — Revisão dos campos obrigatórios no cadastro administrativo
+
+- Notícias agora podem ser publicadas sem resumo; o autor é mostrado a partir da sessão, sem campo obrigatório manual. Integrantes exigem nome e curso, enquanto função e Instagram são opcionais. Eventos aceitam descrição vazia, e resultados aceitam campeonato vazio. Produtos, modalidades e conquistas mantêm os campos essenciais já configurados.
+- A lista administrativa e a página pública da História passaram a ordenar marcos por ano, com ID como desempate; o formulário não pede mais ordem de exibição. A API passou a exigir curso no cadastro/edição de integrantes e a retornar marcos por ano. Esses cadastros e a história continuam integrados à API/PostgreSQL, não são simulações. Verificação: lint, checagem de tipos, build do frontend, compilação dos módulos Python e `git diff --check` passaram. Os testes Pytest não rodaram porque o Python local não tem as dependências do backend; a reconstrução no Docker e o teste no navegador ficaram pendentes porque o serviço Docker deixou de responder (`docker info` excedeu 12 segundos).
+
+### 25/11/2026 — Atualização visual do Login
+
+- `/login` passou a compartilhar o gradiente com a navbar. O formulário recebeu um cartão roxo translúcido discreto, texto de orientação, campos mais legíveis e apresentação clara das ações de recuperação de senha e cadastro.
+- Mudança apenas de interface; login, redirecionamento e recuperação continuam usando a API real. Verificação: lint, checagem de tipos, build e `git diff --check` passaram; frontend reconstruído no Docker e `/login` aberto no navegador com campos, links e botão visíveis. A autenticação não foi exercitada nesta verificação. O primeiro build Docker parou por falta de espaço; foram removidos 19,3 GB de cache de compilação, sem excluir volumes de banco ou uploads, e a reconstrução seguinte concluiu.
+
+### 25/11/2026 — Visual do detalhe de notícias
+
+- `/noticias/[slug]` agora exibe a capa cadastrada, quando existe, e não reserva um bloco branco para notícias sem imagem. A página acompanha o gradiente da navbar; os cartões de outras notícias ficaram compactos e começam alinhados à área da capa principal.
+- Mudança de interface usando os dados e arquivos reais já servidos pela API/PostgreSQL. Verificação: lint, checagem de tipos, build e `git diff --check` passaram; frontend reconstruído no Docker. A notícia `henry-florinda` foi aberta no navegador com a capa carregada, e a borda superior do primeiro cartão relacionado coincidiu com a da capa principal. Conferência em diferentes larguras de tela ainda pendente.
+
+### 25/11/2026 — Atualização visual do Ranking
+
+- `/ranking` passou a compartilhar o fundo contínuo da navbar com Modalidades. Indicadores, classificação e barras receberam superfícies roxas translúcidas discretas, melhor contraste e disposição responsiva; o aviso de números ilustrativos ficou mais visível.
+- Mudança apenas de interface. Indicadores e classificação continuam fixos em `frontend/src/data/ranking.ts`, sem vínculo com resultados da API/PostgreSQL. Verificação: lint, checagem de tipos, build e `git diff --check` passaram; frontend reconstruído no Docker e rota `/ranking` aberta no navegador. Conferência visual em diferentes tamanhos de tela ainda pendente.
+
+### 25/11/2026 — Visual da lista e dos detalhes de modalidades
+
+- Os detalhes de `/modalidades/[slug]` passaram a compartilhar o gradiente da lista e da navbar. A foto cadastrada é exibida no destaque; sem foto, não há bloco branco. Informações, resultados, próximos eventos e elenco receberam superfícies roxas discretas e estados vazios claros. A lista ganhou cards inteiros clicáveis e estado vazio sem altura excessiva. “Próximo desafio” agora considera apenas eventos futuros e exibe a data no horário de Maceió.
+- Mudança de interface e apresentação dos eventos reais consultados na API, sem alteração do backend ou banco. Verificação: lint, checagem de tipos e build do frontend passaram; o container foi reconstruído e a lista e o detalhe foram abertos no navegador com os serviços ativos. A inspeção visual fina em diferentes tamanhos de tela continua pendente.
 
 ### 25/11/2026 — Integração das alterações visuais e históricas pendentes
 

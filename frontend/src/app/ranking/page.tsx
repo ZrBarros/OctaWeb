@@ -13,7 +13,7 @@ export default function RankingPage() {
         <div className={styles.eyebrow}><span>ARENA STATS</span><i aria-hidden="true" /></div>
         <h1>Ranking e Estatísticas Esportivas</h1>
         <p className={styles.intro}>Veja o desempenho e a jornada das nossas equipes nos campeonatos universitários deste ano.</p>
-        <p className={styles.demoNotice}>Dados demonstrativos do protótipo</p>
+        <p className={styles.demoNotice}>Prévia de estatísticas · números ilustrativos</p>
 
         <section className={styles.summary} aria-label="Resumo da temporada">
           {seasonSummary.map((item) => (

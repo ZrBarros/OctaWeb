@@ -1,4 +1,4 @@
-.main { min-height: 1050px; padding: 65px 0 95px; background: transparent; }
+.main { min-height: 70vh; padding: 65px 0 95px; background: transparent; }
 .container { width: min(1280px, calc(100% - 48px)); margin: 0 auto; }
 .kicker { width: 39px; height: 3px; margin-bottom: 13px; border-radius: 2px; background: var(--orange); }
 .main h1 { margin: 0; font-size: clamp(33px, 3.4vw, 48px); font-weight: 900; line-height: 1.1; text-transform: uppercase; }
@@ -6,16 +6,22 @@
 .rankingLink { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 35px; padding: 10px 15px; border: 1px solid var(--orange); border-radius: 5px; color: var(--orange); font-size: 12px; font-weight: 900; text-transform: uppercase; transition: background-color var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease); }
 .rankingLink:hover { background: var(--orange); color: #210b19; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
-.card { position: relative; isolation: isolate; display: flex; min-width: 0; flex-direction: column; padding: 23px; border: 1px solid #a66bb42b; border-radius: 16px; background: linear-gradient(155deg, #281331d9 0%, #1a0d26e8 68%, #160a22ef 100%); box-shadow: inset 0 1px 0 #ffffff0d, 0 18px 34px -27px #000b; }
+.card { position: relative; isolation: isolate; display: flex; min-width: 0; flex-direction: column; padding: 23px; border: 1px solid #a66bb43d; border-radius: 16px; background: linear-gradient(155deg, #281331d9 0%, #1a0d26e8 68%, #160a22ef 100%); box-shadow: inset 0 1px 0 #ffffff0d, 0 18px 34px -27px #000b; transition: border-color var(--motion-normal) var(--motion-ease), transform var(--motion-normal) var(--motion-ease), box-shadow var(--motion-normal) var(--motion-ease); }
+.card:focus-within { border-color: #bd7ecc85; box-shadow: inset 0 1px 0 #ffffff14, 0 20px 36px -24px #000c; }
+@media (hover: hover) { .card:hover { transform: translateY(-2px); border-color: #bd7ecc85; box-shadow: inset 0 1px 0 #ffffff14, 0 20px 36px -24px #000c; } }
 .card::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: radial-gradient(ellipse at 10% 0%, #a363bc12, transparent 66%); }
 .cardHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 19px; }
 .cardHeading h2 { margin: 0; font-size: 25px; font-weight: 900; }
-.cardHeading span { color: var(--orange); font-size: 12px; font-weight: 900; }
+.cardHeading span { color: var(--orange); font-size: 11px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; }
 .image { display: block; width: 100%; height: auto; aspect-ratio: 1.9; border-radius: 9px; object-fit: cover; }
 .card p { min-height: 54px; margin: 19px 0 18px; color: #c9c2cb; font-size: 14px; line-height: 1.5; }
-.details { display: flex; min-height: 45px; align-items: center; justify-content: center; margin-top: auto; border-radius: 5px; background: var(--orange); color: #210b19; font-size: 13px; font-weight: 900; text-align: center; text-transform: uppercase; }
-.details:hover { background: #ff965e; }
+.details { display: flex; min-height: 45px; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding: 0 14px; border: 1px solid #ff7f3f80; border-radius: 8px; color: var(--orange); font-size: 12px; font-weight: 900; text-align: left; text-transform: uppercase; }
+.details::after { content: ""; position: absolute; inset: 0; }
+.details:hover { background: #ff7f3f1a; }
+.details:focus-visible { outline: 3px solid var(--orange); outline-offset: 4px; }
+.empty { padding: 28px; border: 1px solid #a66bb43d; border-radius: 14px; background: #24122ed9; color: #ded1e2; }
 @supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .card { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
 @media (prefers-reduced-transparency: reduce) { .card { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover, .card:focus-within { transform: none; } }
 @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; } }
 @media (max-width: 600px) { .main { min-height: 0; padding: 50px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 30px; } .grid { grid-template-columns: 1fr; } .card p { min-height: 0; } }

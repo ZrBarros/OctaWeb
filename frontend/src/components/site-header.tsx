@@ -20,7 +20,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const { user, status } = useAuth();
   const mobileMenuRef = useRef<HTMLDetailsElement>(null);
-  const accountHref = user?.perfil === "ADMIN" ? "/admin" : user ? "/minha-conta" : "/login";
+  const accountHref = user ? "/minha-conta" : "/login";
   const firstName = user?.nome.trim().split(/\s+/)[0];
   const accountLabel = status === "loading" ? "Minha conta" : firstName ? `Olá, ${firstName}` : "Entrar / Minha conta";
   const closeMobileMenu = () => {
@@ -44,7 +44,7 @@ export function SiteHeader() {
   }, []);
 
   return (
-    <header className={`${styles.header} ${pathname === "/" || pathname === "/noticias" || pathname === "/modalidades" || pathname.startsWith("/agenda") || pathname === "/mural" || pathname.startsWith("/mural/integrantes") || pathname === "/mural/historia" || pathname === "/mural/conquistas" || pathname.startsWith("/loja") || pathname === "/minha-conta" || pathname === "/carrinho" || pathname === "/checkout" ? styles.homeHeader : ""}`}>
+    <header className={`${styles.header} ${pathname === "/" || pathname.startsWith("/noticias") || pathname.startsWith("/modalidades") || pathname === "/ranking" || pathname.startsWith("/agenda") || pathname === "/mural" || pathname.startsWith("/mural/integrantes") || pathname === "/mural/historia" || pathname === "/mural/conquistas" || pathname.startsWith("/loja") || pathname === "/minha-conta" || pathname === "/login" || pathname === "/cadastro" || pathname === "/carrinho" || pathname === "/checkout" ? styles.homeHeader : ""}`}>
       <div className={styles.inner}>
         <Link className={styles.brand} href="/" aria-label="Octacore, página inicial">
           <span className={styles.brandMark}><Image src="/images/logo-octacore.png" alt="" width={76} height={76} priority /></span>
@@ -53,12 +53,16 @@ export function SiteHeader() {
         <nav className={styles.desktopNav} aria-label="Navegação principal">
           {links.map((link) => <Link className={pathname === link.href || (link.href !== "/" && pathname.startsWith(`${link.href}/`)) ? styles.active : ""} href={link.href} key={link.href}>{link.label}</Link>)}
         </nav>
-        <Link className={styles.account} href={accountHref}>{accountLabel}</Link>
+        <div className={styles.accountActions}>
+          {user?.perfil === "ADMIN" && <Link className={styles.adminAccess} href="/admin">Painel admin</Link>}
+          <Link className={styles.account} href={accountHref}>{accountLabel}</Link>
+        </div>
         <details className={styles.mobileMenu} ref={mobileMenuRef}>
           <summary aria-label="Menu de navegação"><span aria-hidden="true">☰</span></summary>
           <nav aria-label="Navegação móvel">
             {links.map((link) => <Link href={link.href} key={link.href} onClick={closeMobileMenu}>{link.label}</Link>)}
             <Link href={accountHref} onClick={closeMobileMenu}>{accountLabel}</Link>
+            {user?.perfil === "ADMIN" && <Link href="/admin" onClick={closeMobileMenu}>Painel admin</Link>}
           </nav>
         </details>
       </div>
