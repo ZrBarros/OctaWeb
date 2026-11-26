@@ -19,6 +19,7 @@ const monthFormatter = new Intl.DateTimeFormat("pt-BR", { month: "long", year: "
 const eventTypeLabels: Record<string, string> = { EVENTO: "Outro", SELETIVA: "Seletiva", TREINO: "Treino", FESTA: "Festa", REUNIAO: "Reunião", JOGO: "Jogo", CAMPEONATO: "Campeonato" };
 
 function eventDate(dateTime: string) { return new Date(`${dateTime}:00`); }
+function todayLocal() { const now = new Date(); return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`; }
 function formatEventDate(dateTime: string) { return `${dateFormatter.format(eventDate(dateTime))} · ${timeFormatter.format(eventDate(dateTime))}`; }
 function monthTitle(date: Date) { const label = monthFormatter.format(date); return label.charAt(0).toLocaleUpperCase("pt-BR") + label.slice(1); }
 function PencilIcon() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m4 20 4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10L4 20Z" /><path d="m14 7 3 3" /></svg>; }
@@ -66,10 +67,11 @@ export function AdminEventsPage() {
     event.preventDefault();
     if (!draft) return;
     const saved = { ...draft, title: draft.title.trim(), description: draft.description.trim(), place: draft.place.trim() };
-    if (!saved.title || !saved.place || !saved.dateTime || Number.isNaN(eventDate(saved.dateTime).getTime())) return;
+    if (!saved.title || !saved.dateTime || Number.isNaN(eventDate(saved.dateTime).getTime())) return;
+    if ((editingId === null || saved.dateTime !== items.find((item) => item.id === editingId)?.dateTime) && saved.dateTime.slice(0, 10) < todayLocal()) { setMessage("A data do evento não pode ser anterior a hoje."); return; }
     const typeMap: Record<string, string> = { Jogo: "JOGO", Campeonato: "CAMPEONATO", Seletiva: "SELETIVA", Treino: "TREINO", Festa: "FESTA", Reunião: "REUNIAO", Outro: "EVENTO" };
     try {
-      const response = await apiClient<ApiItem<ApiEvent>>(`/admin/events${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ title: saved.title, type: typeMap[saved.category] ?? saved.category, dateTime: new Date(saved.dateTime).toISOString(), description: saved.description || null, place: saved.place, imageUrl: saved.image ?? null, modalityId: saved.modalityId ?? null }) });
+      const response = await apiClient<ApiItem<ApiEvent>>(`/admin/events${editingId === null ? "" : `/${editingId}`}`, { method: editingId === null ? "POST" : "PUT", auth: true, body: JSON.stringify({ title: saved.title, type: typeMap[saved.category] ?? saved.category, dateTime: new Date(saved.dateTime).toISOString(), description: saved.description || null, place: saved.place || "Local a definir", imageUrl: saved.image ?? null, modalityId: saved.modalityId ?? null }) });
       const item = response.data; const mapped = { id: item.id, title: item.titulo, category: eventTypeLabels[item.tipo] ?? item.tipo, dateTime: item.dataHora.slice(0, 16), description: item.descricao ?? "", place: item.local, image: item.imagemUrl ?? undefined, modalityId: item.modalidadeId };
       setItems((current) => editingId === null ? [...current, mapped] : current.map((old) => old.id === editingId ? mapped : old));
       setMessage(editingId === null ? "Evento criado e publicado na agenda." : "Evento atualizado.");
@@ -127,9 +129,9 @@ export function AdminEventsPage() {
       <p>As alterações serão salvas no banco e refletidas na agenda pública.</p>
       <form className={styles.form} onSubmit={saveEvent}>
         <label>Título<input autoFocus required maxLength={120} value={draft.title} onChange={(event) => setDraft({ ...draft, title: event.target.value })} placeholder="Nome do evento" /></label>
-        <div className={styles.formRow}><label>Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })}>{adminEventCategories.map((category) => <option key={category}>{category}</option>)}</select></label><label>Data e hora<input required type="datetime-local" value={draft.dateTime} onChange={(event) => setDraft({ ...draft, dateTime: event.target.value })} /></label></div>
+        <div className={styles.formRow}><label>Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value })}>{adminEventCategories.map((category) => <option key={category}>{category}</option>)}</select></label><label>Data e hora<input required type="datetime-local" min={editingId === null ? `${todayLocal()}T00:00` : undefined} value={draft.dateTime} onChange={(event) => setDraft({ ...draft, dateTime: event.target.value })} /></label></div>
         <label>Modalidade vinculada<select value={draft.modalityId ?? ""} onChange={(event) => setDraft({ ...draft, modalityId: event.target.value ? Number(event.target.value) : null })}><option value="">Evento geral</option>{modalities.map((item) => <option value={item.id} key={item.id}>{item.nome}</option>)}</select></label>
-        <label>Local<input required maxLength={100} value={draft.place} onChange={(event) => setDraft({ ...draft, place: event.target.value })} placeholder="Onde será o evento" /></label>
+        <label>Local (opcional)<input maxLength={100} value={draft.place} onChange={(event) => setDraft({ ...draft, place: event.target.value })} placeholder="Local a definir" /></label>
         <label>Descrição (opcional)<textarea maxLength={300} value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} placeholder="Apresente o evento em poucas palavras" /></label>
         <label>Imagem do evento (opcional)<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void readImage(event)} /><small>JPG, PNG ou WebP, até 2 MB.</small></label>
         {imageError && <span className={styles.imageError} role="alert">{imageError}</span>}

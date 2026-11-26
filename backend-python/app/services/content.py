@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, time
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import update
 from sqlalchemy.orm import Session
@@ -102,6 +103,8 @@ class ContentService:
         self.repository.delete(item)
 
     def create_event(self, data: EventInput) -> Evento:
+        if data.dateTime.astimezone(ZoneInfo("America/Maceio")).date() < datetime.now(ZoneInfo("America/Maceio")).date():
+            raise bad_request("A data do evento não pode ser anterior a hoje.")
         item = Evento(slug=data.slug or make_slug(data.title), titulo=data.title, descricao=data.description, tipo=data.type, data_hora=data.dateTime, local=data.place, imagem_url=data.imageUrl, modalidade_id=data.modalityId)
         self.repository.save(item)
         return self.repository.event_by_id(item.id)  # type: ignore[return-value]
@@ -110,6 +113,10 @@ class ContentService:
         item = self.repository.event_by_id(item_id)
         if not item:
             raise not_found("Evento")
+        if item.resultado is not None and data.type not in {"JOGO", "TREINO"}:
+            raise bad_request("Eventos com resultado vinculado devem ser do tipo Jogo ou Treino.")
+        if data.dateTime != item.data_hora and data.dateTime.astimezone(ZoneInfo("America/Maceio")).date() < datetime.now(ZoneInfo("America/Maceio")).date():
+            raise bad_request("A data do evento não pode ser anterior a hoje.")
         item.slug, item.titulo, item.descricao, item.tipo = data.slug or make_slug(data.title), data.title, data.description, data.type
         item.data_hora, item.local, item.imagem_url, item.modalidade_id = data.dateTime, data.place, data.imageUrl, data.modalityId
         self.repository.save(item)
@@ -122,6 +129,7 @@ class ContentService:
         self.repository.delete(item)
 
     def create_result(self, data: ResultInput) -> Resultado:
+        self._validate_result_event(data.eventId)
         if data.featured:
             self.db.execute(update(Resultado).where(Resultado.destaque_home.is_(True)).values(destaque_home=False))
         item = Resultado(modalidade_id=data.modalityId, evento_id=data.eventId, adversario=data.opponent, placar_octa=data.ourScore, placar_adversario=data.opponentScore, campeonato=data.competition, data=data.date, destaque_home=data.featured)
@@ -132,6 +140,7 @@ class ContentService:
         item = self.repository.result_by_id(item_id)
         if not item:
             raise not_found("Resultado")
+        self._validate_result_event(data.eventId)
         item.modalidade_id, item.evento_id, item.adversario = data.modalityId, data.eventId, data.opponent
         item.placar_octa, item.placar_adversario, item.campeonato, item.data = data.ourScore, data.opponentScore, data.competition, data.date
         if data.featured:
@@ -139,6 +148,15 @@ class ContentService:
         item.destaque_home = data.featured
         self.repository.save(item)
         return self.repository.result_by_id(item.id)  # type: ignore[return-value]
+
+    def _validate_result_event(self, event_id: int | None) -> None:
+        if event_id is None:
+            return
+        event = self.repository.event_by_id(event_id)
+        if not event:
+            raise not_found("Evento")
+        if event.tipo not in {"JOGO", "TREINO"}:
+            raise bad_request("Resultados só podem ser vinculados a eventos do tipo Jogo ou Treino.")
 
     def delete_result(self, item_id: int) -> None:
         item = self.repository.result_by_id(item_id)

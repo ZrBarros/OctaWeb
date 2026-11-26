@@ -142,7 +142,7 @@ class EventInput(ApiModel):
     description: str | None = Field(default=None, max_length=50_000)
     type: EVENT_TYPES
     dateTime: datetime
-    place: str = Field(min_length=2, max_length=150)
+    place: str = Field(default="Local a definir", min_length=2, max_length=150)
     imageUrl: str | None = Field(default=None, max_length=255)
     modalityId: int | None = Field(default=None, gt=0)
     _image = field_validator("imageUrl")(validate_asset_url)

@@ -20,7 +20,8 @@ export function ProductPurchase({ product }: { product: Product }) {
 
   function handleAdd() {
     if (product.sizes && !selectedSize) return;
-    const added = Math.min(quantity, available);
+    if (quantity > available) { showFeedback(`Restam ${available} ${available === 1 ? "unidade" : "unidades"} disponíveis para adicionar.`); return; }
+    const added = quantity;
     if (added < 1 || !addToCart(product.slug, selectedSize ?? undefined, added)) {
       showFeedback("Estoque disponível atingido para esta opção.");
       return;
@@ -42,7 +43,7 @@ export function ProductPurchase({ product }: { product: Product }) {
                 className={selectedSize === size ? styles.selectedSize : ""}
                 aria-pressed={selectedSize === size}
                 disabled={product.variations?.find((variation) => variation.size === size)?.stock === 0}
-                onClick={() => { setSelectedSize(size); clearFeedback(); }}
+                onClick={() => { setSelectedSize(size); setQuantity(1); clearFeedback(); }}
               >{size}</button>
             ))}
           </div>
@@ -56,7 +57,7 @@ export function ProductPurchase({ product }: { product: Product }) {
         <div className={styles.quantityControl}>
           <button type="button" aria-label={`Diminuir quantidade de ${product.name}`} disabled={quantity === 1} onClick={() => { setQuantity((current) => current - 1); clearFeedback(); }}>−</button>
           <output aria-label={`Quantidade selecionada: ${quantity}`}>{quantity}</output>
-          <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity === 99} onClick={() => { setQuantity((current) => current + 1); clearFeedback(); }}>+</button>
+          <button type="button" aria-label={`Aumentar quantidade de ${product.name}`} disabled={quantity >= (selectedSize || !product.sizes ? available : 99)} onClick={() => { setQuantity((current) => current + 1); clearFeedback(); }}>+</button>
         </div>
       </div>
 

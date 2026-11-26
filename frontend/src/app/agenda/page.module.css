@@ -28,8 +28,23 @@
 .info h2 { margin: 0 0 17px; font-size: 19px; font-weight: 900; text-transform: uppercase; }
 .info p { margin: 0; color: #c7bdca; font-size: 14px; line-height: 1.6; }
 .empty { margin: 0; padding: 30px; border: 1px solid #a66bb42b; border-radius: 10px; background: #21112bd9; color: #c7bdca; }
+.calendar { margin-top: 48px; padding: 28px; border: 1px solid #a66bb42b; border-radius: 14px; background: linear-gradient(155deg, #281331d9, #1a0d26e8 70%, #160a22ef); }
+.calendarHeader { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+.calendarHeader h2 { margin: 0 0 5px; font-size: 21px; text-transform: uppercase; }
+.calendarHeader p { margin: 0; color: #c7bdca; font-size: 13px; }
+.calendarNavigation { display: flex; align-items: center; gap: 12px; }
+.calendarNavigation strong { min-width: 145px; text-align: center; text-transform: capitalize; }
+.calendarNavigation button { width: 34px; height: 34px; border: 1px solid #704477; border-radius: 8px; background: #24132e; color: white; cursor: pointer; font-size: 24px; }
+.calendarNavigation button:hover, .calendarNavigation button:focus-visible { border-color: var(--orange); }
+.calendarGrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.weekday { padding: 8px; color: #cabfd0; font-size: 11px; text-align: center; }
+.calendarDay, .outsideDay { min-height: 92px; padding: 8px; border: 1px solid #a66bb42b; border-radius: 7px; }
+.calendarDay > span { display: block; margin-bottom: 6px; color: #ddd2e0; font-size: 12px; font-weight: 800; }
+.calendarDay a { display: block; overflow: hidden; margin-top: 4px; padding: 5px 7px; border-radius: 5px; background: #5a267188; color: white; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.calendarDay a:hover, .calendarDay a:focus-visible { background: #8b319f; outline: 2px solid var(--orange); }
 @supports ((backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px))) { .eventCard, .info { -webkit-backdrop-filter: blur(14px) saturate(110%); backdrop-filter: blur(14px) saturate(110%); } }
 @media (prefers-reduced-transparency: reduce) { .eventCard, .info { background: #1f112a; -webkit-backdrop-filter: none; backdrop-filter: none; } .filters button { background: #24132e; } }
 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 28px; } }
 @media (max-width: 600px) { .main { min-height: 0; padding: 50px 0 70px; } .container { width: min(100% - 32px, 1280px); } .intro { margin-bottom: 24px; } .filters { display: none; } .mobileFilter { display: grid; gap: 7px; margin-bottom: 30px; color: #d9c9de; font-size: 11px; font-weight: 800; text-transform: uppercase; } .mobileFilter select { width: 100%; min-height: 44px; padding: 0 40px 0 12px; appearance: none; border: 1px solid #56305e; border-radius: 6px; background: #1c1c1c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ff7f3f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 13px center / 14px; color: white; font: inherit; font-size: 13px; text-transform: none; } .mobileFilter select:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; } .eventCard { gap: 12px; padding: 13px; } .dateBox { flex-basis: 54px; min-height: 59px; } .dateBox strong { font-size: 23px; } .eventDetails h2 { font-size: 15px; } .eventDetails p { gap: 4px; font-size: 11px; } .badge { font-size: 9px; padding: 5px 6px; } .info { padding: 24px; } }
+@media (max-width: 600px) { .calendar { padding: 15px; } .calendarHeader { flex-direction: column; align-items: flex-start; } .calendarNavigation { width: 100%; justify-content: space-between; } .calendarGrid { gap: 2px; } .calendarDay, .outsideDay { min-height: 55px; padding: 4px; } .calendarDay a { overflow: hidden; padding: 3px; font-size: 9px; } }
 @media (max-width: 650px) { .mobileFilter select:focus-visible, .mobileCategory select:focus-visible { outline: none; outline-offset: 0; border-color: #56305e; box-shadow: none; } }

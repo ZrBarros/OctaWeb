@@ -52,13 +52,13 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/modalidades` e `/modalidades/[slug]` | Lista e páginas de modalidades, horários, responsáveis, elenco, resultados e próximos eventos disponíveis. Ambas compartilham o fundo contínuo com a navbar e cartões roxos translúcidos discretos; imagens cadastradas aparecem na lista e no detalhe, enquanto modalidades sem imagem não reservam uma área vazia. Os cards da lista são inteiros clicáveis. | **Integração real:** dados e imagens da API; fundo, cartões e navegação ampliada são tratamento de interface |
 | `/atletas/[slug]` | Perfil público de João Silva, com modalidade, camisa, estatísticas e resultados recentes. | **Prévia visual:** dados de exemplo; foto pendente |
 | `/ranking` | Indicadores da temporada, classificação geral e aproveitamento por modalidade. Acesso pela página de Modalidades. Fundo contínuo com a navbar, cartões translúcidos discretos e aviso de números ilustrativos. | **Prévia visual:** números de exemplo, sem cálculo automático ou integração com a API; o tratamento visual é somente de interface |
-| `/agenda` | Eventos listados em ordem cronológica, com filtro por categoria e cards inteiros clicáveis para suas páginas de detalhe; filtro compacto em celular. O fundo segue a navbar sem faixa abrupta, e os cards usam uma superfície roxa translúcida discreta. | **Integração real:** eventos da API; fundo e cards são tratamento de interface |
+| `/agenda` | A lista mostra eventos futuros e os ocorridos há no máximo sete dias, em ordem cronológica, com filtro por categoria. O calendário mensal permite consultar também os eventos anteriores e abrir seus detalhes. A página busca todas as páginas de eventos da API. | **Integração real:** lista e calendário usam eventos da API/PostgreSQL; ocultar eventos antigos da lista é regra de apresentação, sem exclusão no banco |
 | `/agenda/[slug]` | Detalhe do evento, placar quando há resultado vinculado e lista atualizada de confirmações. Usuários autenticados podem confirmar ou cancelar presença e favoritar/desfavoritar; após login retornam ao evento solicitado. | **Integração real:** conteúdo, resultado vinculado, presença e favoritos por conta/evento no PostgreSQL |
 | `/mural`, `/mural/historia`, `/mural/integrantes`, `/mural/conquistas` | Apresentação da atlética, história, integrantes e conquistas; filtro compacto na lista. As telas do Mural compartilham um fundo contínuo com a navbar e superfícies roxas discretas. A História ordena os marcos por ano. Conquistas mostra estado vazio quando não há títulos; a galeria mostra apenas fotos cadastradas e estado vazio quando não há fotos. | **Integração real:** história, integrantes, conquistas e galeria vêm da API/PostgreSQL; o upload de fotos de até 6 MB foi confirmado no Docker pelo usuário. Gradiente e cartões são apenas interface |
 | `/mural/integrantes/[slug]` | Perfil de integrante com função, curso e modalidades. | **Integração real:** dados do PostgreSQL; foto pode estar pendente |
 | `/loja` | Catálogo com busca, filtro, variações disponíveis, estoque e carrinho. A abertura usa fundo contínuo com a navbar; os cards têm superfícies roxas discretas e a barra recebe sua camada escura somente quando fica fixa durante a rolagem. | **Integração real:** catálogo/estoque da API; seleção do carrinho no navegador; novo tratamento visual somente de interface |
 | `/loja/[slug]` | Detalhe de produto com variação, quantidade e estoque disponível. | **Integração real:** produto da API |
-| `/carrinho` | Alteração de quantidade, remoção e cálculo com preços atuais. | **Integração parcial:** seleção local, catálogo/preços reais |
+| `/carrinho` | Alteração de quantidade, remoção com confirmação visual própria e cálculo com preços atuais. | **Integração parcial:** seleção local, catálogo/preços reais |
 | `/checkout` | Dados de retirada, resumo, estados vazio/erro e confirmação do pedido com gradiente contínuo desde a navbar e superfícies roxas discretas como no Carrinho. | **Integração real:** pedido transacional e estoque; tratamento visual somente de interface, sem cobrança/pagamento |
 | `/login`, `/cadastro` e `/redefinir-senha` | Cadastro, login, recuperação e redefinição. Login e cadastro compartilham o gradiente contínuo com a navbar, cartão roxo translúcido e campos de alto contraste; explicam que a conta serve para concluir/acompanhar pedidos e confirmar presença, enquanto a navegação pública não exige conta. O retorno ao evento é preservado ao alternar entre login e cadastro. | **Integração real:** bcrypt, JWT e cookie `httpOnly`; o visual e os textos são de interface e o retorno usa a navegação existente |
 | `/minha-conta` | Painel do usuário conectado, edição de nome/curso, troca de senha, lista de eventos favoritos e logout. Para administradores, também oferece acesso ao painel admin; o cabeçalho do site mostra separadamente conta e painel. | **Integração real:** sessão compartilhada, perfil, credenciais e favoritos da API/PostgreSQL; alternar entre site e painel preserva a sessão |
@@ -67,11 +67,11 @@ A separação é validada pela API em cada rota protegida. A interface também r
 | `/admin/perfil` | Perfil da conta administrativa, edição de dados, troca de senha e atalhos; cartões acompanham o visual do painel. | **Integração real:** usa a mesma sessão e operações da conta |
 | `/admin/noticias` | Busca, filtros, editor, upload, publicação, edição e exclusão; resumo é opcional e o autor vem da sessão. Tabela e editor seguem as superfícies do painel. | **Integração real:** publica no site; apenas status Publicado porque não existe coluna de rascunho |
 | `/admin/produtos` | Busca, estoque, cadastro, edição, desativação e upload; tabela e formulário seguem as superfícies do painel. | **Integração real:** altera loja e estoque |
-| `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload; descrição é opcional. Cartões, calendário e formulário seguem as superfícies do painel. | **Integração real:** altera agenda pública |
+| `/admin/eventos` | Lista/calendário, busca, criação, edição, exclusão e upload; descrição e local são opcionais. Datas anteriores ao dia atual não podem ser cadastradas; sem local, salva “Local a definir”. Eventos históricos continuam editáveis sem alterar a data. | **Integração real:** interface e API validam datas; alterações persistem e afetam a agenda pública |
 | `/admin/modalidades` | Cadastro, edição, exclusão, imagem com prévia e remoção, responsável, local e horários de treino. A edição preserva horários que não mudaram; cartões e formulários seguem as superfícies do painel. | **Integração real:** persiste dados e imagens na API e altera as páginas de modalidades |
 | `/admin/integrantes` | Busca, cadastro, edição, remoção e foto; nome e curso são obrigatórios, função e Instagram opcionais. Cartões e formulário seguem as superfícies do painel. | **Integração real:** altera mural público |
 | `/admin/mural` | Gestão de conquistas, marcos históricos e fotos da galeria; marcos são exibidos por ano e não pedem ordem manual. A aba Fotos permite adicionar, trocar e remover imagens, com descrição obrigatória e legenda opcional. | **Integração real:** História e Conquistas existentes usam PostgreSQL; a nova gestão de fotos está conectada no código, com persistência real ainda pendente de teste no Docker |
-| `/admin/resultados` | Busca, filtros, cadastro, edição e remoção; campeonato é opcional. O formulário permite marcar um resultado para destaque na Home; somente um pode estar marcado. A tabela identifica o selecionado. | **Integração real:** persiste resultados e escolha do destaque no PostgreSQL |
+| `/admin/resultados` | Busca, filtros, cadastro, edição e remoção; campeonato é opcional. O vínculo de resultado aceita apenas eventos do tipo Jogo ou Treino. O formulário permite marcar um resultado para destaque na Home; somente um pode estar marcado. A tabela identifica o selecionado. | **Integração real:** API valida o tipo do evento e persiste resultados e escolha do destaque no PostgreSQL |
 | `/admin/pedidos` | Busca, filtros, itens e transições válidas de status; tabela, cartões móveis e detalhes seguem as superfícies do painel. | **Integração real:** gerencia pedidos; notificações ao cliente não existem |
 | `/admin/usuarios` | Busca, filtro, edição de dados/perfil e exclusão controlada; usa os cartões e formulários compartilhados do painel. | **Integração real:** gerencia contas; impede autoexclusão e autorrebaixamento administrativo |
 
@@ -163,9 +163,9 @@ Preços são enviados pela interface em centavos e persistidos pelo PostgreSQL c
 
 1. A lista em `/loja` consulta produtos ativos e variações da API; cada card oferece compra rápida e link explícito para `/loja/<slug>`.
 2. O detalhe consulta o produto pelo `slug` e limita a quantidade ao estoque disponível.
-3. Ao adicionar, `cart.ts` grava identificador, tamanho e quantidade em `localStorage`, na chave `octacore-cart`. A pessoa permanece na loja ou no detalhe; abre-se um painel lateral modal com imagem, nome, tamanho, quantidade adicionada, preço correspondente e ações para ver o carrinho ou continuar comprando. O botão também confirma brevemente a adição. O acesso fixo ao carrinho exibe a contagem de itens. A quantidade por produto e tamanho é limitada a 99 e pela disponibilidade da variação.
-4. `/carrinho` lê esses itens, consulta os preços atuais da API e calcula o total.
-5. `/checkout` exige sessão, revalida variações e envia nome, telefone, retirada e observações. A API cria pedido e itens em transação, congela preços e desconta estoque.
+3. Ao adicionar, `cart.ts` grava identificador, tamanho e quantidade em `localStorage`, na chave `octacore-cart`. A pessoa permanece na loja ou no detalhe; abre-se um painel lateral modal com todos os itens do carrinho, incluindo cada tamanho, quantidade, preço por linha e total somado. O produto recém-adicionado recebe um aviso no topo. Os dados dos produtos são consultados na API; o painel oferece ações para ver o carrinho ou continuar comprando. O botão também confirma brevemente a adição. O acesso fixo ao carrinho exibe a contagem de itens. A quantidade por produto e tamanho é limitada a 99 e pela disponibilidade da variação.
+4. `/carrinho` lê esses itens, consulta preços e estoque atuais da API e calcula o total. O controle de quantidade não ultrapassa o estoque da variação; quantidades antigas acima do estoque recebem aviso e ação para ajustar, bloqueando a ida ao checkout.
+5. `/checkout` exige sessão, revalida variações e quantidades disponíveis e envia nome, telefone, retirada e observações. A API cria pedido e itens em transação, congela preços e desconta estoque; a API faz a validação final para evitar venda concorrente acima do estoque.
 
 O carrinho persiste no mesmo navegador; ele não acompanha o usuário em outros dispositivos. Se o armazenamento estiver bloqueado, há uma cópia temporária apenas na aba. Estoque e pedidos estão integrados; frete, desconto e pagamento não existem no schema atual.
 
@@ -183,13 +183,13 @@ O cabeçalho consulta um estado compartilhado de autenticação: visitantes abre
 
 `/admin/produtos` consulta produtos/variações reais. Cadastro, edição, desativação, preço, estoque e upload persistem e alimentam Home, Loja e checkout. Camisas têm estoque individual para P, M, G e GG; as demais categorias usam estoque único. Ao editar uma camisa antiga cadastrada com estoque `UNICO`, o administrador deve distribuir as unidades pelos tamanhos antes de salvar. A variação antiga fica com estoque zero e preservada para não alterar pedidos já vinculados a ela.
 
-`/admin/eventos` consulta e altera a mesma tabela usada por Agenda e Home. Lista, calendário, busca, CRUD, upload e vínculo opcional com modalidade persistem na API.
+`/admin/eventos` consulta e altera a mesma tabela usada por Agenda e Home. Lista, calendário, busca, CRUD, upload e vínculo opcional com modalidade persistem na API. Novos registros e mudanças de data não aceitam dias anteriores ao atual no fuso de Maceió. O local vazio é salvo como “Local a definir”.
 
 `/admin/modalidades` gerencia modalidades, imagens, responsáveis, locais e múltiplos horários de treino. O formulário mostra a prévia da imagem enviada e permite removê-la antes de salvar. Na edição, horários existentes são mantidos quando seus dias e horas iniciais não mudam, evitando conflito com a chave única do banco; horários repetidos no mesmo dia e início são recusados com mensagem específica. `/admin/mural` gerencia conquistas e marcos históricos. As alterações alimentam imediatamente as respectivas páginas públicas.
 
 `/admin/integrantes` consulta e altera integrantes do mural. Nome, função, curso, Instagram, foto, participação na diretoria e múltiplos vínculos com modalidades persistem na edição. As modalidades são selecionadas por caixas de marcação, sem exigir teclas modificadoras.
 
-`/admin/resultados` consulta e persiste partidas ligadas a uma modalidade cadastrada e, opcionalmente, a um evento sem resultado. Busca, filtros, CRUD e cálculo de vitória/empate/derrota continuam na interface; a tabela pode rolar horizontalmente em telas estreitas.
+`/admin/resultados` consulta e persiste partidas ligadas a uma modalidade cadastrada e, opcionalmente, a um evento do tipo Jogo ou Treino sem resultado. A API impede vínculos com outros tipos e impede mudar um evento com resultado para outro tipo. Busca, filtros, CRUD e cálculo de vitória/empate/derrota continuam na interface; a tabela pode rolar horizontalmente em telas estreitas.
 
 `/admin/pedidos` lista os pedidos criados pelo checkout e seus itens com preço congelado. A API aceita somente transições válidas de status; cancelamento devolve estoque uma única vez. A interface não envia notificações ao cliente porque não há entidade ou integração para isso.
 
@@ -224,11 +224,37 @@ Esta ordem pode mudar por decisão da equipe; registre a decisão abaixo quando 
 - “Minha Conta” e “Meus Pedidos” usam sessão, perfil, troca de senha e pedidos reais. O cabeçalho acompanha login, atualização de nome e logout sem depender da rota atual.
 - O perfil público do atleta também usa dados fixos e não compartilha ainda estatísticas com as outras páginas.
 - O ranking público usa números fixos do Figma e não é recalculado a partir das partidas do painel ou das estatísticas individuais.
-- Favoritar evento permanece local. Presenças são vinculadas às contas autenticadas e não reutilizam os números ou nomes demonstrativos do Figma.
+- Favoritos e presenças em eventos são vinculados às contas autenticadas no banco e não reutilizam os números ou nomes demonstrativos do Figma.
 - O painel exige `ADMIN` e persiste notícias, produtos, estoque, eventos, integrantes, resultados e status de pedidos. Atividades recentes não são fabricadas: permanecem vazias sem uma tabela de auditoria.
 - Os quadros de login e cadastro do Figma usam cartões centralizados sobre fundo roxo escuro; os formulários foram ajustados a essa estrutura. O rodapé mantém a alteração posterior solicitada para “Comunidade acadêmica”.
 
 ## 9. Histórico de desenvolvimento
+
+### 26/11/2026 — Vínculo de resultados apenas com jogos e treinos
+
+- O seletor de evento do resultado agora exibe apenas jogos e treinos disponíveis. A API valida o mesmo critério ao criar ou editar resultados e impede alterar o tipo de um evento com resultado vinculado para outra categoria. Um vínculo antigo inválido precisa ser removido ou trocado antes de salvar o resultado; registros antigos não foram apagados automaticamente.
+- Verificação: lint, checagem de tipos, compilação Python e `git diff --check`. Operações com banco no Docker ainda pendentes de conferência manual.
+
+### 26/11/2026 — Limite de compra pelo estoque disponível
+
+- O carrinho passou a limitar o botão de aumento ao estoque real da variação, por tamanho, além do limite de 99. Itens antigos salvos acima do estoque mostram aviso e botão para ajustar a quantidade; o checkout fica bloqueado até a correção. Catálogo e detalhe também impedem selecionar ou adicionar mais unidades do que a disponibilidade atual.
+- A verificação final de estoque continua na API durante a criação transacional do pedido, pois outro comprador pode esgotar o item depois de a página carregar. Verificação: lint, checagem de tipos e `git diff --check`; teste manual com estoque baixo no navegador ainda pendente.
+
+### 26/11/2026 — Confirmação visual para remover item do carrinho
+
+- A lixeira ao lado da quantidade abre um diálogo no visual do site, com nome e tamanho do produto, ações de cancelar e remover e fechamento por Escape. A remoção só acontece após a confirmação; o carrinho continua armazenado localmente no navegador.
+- Verificação: lint, checagem de tipos e `git diff --check`. Interação no navegador ainda pendente.
+
+### 26/11/2026 — Resumo completo na barra lateral da Loja
+
+- O painel aberto após adicionar um produto passou a listar todos os itens do carrinho local, cada tamanho como linha própria, com quantidade, preço da linha e total somado. Os produtos e preços são consultados na API; o aviso do item recém-adicionado permanece no topo. A lista rola quando há muitos itens, mantendo total e ações visíveis.
+- Verificação: lint, checagem de tipos e `git diff --check`. Conferência manual com múltiplos produtos no navegador ainda pendente.
+
+### 26/11/2026 — Agenda pública e validação de eventos
+
+- A lista da Agenda mostra eventos futuros e os realizados há até sete dias; o calendário mensal mantém a consulta dos eventos passados e seus detalhes. Os eventos não são apagados do banco e a página consulta todas as páginas da API.
+- O cadastro administrativo impede novos eventos em dias anteriores ao atual no fuso de Maceió, com validação na interface e na API. A edição de eventos históricos sem mudança de data continua possível. Local tornou-se opcional; quando deixado vazio no formulário, a API recebe e persiste “Local a definir”.
+- Verificação: lint e checagem de tipos do frontend, compilação Python com cache temporário e `git diff --check`. Interação manual no navegador e persistência com serviços Docker ainda pendentes.
 
 ### 25/11/2026 — Escolha administrativa do resultado em destaque
 
